@@ -34,8 +34,7 @@ namespace LiteCAD.Common
                 var a = item2.Select(z => new Vertex(z.X, z.Y, 0)).ToArray();
                 if (a.Count() > 2)
                 {
-                    poly2.Add(new TriangleNet.Geometry.Contour(a));
-                    //df.AppendPolygon(item2);
+                    poly2.Add(new TriangleNet.Geometry.Contour(a));                    
                 }
             }
 
@@ -49,7 +48,6 @@ namespace LiteCAD.Common
                     if (a.Count() > 2)
                     {
                         poly2.Add(new TriangleNet.Geometry.Contour(a), new TriangleNet.Geometry.Point(interior.X, interior.Y));
-
                     }
                 }
 
@@ -141,6 +139,24 @@ namespace LiteCAD.Common
             }
 
             return area / 2.0;
+        }
+        public static double CalculateArea(Vector2d[] Points)
+        {
+            // Add the first point to the end.
+            int num_points = Points.Length;
+            Vector2d[] pts = new Vector2d[num_points + 1];
+            Points.CopyTo(pts, 0);
+            pts[num_points] = Points[0];
+
+            // Get the areas.
+            double area = 0;
+            for (int i = 0; i < num_points; i++)
+            {
+                area += (pts[i + 1].X - pts[i].X) * (pts[i + 1].Y + pts[i].Y) / 2;
+            }
+
+            // Return the result.
+            return Math.Abs(area);
         }
     }
 }

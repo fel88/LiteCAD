@@ -71,15 +71,16 @@ namespace IxMilia.Step.Items
                     case StepItemTypeExtensions.VertexPointText:
                         item = StepVertexPoint.CreateFromSyntaxList(binder, simpleItem.Parameters);
                         break;
-                    case StepItemTypeExtensions.SurfaceCurveText:                        
+                    case StepItemTypeExtensions.SurfaceCurveText:
                         item = StepCurveSurface.CreateFromSyntaxList(binder, simpleItem.Parameters);
                         break;
                     case StepItemTypeExtensions.PCurveText:
                         item = StepPCurve.CreateFromSyntaxList(binder, simpleItem.Parameters);
-                        if((item as StepPCurve).Surface is StepPlane pln)
+                        if ((item as StepPCurve).Surface is StepPlane pln)
                         {
 
-                        }else 
+                        }
+                        else
                         if ((item as StepPCurve).Surface is StepCylindricalSurface crf)
                         {
 
@@ -88,6 +89,9 @@ namespace IxMilia.Step.Items
                         {
 
                         }
+                        break;
+                    case StepItemTypeExtensions.SeamCurveText:
+                        item = StepSeamCurve.CreateFromSyntaxList(binder, simpleItem.Parameters);
                         break;
                     default:
                         //throw new System.Exception($"Unsupported item {simpleItem.Keyword} at {simpleItem.Line}, {simpleItem.Column}");

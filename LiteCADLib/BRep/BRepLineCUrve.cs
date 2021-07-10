@@ -1,6 +1,6 @@
 ﻿namespace LiteCAD.BRep
 {
-    public class BRepLineCUrve : BRepCurve
+    public class BRepLineCurve : BRepCurve
     {
 
     }

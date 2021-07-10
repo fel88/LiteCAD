@@ -34,4 +34,33 @@ namespace IxMilia.Step.Items
             return curve;
         }
     }
+    public class StepSeamCurve : StepCurve
+    {
+        public StepSeamCurve() : base("") { }
+
+
+        public StepSeamCurve(string str) : base(str)
+        {
+
+        }
+
+        public StepSurface Surface;
+        public override StepItemType ItemType => StepItemType.CurveSurface;
+        internal static StepRepresentationItem CreateFromSyntaxList(StepBinder binder, StepSyntaxList syntaxList)
+        {
+            syntaxList.AssertListCount(4);
+            var curve = new StepSeamCurve();
+            curve.Name = syntaxList.Values[0].GetStringValue();
+            /*binder.BindValue(syntaxList.Values[1], v =>
+            {
+                curve.Surface = v.AsType<StepSurface>();
+                if (curve.Surface == null)
+                {
+
+                }
+            });*/
+
+            return curve;
+        }
+    }
 }

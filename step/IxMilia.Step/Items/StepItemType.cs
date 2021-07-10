@@ -48,6 +48,7 @@ namespace IxMilia.Step.Items
         public const string VertexPointText = "VERTEX_POINT";
         public const string SurfaceCurveText = "SURFACE_CURVE";
         public const string PCurveText = "PCURVE";
+        public const string SeamCurveText = "SEAM_CURVE";
 
         public static string GetItemTypeString(this StepItemType type)
         {

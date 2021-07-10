@@ -2,6 +2,7 @@
 using IxMilia.Step.Items;
 using LiteCAD.BRep;
 using OpenTK;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,6 +15,25 @@ namespace LiteCAD.Common
         public string Name { get; set; }
 
         public List<BRepFace> Faces = new List<BRepFace>();
+        public List<MeshNode> Nodes = new List<MeshNode>();
+        public void ExtractMesh()
+        {
+            foreach (var item in Faces)
+            {
+                try
+                {
+                    var nd = item.ExtractMesh();
+                    if (nd != null)
+                    {
+                        Nodes.Add(nd);
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+        }
 
         public bool Visible { get; set; } = true;
         public static Part FromStep(string fileName)
@@ -87,7 +107,7 @@ namespace LiteCAD.Common
                                 var nrm2 = new Vector3d(nrm.X, nrm.Y, nrm.Z);
                                 pface.Surface = new BRepPlane()
                                 {
-                                    Position = loc2,
+                                    Location = loc2,
                                     Normal = nrm2
                                 };
                                 ret.Faces.Add(pface);
@@ -142,7 +162,7 @@ namespace LiteCAD.Common
                                         else if (crv.EdgeGeometry is StepLine lin)
                                         {
                                             BRepEdge edge = new BRepEdge();
-                                            edge.Curve = new BRepLineCUrve() { };
+                                            edge.Curve = new BRepLineCurve() { };
                                             wire.Edges.Add(edge);
 
                                             var vec = new Vector3d(lin.Vector.Direction.X,
@@ -163,6 +183,13 @@ namespace LiteCAD.Common
                                         {
                                             if (csurf.EdgeGeometry is StepLine ln)
                                             {
+                                                BRepEdge edge = new BRepEdge();
+                                                edge.Curve = new BRepLineCurve() { };
+                                                wire.Edges.Add(edge);
+
+                                                edge.Start = start;
+                                                edge.End = end1;
+
                                                 pface.Items.Add(new LineItem()
                                                 {
                                                     Start = start,
@@ -171,7 +198,19 @@ namespace LiteCAD.Common
                                             }
                                             else if (csurf.EdgeGeometry is StepCircle circ2)
                                             {
+                                                BRepEdge edge = new BRepEdge();
+
+                                                wire.Edges.Add(edge);
+
                                                 var rad = circ2.Radius;
+                                                var cc = new BRepCircleCurve();
+                                                edge.Curve = cc;
+                                                cc.Radius = rad;
+
+                                                edge.Start = start;
+                                                edge.End = end1;
+                                                
+
                                                 var axis3d = circ2.Position as StepAxis2Placement3D;
                                                 var axis = new Vector3d(axis3d.Axis.X, axis3d.Axis.Y, axis3d.Axis.Z);
                                                 var refdir = new Vector3d(axis3d.RefDirection.X, axis3d.RefDirection.Y, axis3d.RefDirection.Z);
@@ -188,6 +227,9 @@ namespace LiteCAD.Common
                                                 var ang2 = (Math.Acos(dot / dir2.Length / dir1.Length)) / Math.PI * 180f;
 
                                                 pnts.Add(pos + dir1);
+                                                cc.Axis = axis;
+                                                cc.Dir = dir1;
+                                                cc.SweepAngle = ang2;
                                                 for (int i = 0; i < ang2; i++)
                                                 {
                                                     var mtr4 = Matrix4d.CreateFromAxisAngle(axis, (float)(i * Math.PI / 180f));
@@ -223,20 +265,35 @@ namespace LiteCAD.Common
                         break;
                 }
             }
+            ret.ExtractMesh();
             return ret;
         }
-
-
 
         public void Draw()
         {
             if (!Visible) return;
+            GL.Disable(EnableCap.Lighting);
             foreach (var item in Faces)
             {
                 foreach (var pitem in item.Items)
                 {
                     pitem.Draw();
                 }
+            }
+            GL.Enable(EnableCap.Lighting);
+
+            foreach (var item in Nodes)
+            {
+                GL.Begin(PrimitiveType.Triangles);
+                foreach (var zitem in item.Triangles)
+                {
+                    foreach (var vv in zitem.Vertices)
+                    {
+                        GL.Normal3(vv.Normal);
+                        GL.Vertex3(vv.Position);
+                    }
+                }
+                GL.End();
             }
         }
     }

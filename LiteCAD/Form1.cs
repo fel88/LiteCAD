@@ -5,6 +5,7 @@ using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace LiteCAD
@@ -113,12 +114,15 @@ namespace LiteCAD
             GL.PopMatrix();
 
             GL.Color3(Color.Blue);
-
+            GL.Enable(EnableCap.Lighting);
+            GL.Enable(EnableCap.Light0);
+            GL.ShadeModel(ShadingModel.Smooth);
             foreach (var item in Parts)
             {
                 if (checkBox1.Checked && item is LineItem) continue;
                 item.Draw();
             }
+            GL.Disable(EnableCap.Lighting);
 
 
             glControl.SwapBuffers();
@@ -216,10 +220,69 @@ namespace LiteCAD
             if (listView1.SelectedItems.Count == 0) return;
             propertyGrid1.SelectedObject = listView1.SelectedItems[0].Tag;
         }
+
+        public void FitToPoints(Vector3d[] pnts, Camera cam)
+        {
+            List<Vector2d> vv = new List<Vector2d>();
+            foreach (var vertex in pnts)
+            {
+                var p = MouseRay.Project(vertex.ToVector3(), cam.ProjectionMatrix, cam.ViewMatrix, cam.WorldMatrix, camera1.viewport);
+                vv.Add(p.Xy.ToVector2d());
+            }
+
+            //prjs->xy coords
+            var minx = vv.Min(z => z.X);
+            var maxx = vv.Max(z => z.X);
+            var miny = vv.Min(z => z.Y);
+            var maxy = vv.Max(z => z.Y);
+
+            var dx = (maxx - minx);
+            var dy = (maxy - miny);
+
+            var cx = dx / 2;
+            var cy = dy / 2;
+            var dir = cam.CamTo - cam.CamFrom;
+            //center back to 3d
+
+            var mr = new MouseRay((float)(cx + minx), (float)(cy + miny), cam);
+            var v0 = mr.Start;
+
+            cam.CamFrom = v0;
+            cam.CamTo = cam.CamFrom + dir;
+
+            var aspect = glControl.Width / (float)(glControl.Height);
+
+            dx /= glControl.Width;
+            dx *= camera1.OrthoWidth;
+            dy /= glControl.Height;
+            dy *= camera1.OrthoWidth;
+
+            cam.OrthoWidth = (float)Math.Max(dx, dy);
+        }
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            List<Vector3d> vv = new List<Vector3d>();
+            foreach (var item in Parts)
+            {
+                if (!(item is Part p)) continue;
+                var nn = p.Nodes.SelectMany(z => z.Triangles.SelectMany(u => u.Vertices.Select(zz => zz.Position))).ToArray();
+                vv.AddRange(nn);
+
+            }
+            if (vv.Count == 0) return;
+            FitToPoints(vv.ToArray(), camera1);
+        }
+
+        private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeListView1.SelectedObjects.Count <= 0) return;
+            if (Helpers.ShowQuestion($"Are you sure to delete {treeListView1.SelectedObjects.Count} items?", Text) != DialogResult.Yes) return;
+            foreach (var item in treeListView1.SelectedObjects)
+            {
+                Parts.Remove(item as IDrawable);
+            }
+            treeListView1.SetObjects(Parts);
+        }
     }
-
-    
-   
-    
-
 }

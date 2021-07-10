@@ -1,8 +1,7 @@
-﻿using OpenTK;
-using OpenTK.Graphics.OpenGL;
-using System;
+﻿using LiteCAD.Common;
+using OpenTK;
 using System.Collections.Generic;
-using System.Drawing;
+using System.Linq;
 
 namespace LiteCAD.BRep
 {
@@ -13,95 +12,116 @@ namespace LiteCAD.BRep
         public List<BRepWire> Wires = new List<BRepWire>();
         public BRepWire OutterWire;
 
-        public void ExtractMesh()
+        public MeshNode ExtractMesh()
         {
+            MeshNode ret = null;
+            Vector3d proj1;
+            Vector3d v1;
+
+            List<Contour[]> ll = new List<Contour[]>();
+
             if (Surface is BRepPlane pl)
             {
-                MeshItem m = new MeshItem();
-                //var lns = Items.Where(z => z is LineItem).OfType<LineItem>().ToArray();
-                //lns[0].
-                // GeometryUtils.TriangulateWithHoles()
-                // Items.Add(m);
-            }
-        }
-    }
-    public class DrawItem
-    {
-        public virtual void Draw() { }
-    }
+                if (Wires.Count == 0 || Wires.Sum(z => z.Edges.Count) == 0) return null;
+                var fr = Wires.First(z => z.Edges.Any(u => u.Curve is BRepLineCurve));
+                var efr = fr.Edges.First(z => z.Curve is BRepLineCurve);
+                var dir = efr.End - efr.Start;
+                proj1 = pl.GetProjPoint(pl.Location + dir);
 
-    public class BRepSurface
-    {
+                v1 = (proj1 - pl.Location).Normalized();
 
-    }
-    public class BRepPlane : BRepSurface
-    {
-        public Vector3d Position;
-        public Vector3d Normal;
-    }
-
-    public class LineItem : DrawItem
-    {
-        public override void Draw()
-        {
-            GL.Begin(PrimitiveType.Lines);
-            GL.Vertex3(Start);
-            GL.Vertex3(End);
-            GL.End();
-        }
-        public Vector3d Start;
-        public Vector3d End;
-    }
-
-    public class TriangleInfo
-    {
-        public Vector3d[] Verticies;
-    }
-    public class MeshItem : DrawItem
-    {
-        public List<TriangleInfo> Triangles = new List<TriangleInfo>();
-        public override void Draw()
-        {
-            GL.Begin(PrimitiveType.Triangles);
-            foreach (var item in Triangles)
-            {
-                foreach (var vv in item.Verticies)
+                if (double.IsNaN(v1.X))
                 {
-                    GL.Vertex3(vv);
+                    throw new LiteCadException("normal is NaN");
                 }
+                var axis2 = Vector3d.Cross(pl.Normal, v1).Normalized();
+                foreach (var wire in Wires)
+                {
+                    List<Contour> l1 = new List<Contour>();
+
+                    foreach (var edge in wire.Edges)
+                    {
+                        List<Segment> ll1 = new List<Segment>();
+                        if (edge.Curve is BRepLineCurve lc)
+                        {
+                            var p0 = pl.GetUVProjPoint(edge.Start, v1, axis2);
+                            var p1 = pl.GetUVProjPoint(edge.End, v1, axis2);
+                            ll1.Add(new Segment() { Start = p0, End = p1 });
+                        }
+                        else
+                        {
+                            throw new LiteCadException("unsupported curve type");
+                        }
+                        if (ll1.Any())
+                        {
+                            var zz = new Contour() { Wire = wire };
+                            var arr3 = ll1.ToList();
+                            while (true)
+                            {
+                                var nl = zz.ConnectNext(arr3.ToArray());
+                                if (nl == null)
+                                {
+                                    if (arr3.Any())
+                                    {
+                                        throw new LiteCadException("");
+                                    }
+                                    break;
+                                }
+                                arr3.Remove(nl);
+                            }
+
+                            l1.Add(zz);
+                        }
+                    }
+                    if (l1.Any())
+                    {
+                        ll.Add(l1.ToArray());
+                    }
+                }
+                List<Contour> cntrs = new List<Contour>();
+                foreach (var item in ll)
+                {
+                    Contour ccn = new Contour();
+                    var ar = item.ToList();
+                    while (true)
+                    {
+                        var res = ccn.ConnectNext(ar.ToArray());
+
+                        if (res == null)
+                        {
+                            if (ar.Any())
+                            {
+                                throw new LiteCadException("bad contour");
+                            }
+                            break;
+                        }
+                        ar.Remove(res);
+                    }
+                    cntrs.Add(ccn);
+                }
+                cntrs = cntrs.OrderByDescending(z => GeometryUtils.CalculateArea(z.Elements.Select(u => u.Start).ToArray())).ToList();
+                if (cntrs.Count == 0) return null;
+                if (!(cntrs[0].Elements.Count > 2)) return null;
+
+                var triangls = GeometryUtils.TriangulateWithHoles(new[] { cntrs[0].Elements.Select(z => z.Start).ToArray() },
+                    cntrs.Skip(1).Select(z => z.Elements.Select(u => u.Start).ToArray()).ToArray(), true);
+                ret = new MeshNode();
+                ret.Parent = this;
+                List<TriangleInfo> tt = new List<TriangleInfo>();
+                foreach (var item in triangls)
+                {
+                    tt.Add(new TriangleInfo()
+                    {
+                        Vertices = item.Select(z => new VertexInfo()
+                        {
+                            Position = z.X * v1 + z.Y * axis2 + pl.Location,
+                            Normal = -pl.Normal
+                        }).ToArray()
+                    });
+                }
+                ret.Triangles.AddRange(tt);
             }
-            GL.End();
-
+            return ret;
         }
     }
-    public class PlaneItem : DrawItem
-    {
-        public Vector3d Dir;
-        public Vector3d Position;
-        public override void Draw()
-        {
-            GL.Color3(Color.Red);
-            GL.Begin(PrimitiveType.Lines);
-            GL.Vertex3(Position);
-            GL.Vertex3(Position + Dir * 100);
-            GL.End();
-            GL.Color3(Color.Blue);
-        }
-    }
-    public class PointItem : DrawItem
-    {
-
-        public Vector3d Position;
-        public override void Draw()
-        {
-            GL.Color3(Color.Yellow);
-            GL.PointSize(4);
-            GL.Begin(PrimitiveType.Points);
-            GL.Vertex3(Position);
-            GL.End();
-            GL.Color3(Color.Blue);
-        }
-    }
-    
-
 }

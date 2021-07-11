@@ -22,4 +22,11 @@ namespace LiteCAD.BRep
             return proj;
         }
     }
+
+    public class BRepCylinder : BRepSurface
+    {
+        public Vector3d Location;
+        public double Radius;
+        public Vector3d Axis;        
+    }
 }

@@ -1,9 +1,7 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Reflection;
 
 namespace LiteCAD.Common
 {
@@ -12,9 +10,11 @@ namespace LiteCAD.Common
         public string Name { get; set; }
 
         [EditField]
-        public Vector3d Position;
+        public Vector3d Position { get; set; }
         [EditField]
-        public Vector3d Normal;
+        public Vector3d Normal { get; set; }
+
+        [EditField]
         public int DrawSize { get; set; } = 10;
         public Vector3d[] GetBasis()
         {
@@ -90,133 +90,24 @@ namespace LiteCAD.Common
         public IName[] GetObjects()
         {
             List<IName> ret = new List<IName>();
-            var fld = GetType().GetFields();
+            var fld = GetType().GetProperties();
             for (int i = 0; i < fld.Length; i++)
             {
 
                 var at = fld[i].GetCustomAttributes(typeof(EditFieldAttribute), true);
                 if (at != null && at.Length > 0)
                 {
-                    if (fld[i].FieldType == typeof(Vector3d))
+                    if (fld[i].PropertyType == typeof(Vector3d))
                     {
                         ret.Add(new VectorEditor(fld[i]) { Object = this });
+                    }
+                    if (fld[i].PropertyType == typeof(int))
+                    {
+                        ret.Add(new IntFieldEditor(fld[i]) { Object = this });
                     }
                 }
             }
             return ret.ToArray();
         }
-    }
-
-    public class VectorEditor : IName
-    {
-        public VectorEditor(FieldInfo f)
-        {
-            Field = f;
-            Name = f.Name;
-        }
-        public string Name { get; set; }
-        public object Object;
-        public FieldInfo Field;
-        public double X
-        {
-            get
-            {
-                return ((Vector3d)Field.GetValue(Object)).X;
-            }
-            set
-            {
-                var v = ((Vector3d)Field.GetValue(Object));
-                v.X = value;
-                Field.SetValue(Object, v);
-            }
-        }
-
-        public double Y
-        {
-            get
-            {
-                return ((Vector3d)Field.GetValue(Object)).Y;
-            }
-            set
-            {
-                var v = ((Vector3d)Field.GetValue(Object));
-                v.Y = value;
-                Field.SetValue(Object, v);
-            }
-        }
-
-        public double Z
-        {
-            get
-            {
-                return ((Vector3d)Field.GetValue(Object)).Z;
-            }
-            set
-            {
-                var v = ((Vector3d)Field.GetValue(Object));
-                v.Z = value;
-                Field.SetValue(Object, v);
-            }
-        }
-    }
-    public class StringFieldEditor : IName
-    {
-        public StringFieldEditor(FieldInfo f)
-        {
-            Field = f;
-            Name = f.Name;
-        }
-        public string Name { get; set; }
-        public object Object;
-        public FieldInfo Field;
-        public string Value
-        {
-            get
-            {
-                return ((string)Field.GetValue(Object));
-            }
-            set
-            {
-                Field.SetValue(Object, value);
-            }
-        }
-
-    }
-    public class IntFieldEditor : IName
-    {
-        public IntFieldEditor(FieldInfo f)
-        {
-            Field = f;
-            Name = f.Name;
-        }
-        public string Name { get; set; }
-        public object Object;
-        public FieldInfo Field;
-        public int Value
-        {
-            get
-            {
-                return ((int)Field.GetValue(Object));
-            }
-            set
-            {
-                Field.SetValue(Object, value);
-            }
-        }
-
-    }
-
-    public interface IEditFieldsContainer
-    {
-        IName[] GetObjects();
-    }
-
-    public interface IName
-    {
-        string Name { get; set; }
-    }
-    public class EditFieldAttribute : Attribute
-    {
-
     }
 }

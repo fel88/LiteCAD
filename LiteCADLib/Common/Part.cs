@@ -57,20 +57,56 @@ namespace LiteCAD.Common
                             var geom = face.FaceGeometry;
                             if (geom is StepCylindricalSurface cyl)
                             {
+                                var pface = new BRepFace();
+                                var loc = cyl.Position.Location;
+                                var loc2 = new Vector3d(loc.X, loc.Y, loc.Z);
+                                var nrm = cyl.Position.Axis;
+                                var nrm2 = new Vector3d(nrm.X, nrm.Y, nrm.Z);
+                                pface.Surface = new BRepCylinder()
+                                {
+                                    Location = loc2,
+                                    Radius = cyl.Radius,
+                                    Axis = nrm2
+                                };
+                                ret.Faces.Add(pface);
+
                                 var rad = cyl.Radius;
                                 foreach (var bitem in face.Bounds)
                                 {
+                                    BRepWire wire = new BRepWire();
+                                    pface.Wires.Add(wire);
                                     var loop = bitem.Bound as StepEdgeLoop;
                                     foreach (var litem in loop.EdgeList)
                                     {
-
                                         StepEdgeCurve crv = litem.EdgeElement as StepEdgeCurve;
+
+                                        var strt = (crv.EdgeStart as StepVertexPoint).Location;
+                                        var end = (crv.EdgeEnd as StepVertexPoint).Location;
+                                        var start = new Vector3d(strt.X, strt.Y, strt.Z);
+                                        var end1 = new Vector3d(end.X, end.Y, end.Z);
+
+
                                         if (crv.EdgeGeometry is StepCircle circ)
                                         {
+                                            var edge = new BRepEdge();
+                                            wire.Edges.Add(edge);
+                                            var pos = new Vector3d(circ.Position.Location.X,
+                                                   circ.Position.Location.Y,
+                                                   circ.Position.Location.Z);
+                                            edge.Curve = new BRepCircleCurve() { Radius = circ.Radius, Location = pos };
+                                            edge.Start = start;
+                                            edge.End = end1;
 
                                         }
                                         else if (crv.EdgeGeometry is StepLine lin)
                                         {
+                                            var edge = new BRepEdge();
+                                            wire.Edges.Add(edge);
+
+                                            edge.Curve = new BRepLineCurve() { };
+                                            edge.Start = start;
+                                            edge.End = end1;
+
                                             /*var c = crv.EdgeStart as StepVertexPoint;
                                             var c0 = c.Location;
                                             var c1 = crv.EdgeEnd as StepVertexPoint;
@@ -88,11 +124,34 @@ namespace LiteCAD.Common
                                         }
                                         else if (crv.EdgeGeometry is StepCurveSurface csurf)
                                         {
+                                            var edge = new BRepEdge();
+                                            wire.Edges.Add(edge);
 
+                                            edge.Start = start;
+                                            edge.End = end1;
+
+                                            if (csurf.EdgeGeometry is StepCircle circ2)
+                                            {
+                                                var loc0 = circ2.Position.Location;
+                                                var loc1 = new Vector3d(loc0.X, loc0.Y, loc0.Z);
+                                                edge.Curve = new BRepCircleCurve() { Location = loc1, Radius = circ2.Radius };
+                                            }
+                                            else if (csurf.EdgeGeometry is StepLine lin2)
+                                            {
+                                                edge.Curve = new BRepLineCurve() { };
+                                            }
+                                            else
+                                            {
+
+                                            }
                                         }
-                                        else
+                                        else if (crv.EdgeGeometry is StepSeamCurve seam)
                                         {
-
+                                            var edge = new BRepEdge();
+                                            wire.Edges.Add(edge);
+                                            edge.Curve = new BRepSeamCurve();
+                                            edge.Start = start;
+                                            edge.End = end1;
                                         }
 
                                     }
@@ -209,7 +268,7 @@ namespace LiteCAD.Common
 
                                                 edge.Start = start;
                                                 edge.End = end1;
-                                                
+
 
                                                 var axis3d = circ2.Position as StepAxis2Placement3D;
                                                 var axis = new Vector3d(axis3d.Axis.X, axis3d.Axis.Y, axis3d.Axis.Z);
@@ -217,6 +276,7 @@ namespace LiteCAD.Common
                                                 var pos = new Vector3d(circ2.Position.Location.X,
                                                     circ2.Position.Location.Y,
                                                     circ2.Position.Location.Z);
+
                                                 var dir1 = start - pos;
                                                 var dir2 = end1 - pos;
                                                 List<Vector3d> pnts = new List<Vector3d>();
@@ -229,12 +289,16 @@ namespace LiteCAD.Common
                                                 pnts.Add(pos + dir1);
                                                 cc.Axis = axis;
                                                 cc.Dir = dir1;
+                                                cc.Location = pos;
                                                 cc.SweepAngle = ang2;
+                                                if ((start - end1).Length < 1e-8)
+                                                {
+                                                    cc.SweepAngle = Math.PI * 2;
+                                                }
                                                 for (int i = 0; i < ang2; i++)
                                                 {
                                                     var mtr4 = Matrix4d.CreateFromAxisAngle(axis, (float)(i * Math.PI / 180f));
                                                     var res = Vector4d.Transform(new Vector4d(dir1), mtr4);
-                                                    //var rot = new Vector4d(dir1) * mtr4;
                                                     pnts.Add(pos + res.Xyz);
                                                 }
                                                 pnts.Add(pos + dir2);
@@ -266,9 +330,93 @@ namespace LiteCAD.Common
                 }
             }
             ret.ExtractMesh();
+            ret.fixNormals();
             return ret;
         }
 
+        IEnumerable<Vector3d> getPoints()
+        {
+            foreach (var item in Nodes)
+            {
+                foreach (var t in item.Triangles)
+                {
+                    foreach (var v in t.Vertices)
+                    {
+                        yield return v.Position;
+                    }
+                }
+            }
+        }
+
+        private void fixNormals()
+        {
+            List<BRepFace> calculated = new List<BRepFace>();
+            foreach (var item in Faces)
+            {
+                if (item.Surface is BRepPlane pl)
+                {
+                    int? sign = null;
+                    bool good = true;
+                    foreach (var pp in getPoints())
+                    {
+                        var dot = Vector3d.Dot(pl.Normal, pp - pl.Location);
+                        if (Math.Abs(dot) < 1e-8) continue;
+                        if (sign == null) { sign = Math.Sign(dot); }
+                        else
+                        {
+                            if (sign != Math.Sign(dot)) { good = false; break; }
+                        }
+                    }
+
+                    if (!good) continue;
+
+                    calculated.Add(item);
+                    if (sign.HasValue && sign.Value < 0)
+                    {
+                        pl.Normal *= -1;
+                        var nf = Nodes.First(z => z.Parent == item);
+                        foreach (var tr in nf.Triangles)
+                        {
+                            foreach (var vv in tr.Vertices)
+                            {
+                                vv.Normal *= -1;
+                            }
+                        }
+                    }
+                }
+                else if (item.Surface is BRepCylinder cyl)
+                {
+                    int? sign = null;
+                    bool good = true;
+                    var face = Nodes.First(z => z.Parent == item);
+                    var pl0 = face.Triangles[0];
+                    var v0 = pl0.Vertices[1].Position - pl0.Vertices[0].Position;
+                    var v1 = pl0.Vertices[2].Position - pl0.Vertices[0].Position;
+                    var crs = Vector3d.Cross(v0, v1);
+                    foreach (var pp in getPoints())
+                    {
+                        var dot = Vector3d.Dot(crs, pp - pl0.Vertices[0].Position);
+                        if (Math.Abs(dot) < 1e-8) continue;
+                        if (sign == null) { sign = Math.Sign(dot); }
+                        else
+                        {
+                            if (sign != Math.Sign(dot)) { good = false; break; }
+                        }
+                    }
+
+                    if (!good) continue;
+
+                    calculated.Add(item);
+                }
+                else
+                {
+
+                }
+
+            }
+        }
+
+        bool showNormals = false;
         public void Draw()
         {
             if (!Visible) return;
@@ -294,6 +442,19 @@ namespace LiteCAD.Common
                     }
                 }
                 GL.End();
+                if (showNormals)
+                {
+                    GL.Begin(PrimitiveType.Lines);
+                    foreach (var tr in item.Triangles)
+                    {
+                        foreach (var vv in tr.Vertices)
+                        {
+                            GL.Vertex3(vv.Position);
+                            GL.Vertex3(vv.Position + vv.Normal);
+                        }
+                    }
+                    GL.End();
+                }
             }
         }
     }

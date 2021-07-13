@@ -160,7 +160,7 @@ namespace LiteCAD.Common
             return Math.Abs(area);
         }
 
-        internal static Vector3d CalcConjugateNormal(Vector3d nm, Vector3d nm1, Vector3d point0, Vector3d point1, Segment3d edge)
+        internal static Vector3d CalcConjugateNormal(Vector3d nm, Vector3d point0, Vector3d point1, Segment3d edge)
         {
             var neg = -nm;
             var axis = (edge.End - edge.Start).Normalized();
@@ -168,18 +168,16 @@ namespace LiteCAD.Common
             var prj0 = pp.GetProjPoint(point0) - edge.Start;
             var prj1 = pp.GetProjPoint(point1) - edge.Start;
 
-            var crs1 = Vector3d.Cross(prj1, prj0)/prj0.Length/prj1.Length;
-            var ang = Math.Asin(crs1.Length);
-
-            var mtr = Matrix4d.CreateFromAxisAngle(crs1.Normalized(), ang);
-            var trans = Vector3d.Transform(neg, mtr);
-
+            var crs1 = Vector3d.Cross(prj0, prj1) / prj0.Length / prj1.Length;
+            var ang2 = Vector3d.CalculateAngle(prj0, prj1);
+            if (crs1.Length > 1e-8)
+            {
+                axis = -crs1.Normalized();
+            }            
+            var mtr2 = Matrix4d.CreateFromAxisAngle(axis, -ang2);
+            var trans = Vector3d.Transform(neg, mtr2);
+            
             return trans;
         }
-    }
-    public class Segment3d
-    {
-        public Vector3d Start;
-        public Vector3d End;
     }
 }

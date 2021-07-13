@@ -31,7 +31,7 @@ namespace LiteCAD.Common
                 catch (Exception ex)
                 {
                     DebugHelpers.Error($"mesh extract erroe #{item.Id}: {ex.Message}");
-                    
+
                 }
             }
         }
@@ -331,7 +331,7 @@ namespace LiteCAD.Common
                 }
             }
             ret.ExtractMesh();
-            ret.fixNormals();
+            ret.FixNormals();
             return ret;
         }
 
@@ -349,7 +349,7 @@ namespace LiteCAD.Common
             }
         }
 
-        private void fixNormals()
+        public void FixNormals()
         {
             List<BRepFace> calculated = new List<BRepFace>();
             //1 phase
@@ -417,7 +417,7 @@ namespace LiteCAD.Common
 
                 }
             }
-            return;
+
             //2 phase
             do
             {
@@ -438,14 +438,14 @@ namespace LiteCAD.Common
                                 if (e1.IsSame(e0))
                                 {
                                     var nd = Nodes.FirstOrDefault(z => z.Parent == item);
-                                    if (nd == null)continue;
+                                    if (nd == null) continue;
                                     var nm = nd.Triangles[0].Vertices[0].Normal;
                                     var nd2 = Nodes.FirstOrDefault(z => z.Parent == rr);
                                     if (nd2 == null) continue;
                                     var nm2 = nd2.Triangles[0].Vertices[0].Normal;
-                                    var point0 = nd.Triangles[0].Center();
-                                    var point1 = nd2.Triangles[0].Center();
-                                    var nrm = GeometryUtils.CalcConjugateNormal(nm, nm2, point0, point1, new Segment3d() { Start = e1.Start, End = e1.End });
+                                    var point0 = nd.Triangles.First(z => z.Contains(e1.Start) && z.Contains(e1.End)).Center();
+                                    var point1 = nd2.Triangles.First(z => z.Contains(e1.Start) && z.Contains(e1.End)).Center();
+                                    var nrm = GeometryUtils.CalcConjugateNormal(nm, point0, point1, new Segment3d() { Start = e1.Start, End = e1.End });
                                     foreach (var item1 in nd2.Triangles)
                                     {
                                         foreach (var vv in item1.Vertices)
@@ -519,5 +519,5 @@ namespace LiteCAD.Common
         }
     }
 
-    
+
 }

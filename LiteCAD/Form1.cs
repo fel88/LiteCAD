@@ -222,7 +222,7 @@ namespace LiteCAD
                     Stopwatch sw = Stopwatch.StartNew();
                     while (true)
                     {
-                        if (sw.Elapsed.TotalSeconds > 5)
+                        if (!Debugger.IsAttached && sw.Elapsed.TotalSeconds > 5)
                         {
                             th.Abort();
                             DebugHelpers.Error("load timeout");
@@ -232,8 +232,11 @@ namespace LiteCAD
                         if (loaded) break;
                     }
                 });
-                th2.IsBackground = true;
-                th2.Start();
+                if (!Debugger.IsAttached)
+                {
+                    th2.IsBackground = true;
+                    th2.Start();
+                }
                 th.IsBackground = true;
                 th.Start();
             }
@@ -350,6 +353,12 @@ namespace LiteCAD
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            if (!(treeListView1.SelectedObject is Part pp)) return;            
+            pp.FixNormals();
         }
     }
 }

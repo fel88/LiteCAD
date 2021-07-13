@@ -74,6 +74,7 @@
     <Compile Include="Common\LiteCadException.cs" />
     <Compile Include="Common\Part.cs" />
     <Compile Include="Common\PlaneHelper.cs" />
+    <Compile Include="Common\Segment3d.cs" />
     <Compile Include="Common\StringFieldEditor.cs" />
     <Compile Include="Common\VectorEditor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

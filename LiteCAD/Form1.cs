@@ -4,8 +4,11 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace LiteCAD
@@ -116,7 +119,9 @@ namespace LiteCAD
             GL.Color3(Color.Blue);
             GL.Enable(EnableCap.Lighting);
             GL.Enable(EnableCap.Light0);
+
             GL.ShadeModel(ShadingModel.Smooth);
+
             foreach (var item in Parts)
             {
                 if (checkBox1.Checked && item is LineItem) continue;
@@ -145,11 +150,19 @@ namespace LiteCAD
             ViewManager = new DefaultCameraViewManager();
             ViewManager.Attach(evwrapper, camera1);
 
-            tableLayoutPanel1.Controls.Add(glControl, 1, 0);
+            panel2.Controls.Add(glControl);
+            panel2.Controls.Add(infoPanel);
+            infoPanel.BringToFront();
+            infoPanel.Dock = DockStyle.Bottom;
+
             glControl.Dock = DockStyle.Fill;
+            DebugHelpers.Error = (str) =>
+            {
+                infoPanel.Invoke((Action)(() => { infoPanel.AddError(str); }));
+            };
         }
 
-
+        InfoPanel infoPanel = new InfoPanel();
 
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -179,14 +192,50 @@ namespace LiteCAD
 
         public List<IDrawable> Parts = new List<IDrawable>();
 
+        bool loaded = false;
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
+            OpenFileDialog ofd = new OpenFileDialog();            
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                var prt = Part.FromStep(ofd.FileName);
-                Parts.Add(prt);
-                treeListView1.SetObjects(Parts);
+                loaded = false;
+                Thread th = new Thread(() =>
+                {
+                    try
+                    {
+                        var prt = Part.FromStep(ofd.FileName);
+                        var fi = new FileInfo(ofd.FileName);
+                        loaded = true;
+                        Parts.Add(prt);
+                        infoPanel.AddInfo($"model loaded succesfully: {fi.Name}");
+                        treeListView1.SetObjects(Parts);
+                        fitAll();
+                    }
+                    catch (Exception ex)
+                    {
+                        loaded = true;
+                        DebugHelpers.Error(ex.Message);
+                    }
+                });
+                Thread th2 = new Thread(() =>
+                {
+                    Stopwatch sw = Stopwatch.StartNew();
+                    while (true)
+                    {
+                        if (sw.Elapsed.TotalSeconds > 5)
+                        {
+                            th.Abort();
+                            DebugHelpers.Error("load timeout");
+                            break;
+                        }
+                        Thread.Sleep(1000);
+                        if (loaded) break;
+                    }
+                });
+                th2.IsBackground = true;
+                th2.Start();
+                th.IsBackground = true;
+                th.Start();
             }
         }
 
@@ -260,7 +309,7 @@ namespace LiteCAD
             cam.OrthoWidth = (float)Math.Max(dx, dy);
         }
 
-        private void toolStripButton1_Click(object sender, EventArgs e)
+        void fitAll()
         {
             List<Vector3d> vv = new List<Vector3d>();
             foreach (var item in Parts)
@@ -274,6 +323,11 @@ namespace LiteCAD
             FitToPoints(vv.ToArray(), camera1);
         }
 
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            fitAll();
+        }
+
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;
@@ -283,6 +337,19 @@ namespace LiteCAD
                 Parts.Remove(item as IDrawable);
             }
             treeListView1.SetObjects(Parts);
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            foreach (var item in Parts.OfType<Part>())
+            {
+                item.ShowNormals = checkBox2.Checked;
+            }
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -30,7 +30,8 @@ namespace LiteCAD.Common
                 }
                 catch (Exception ex)
                 {
-
+                    DebugHelpers.Error($"mesh extract erroe #{item.Id}: {ex.Message}");
+                    
                 }
             }
         }
@@ -57,7 +58,7 @@ namespace LiteCAD.Common
                             var geom = face.FaceGeometry;
                             if (geom is StepCylindricalSurface cyl)
                             {
-                                var pface = new BRepFace();
+                                var pface = new BRepCylinderSurfaceFace();
                                 var loc = cyl.Position.Location;
                                 var loc2 = new Vector3d(loc.X, loc.Y, loc.Z);
                                 var nrm = cyl.Position.Axis;
@@ -351,6 +352,7 @@ namespace LiteCAD.Common
         private void fixNormals()
         {
             List<BRepFace> calculated = new List<BRepFace>();
+            //1 phase
             foreach (var item in Faces)
             {
                 if (item.Surface is BRepPlane pl)
@@ -374,7 +376,8 @@ namespace LiteCAD.Common
                     if (sign.HasValue && sign.Value < 0)
                     {
                         pl.Normal *= -1;
-                        var nf = Nodes.First(z => z.Parent == item);
+                        var nf = Nodes.FirstOrDefault(z => z.Parent == item);
+                        if (nf == null) continue;
                         foreach (var tr in nf.Triangles)
                         {
                             foreach (var vv in tr.Vertices)
@@ -388,7 +391,8 @@ namespace LiteCAD.Common
                 {
                     int? sign = null;
                     bool good = true;
-                    var face = Nodes.First(z => z.Parent == item);
+                    var face = Nodes.FirstOrDefault(z => z.Parent == item);
+                    if (face == null) continue;
                     var pl0 = face.Triangles[0];
                     var v0 = pl0.Vertices[1].Position - pl0.Vertices[0].Position;
                     var v1 = pl0.Vertices[2].Position - pl0.Vertices[0].Position;
@@ -412,11 +416,58 @@ namespace LiteCAD.Common
                 {
 
                 }
-
             }
+            return;
+            //2 phase
+            do
+            {
+                var remain = Faces.Except(calculated).ToArray();
+                if (remain.Length == 0) break;
+                foreach (var rr in remain)
+                {
+                    var edges = rr.Wires.SelectMany(z => z.Edges);
+                    bool exit = false;
+                    foreach (var item in calculated)
+                    {
+                        var edges1 = item.Wires.SelectMany(z => z.Edges);
+
+                        foreach (var e1 in edges1)
+                        {
+                            foreach (var e0 in edges)
+                            {
+                                if (e1.IsSame(e0))
+                                {
+                                    var nd = Nodes.FirstOrDefault(z => z.Parent == item);
+                                    if (nd == null)continue;
+                                    var nm = nd.Triangles[0].Vertices[0].Normal;
+                                    var nd2 = Nodes.FirstOrDefault(z => z.Parent == rr);
+                                    if (nd2 == null) continue;
+                                    var nm2 = nd2.Triangles[0].Vertices[0].Normal;
+                                    var point0 = nd.Triangles[0].Center();
+                                    var point1 = nd2.Triangles[0].Center();
+                                    var nrm = GeometryUtils.CalcConjugateNormal(nm, nm2, point0, point1, new Segment3d() { Start = e1.Start, End = e1.End });
+                                    foreach (var item1 in nd2.Triangles)
+                                    {
+                                        foreach (var vv in item1.Vertices)
+                                        {
+                                            vv.Normal = nrm;
+                                        }
+                                    }
+                                    calculated.Add(rr);
+                                    exit = true;
+                                    break;
+                                }
+                            }
+                            if (exit) break;
+                        }
+                        if (exit) break;
+                    }
+                    if (exit) break;
+                }
+            } while (true);
         }
 
-        bool showNormals = false;
+        public bool ShowNormals = false;
         public void Draw()
         {
             if (!Visible) return;
@@ -442,15 +493,24 @@ namespace LiteCAD.Common
                     }
                 }
                 GL.End();
-                if (showNormals)
+
+            }
+            if (ShowNormals)
+            {
+                GL.Disable(EnableCap.Lighting);
+
+                foreach (var item in Nodes)
                 {
+
+
                     GL.Begin(PrimitiveType.Lines);
                     foreach (var tr in item.Triangles)
                     {
-                        foreach (var vv in tr.Vertices)
+                        var c = tr.Center();
+                        //foreach (var vv in tr.Vertices)
                         {
-                            GL.Vertex3(vv.Position);
-                            GL.Vertex3(vv.Position + vv.Normal);
+                            GL.Vertex3(c);
+                            GL.Vertex3(c + tr.Vertices[0].Normal);
                         }
                     }
                     GL.End();
@@ -458,4 +518,6 @@ namespace LiteCAD.Common
             }
         }
     }
+
+    
 }

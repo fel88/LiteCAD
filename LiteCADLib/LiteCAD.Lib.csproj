@@ -37,6 +37,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,9 +47,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BRep\BRepCircleCurve.cs" />
+    <Compile Include="BRep\BRepCylinderSurfaceFace.cs" />
     <Compile Include="BRep\BRepPlane.cs" />
     <Compile Include="BRep\BRepSurface.cs" />
     <Compile Include="BRep\Contour.cs" />
+    <Compile Include="BRep\DebugHelpers.cs" />
     <Compile Include="BRep\DrawItem.cs" />
     <Compile Include="BRep\LineItem.cs" />
     <Compile Include="BRep\MeshNode.cs" />

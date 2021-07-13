@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using LiteCAD.BRep;
+using OpenTK;
 using System;
 using System.Drawing;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace LiteCAD.Common
     public class GeometryUtils
     {
         public static Vector2d[][] TriangulateWithHoles(Vector2d[][] points, Vector2d[][] holes, bool checkArea = true)
-        {            
+        {
             #region checker
             double area = 0;
             foreach (var item in points)
@@ -34,7 +35,7 @@ namespace LiteCAD.Common
                 var a = item2.Select(z => new Vertex(z.X, z.Y, 0)).ToArray();
                 if (a.Count() > 2)
                 {
-                    poly2.Add(new TriangleNet.Geometry.Contour(a));                    
+                    poly2.Add(new TriangleNet.Geometry.Contour(a));
                 }
             }
 
@@ -52,7 +53,7 @@ namespace LiteCAD.Common
                 }
 
             ConstraintMesher.ScoutCounter = 0;
-            
+
 
             var trng = (new GenericMesher()).Triangulate(poly2, new ConstraintOptions(), new QualityOptions());
 
@@ -158,5 +159,27 @@ namespace LiteCAD.Common
             // Return the result.
             return Math.Abs(area);
         }
+
+        internal static Vector3d CalcConjugateNormal(Vector3d nm, Vector3d nm1, Vector3d point0, Vector3d point1, Segment3d edge)
+        {
+            var neg = -nm;
+            var axis = (edge.End - edge.Start).Normalized();
+            BRepPlane pp = new BRepPlane() { Location = edge.Start, Normal = axis };
+            var prj0 = pp.GetProjPoint(point0) - edge.Start;
+            var prj1 = pp.GetProjPoint(point1) - edge.Start;
+
+            var crs1 = Vector3d.Cross(prj1, prj0)/prj0.Length/prj1.Length;
+            var ang = Math.Asin(crs1.Length);
+
+            var mtr = Matrix4d.CreateFromAxisAngle(crs1.Normalized(), ang);
+            var trans = Vector3d.Transform(neg, mtr);
+
+            return trans;
+        }
+    }
+    public class Segment3d
+    {
+        public Vector3d Start;
+        public Vector3d End;
     }
 }

@@ -59,6 +59,7 @@ namespace LiteCAD
             listView1.Invoke((Action)(() =>
             {
                 listView1.Items.Add(l);
+                if (!status) Switch();
             }));
 
         }
@@ -77,12 +78,14 @@ namespace LiteCAD
             listView1.Invoke((Action)(() =>
             {
                 listView1.Items.Add(l);
+                if (!status) Switch();
             }));
             
 
         }
         public void AddError(string info)
         {
+
             List<string> ss = new List<string>();
             ss.Add(GetDate());
 
@@ -98,6 +101,7 @@ namespace LiteCAD
             listView1.Invoke((Action)(() =>
             {
                 listView1.Items.Add(l);
+                if (!status) Switch();
             }));
 
         }

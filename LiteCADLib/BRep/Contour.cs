@@ -49,7 +49,7 @@ namespace LiteCAD.BRep
                 {
                     mindist = dist1;
                     minsegm = item;
-                    reverse = false;                                    
+                    reverse = false;
                 }
                 var dist2 = Math.Abs((end - item.End).Length);
 
@@ -57,7 +57,7 @@ namespace LiteCAD.BRep
                 {
                     mindist = dist2;
                     minsegm = item;
-                    reverse = true;                    
+                    reverse = true;
                 }
             }
             if (minsegm != null)
@@ -80,7 +80,7 @@ namespace LiteCAD.BRep
             return null;
         }
 
-               
+
         public Segment ConnectNext(Segment[] segments)
         {
             if (Elements.Count == 0)
@@ -101,7 +101,7 @@ namespace LiteCAD.BRep
                 {
                     mindist = dist1;
                     minsegm = item;
-                    reverse = false;                    
+                    reverse = false;
                 }
                 var dist2 = Math.Abs((end - item.End).Length);
 
@@ -109,7 +109,7 @@ namespace LiteCAD.BRep
                 {
                     mindist = dist2;
                     minsegm = item;
-                    reverse = true;                    
+                    reverse = true;
                 }
             }
             if (minsegm != null)
@@ -124,6 +124,11 @@ namespace LiteCAD.BRep
             }
 
             return null;
-        }        
+        }
+
+        internal void Reduce(double eps = 1e-8)
+        {
+            Elements.RemoveAll(x => x.Length() < eps);
+        }
     }
 }

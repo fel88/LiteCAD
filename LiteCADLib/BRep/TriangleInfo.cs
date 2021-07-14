@@ -5,6 +5,22 @@ namespace LiteCAD.BRep
     public class TriangleInfo
     {
         public VertexInfo[] Vertices;
+
+        public double Area()
+        {
+            var v0 = Vertices[1].Position - Vertices[0].Position;
+            var v1 = Vertices[2].Position - Vertices[0].Position;
+            var crs = Vector3d.Cross(v0, v1);
+            return crs.Length / 2;
+        }
+        public Vector3d Normal()
+        {
+            var v0 = Vertices[1].Position - Vertices[0].Position;
+            var v1 = Vertices[2].Position - Vertices[0].Position;
+            var crs = Vector3d.Cross(v0, v1);
+            return crs.Normalized();
+        }
+
         public Vector3d Center()
         {
             Vector3d z1 = Vector3d.Zero;

@@ -20,6 +20,7 @@ namespace LiteCAD.Common
         {
             foreach (var item in Faces)
             {
+                //if (!(item is BRepCylinderSurfaceFace)) continue;
                 try
                 {
                     var nd = item.ExtractMesh();
@@ -30,8 +31,7 @@ namespace LiteCAD.Common
                 }
                 catch (Exception ex)
                 {
-                    DebugHelpers.Error($"mesh extract erroe #{item.Id}: {ex.Message}");
-
+                    DebugHelpers.Error($"mesh extract error #{item.Id}: {ex.Message}");
                 }
             }
         }
@@ -62,12 +62,15 @@ namespace LiteCAD.Common
                                 var loc = cyl.Position.Location;
                                 var loc2 = new Vector3d(loc.X, loc.Y, loc.Z);
                                 var nrm = cyl.Position.Axis;
+                                var ref1 = cyl.Position.RefDirection;
                                 var nrm2 = new Vector3d(nrm.X, nrm.Y, nrm.Z);
+                                var ref2 = new Vector3d(ref1.X, ref1.Y, ref1.Z);
                                 pface.Surface = new BRepCylinder()
                                 {
                                     Location = loc2,
                                     Radius = cyl.Radius,
-                                    Axis = nrm2
+                                    Axis = nrm2,
+                                    RefDir = ref2
                                 };
                                 ret.Faces.Add(pface);
 
@@ -133,13 +136,60 @@ namespace LiteCAD.Common
 
                                             if (csurf.EdgeGeometry is StepCircle circ2)
                                             {
+                                                var axis3d = circ2.Position as StepAxis2Placement3D;
+                                                var axis = new Vector3d(axis3d.Axis.X, axis3d.Axis.Y, axis3d.Axis.Z);
+                                                var refdir = new Vector3d(axis3d.RefDirection.X, axis3d.RefDirection.Y, axis3d.RefDirection.Z);
+                                                var pos = new Vector3d(circ2.Position.Location.X,
+                                                    circ2.Position.Location.Y,
+                                                    circ2.Position.Location.Z);
+
                                                 var loc0 = circ2.Position.Location;
                                                 var loc1 = new Vector3d(loc0.X, loc0.Y, loc0.Z);
-                                                edge.Curve = new BRepCircleCurve() { Location = loc1, Radius = circ2.Radius };
+
+                                                var dir2 = end1 - pos;
+                                                var dir1 = start - pos;
+                                                var ang2 = Vector3d.CalculateAngle(dir2, dir1);
+                                                var sweep = ang2;
+                                                if ((start - end1).Length < 1e-8)
+                                                {
+                                                    sweep = Math.PI * 2;
+                                                }
+
+                                                edge.Curve = new BRepCircleCurve()
+                                                {
+                                                    Location = loc1,
+                                                    Radius = circ2.Radius,
+                                                    Axis = axis,
+                                                    Dir = dir1,
+                                                    SweepAngle = sweep
+                                                };
                                             }
                                             else if (csurf.EdgeGeometry is StepLine lin2)
                                             {
-                                                edge.Curve = new BRepLineCurve() { };
+                                                var pos = new Vector3d(lin2.Point.X,
+                                                  lin2.Point.Y,
+                                                  lin2.Point.Z);
+                                                var vec = new Vector3d(lin2.Vector.Direction.X,
+                                              lin2.Vector.Direction.Y,
+                                              lin2.Vector.Direction.Z);
+                                                edge.Curve = new BRepLineCurve() { Point = pos, Vector = vec };
+                                            }
+                                            else if (csurf.EdgeGeometry is StepEllipse elp)
+                                            {
+
+                                                var pos = new Vector3d(elp.Position.Location.X,
+                                                 elp.Position.Location.Y,
+                                                 elp.Position.Location.Z);
+                                                var vec = new Vector3d(elp.Position.RefDirection.X,
+                                              elp.Position.RefDirection.Y,
+                                              elp.Position.RefDirection.Z);
+                                                edge.Curve = new BRepEllipseCurve()
+                                                {
+                                                    Location = pos,
+                                                    RefDir = vec,
+                                                    SemiAxis1 = elp.SemiAxis1,
+                                                    SemiAxis2 = elp.SemiAxis2
+                                                };
                                             }
                                             else
                                             {
@@ -154,7 +204,10 @@ namespace LiteCAD.Common
                                             edge.Start = start;
                                             edge.End = end1;
                                         }
+                                        else
+                                        {
 
+                                        }
                                     }
                                 }
                             }
@@ -285,7 +338,7 @@ namespace LiteCAD.Common
                                                 var crs = Vector3d.Cross(dir2, dir1);
                                                 var dot = Vector3d.Dot(dir2, dir1);
 
-                                                var ang2 = (Math.Acos(dot / dir2.Length / dir1.Length)) / Math.PI * 180f;
+                                                var ang2 = (Math.Acos(dot / dir2.Length / dir1.Length));
 
                                                 pnts.Add(pos + dir1);
                                                 cc.Axis = axis;
@@ -298,7 +351,7 @@ namespace LiteCAD.Common
                                                 }
                                                 for (int i = 0; i < ang2; i++)
                                                 {
-                                                    var mtr4 = Matrix4d.CreateFromAxisAngle(axis, (float)(i * Math.PI / 180f));
+                                                    var mtr4 = Matrix4d.CreateFromAxisAngle(axis, i);
                                                     var res = Vector4d.Transform(new Vector4d(dir1), mtr4);
                                                     pnts.Add(pos + res.Xyz);
                                                 }
@@ -389,7 +442,7 @@ namespace LiteCAD.Common
                 }
                 else if (item.Surface is BRepCylinder cyl)
                 {
-                    int? sign = null;
+                    /*int? sign = null;
                     bool good = true;
                     var face = Nodes.FirstOrDefault(z => z.Parent == item);
                     if (face == null) continue;
@@ -410,7 +463,7 @@ namespace LiteCAD.Common
 
                     if (!good) continue;
 
-                    calculated.Add(item);
+                    calculated.Add(item);*/
                 }
                 else
                 {
@@ -418,13 +471,17 @@ namespace LiteCAD.Common
                 }
             }
 
+
             //2 phase
             do
             {
                 var remain = Faces.Except(calculated).ToArray();
+
                 if (remain.Length == 0) break;
+                int before = calculated.Count;
                 foreach (var rr in remain)
                 {
+                   
                     var edges = rr.Wires.SelectMany(z => z.Edges);
                     bool exit = false;
                     foreach (var item in calculated)
@@ -446,11 +503,18 @@ namespace LiteCAD.Common
                                     var point0 = nd.Triangles.First(z => z.Contains(e1.Start) && z.Contains(e1.End)).Center();
                                     var point1 = nd2.Triangles.First(z => z.Contains(e1.Start) && z.Contains(e1.End)).Center();
                                     var nrm = GeometryUtils.CalcConjugateNormal(nm, point0, point1, new Segment3d() { Start = e1.Start, End = e1.End });
-                                    foreach (var item1 in nd2.Triangles)
+                                    if (rr is BRepCylinderSurfaceFace)
                                     {
-                                        foreach (var vv in item1.Vertices)
+                                        (nd2 as CylinderMeshNode).SetNormal(nd2.Triangles[0],nrm);
+                                    }
+                                    else
+                                    {
+                                        foreach (var item1 in nd2.Triangles)
                                         {
-                                            vv.Normal = nrm;
+                                            foreach (var vv in item1.Vertices)
+                                            {
+                                                vv.Normal = nrm;
+                                            }
                                         }
                                     }
                                     calculated.Add(rr);
@@ -463,6 +527,11 @@ namespace LiteCAD.Common
                         if (exit) break;
                     }
                     if (exit) break;
+                }
+                if (calculated.Count == before)
+                {
+                    DebugHelpers.Error("normals restore failed");
+                    break;
                 }
             } while (true);
         }

@@ -10,5 +10,9 @@ namespace LiteCAD.BRep
         }
         public Vector2d Start;
         public Vector2d End;
+        public double Length()
+        {
+            return (End - Start).Length;
+        }
     }
 }

@@ -160,6 +160,8 @@ namespace LiteCAD
             {
                 infoPanel.Invoke((Action)(() => { infoPanel.AddError(str); }));
             };
+
+            infoPanel.Switch();
         }
 
         InfoPanel infoPanel = new InfoPanel();

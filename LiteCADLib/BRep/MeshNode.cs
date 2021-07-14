@@ -1,4 +1,6 @@
-﻿using OpenTK.Graphics.OpenGL;
+﻿using OpenTK;
+using OpenTK.Graphics.OpenGL;
+using System;
 using System.Collections.Generic;
 
 namespace LiteCAD.BRep
@@ -20,6 +22,8 @@ namespace LiteCAD.BRep
                 }
             }
         }
+
+        
     }
 
     public class CylinderMeshNode : MeshNode
@@ -33,6 +37,13 @@ namespace LiteCAD.BRep
                 {
                     vv.Normal *= -1;
                 }
+            }
+        }
+        public void SetNormal(TriangleInfo triangleInfo, Vector3d nrm)
+        {
+            if(Vector3d.Dot(triangleInfo.Vertices[0].Normal, nrm) < 0)
+            {
+                SwitchNormal();
             }
         }
     }

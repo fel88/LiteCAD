@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BRep\BRepCircleCurve.cs" />
+    <Compile Include="BRep\BRepCylinder.cs" />
     <Compile Include="BRep\BRepCylinderSurfaceFace.cs" />
     <Compile Include="BRep\BRepPlane.cs" />
     <Compile Include="BRep\BRepSurface.cs" />

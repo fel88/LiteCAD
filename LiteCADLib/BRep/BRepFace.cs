@@ -71,10 +71,10 @@ namespace LiteCAD.BRep
                             pnts.Add(cc.Location + res.Xyz);
                         }
                         pnts.Add(edge.End);
-                        for (int i = 0; i < pnts.Count; i++)
+                        for (int i = 1; i < pnts.Count; i++)
                         {
-                            var pp0 = pnts[i];
-                            var pp1 = pnts[(i + 1) % pnts.Count];
+                            var pp0 = pnts[i - 1];
+                            var pp1 = pnts[i];
                             var p0 = pl.GetUVProjPoint(pp0, v1, axis2);
                             var p1 = pl.GetUVProjPoint(pp1, v1, axis2);
                             ll1.Add(new Segment() { Start = p0, End = p1 });
@@ -132,10 +132,10 @@ namespace LiteCAD.BRep
                 cntrs.Add(ccn);
             }
             cntrs = cntrs.OrderByDescending(z => GeometryUtils.CalculateArea(z.Elements.Select(u => u.Start).ToArray())).ToList();
-            
+
             if (cntrs.Count == 0) return null;
             if (!(cntrs[0].Elements.Count > 2)) return null;
-            //DebugHelpers.ToBitmap(cntrs[0]);
+            DebugHelpers.ToBitmap(cntrs[0]);
 
             var triangls = GeometryUtils.TriangulateWithHoles(new[] { cntrs[0].Elements.Select(z => z.Start).ToArray() },
                 cntrs.Skip(1).Select(z => z.Elements.Select(u => u.Start).ToArray()).ToArray(), true);

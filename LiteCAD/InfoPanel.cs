@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace LiteCAD
@@ -38,10 +33,12 @@ namespace LiteCAD
             public ListViewItem Item;
             public InfoPanelItemType Type;
         }
+
         public enum InfoPanelItemType
         {
             Warning, Error, Info
         }
+
         public void AddWarning(string info)
         {
             List<string> ss = new List<string>();
@@ -54,15 +51,9 @@ namespace LiteCAD
                 ForeColor = Color.Blue
             };
 
-            Messages.Add(new MessageInfo(l, InfoPanelItemType.Error));
-
-            listView1.Invoke((Action)(() =>
-            {
-                listView1.Items.Add(l);
-                if (!status) Switch();
-            }));
-
+            addMessage(l, InfoPanelItemType.Warning);
         }
+
         public void AddInfo(string info)
         {
             List<string> ss = new List<string>();
@@ -74,18 +65,22 @@ namespace LiteCAD
                 BackColor = Color.White,
                 ForeColor = Color.Blue
             };
-            Messages.Add(new MessageInfo(l, InfoPanelItemType.Info));
+            addMessage(l, InfoPanelItemType.Info);   
+        }
+
+        void addMessage(ListViewItem l, InfoPanelItemType type)
+        {
+            Messages.Add(new MessageInfo(l, type));
             listView1.Invoke((Action)(() =>
             {
                 listView1.Items.Add(l);
+                listView1.EnsureVisible(listView1.Items.Count - 1);
                 if (!status) Switch();
             }));
-            
-
         }
+
         public void AddError(string info)
         {
-
             List<string> ss = new List<string>();
             ss.Add(GetDate());
 
@@ -96,13 +91,7 @@ namespace LiteCAD
                 BackColor = Color.Red,
                 ForeColor = Color.White
             };
-
-            Messages.Add(new MessageInfo(l, InfoPanelItemType.Error));
-            listView1.Invoke((Action)(() =>
-            {
-                listView1.Items.Add(l);
-                if (!status) Switch();
-            }));
+            addMessage(l, InfoPanelItemType.Error);
 
         }
         public void Switch()

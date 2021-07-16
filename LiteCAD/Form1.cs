@@ -122,9 +122,14 @@ namespace LiteCAD
 
             GL.ShadeModel(ShadingModel.Smooth);
 
-            foreach (var item in Parts)
+            IDrawable[] parts = null;
+            lock (Parts)
             {
-                if (checkBox1.Checked && item is LineItem) continue;
+                parts = Parts.ToArray();
+            }
+            foreach (var item in parts)
+            {
+                if (!item.Visible) continue;
                 item.Draw();
             }
             GL.Disable(EnableCap.Lighting);
@@ -136,6 +141,7 @@ namespace LiteCAD
         public Form1()
         {
             InitializeComponent();
+            checkBox3.Checked = Part.AutoExtractMeshOnLoad;
 
             glControl = new OpenTK.GLControl(new OpenTK.Graphics.GraphicsMode(32, 24, 0, 8));
 
@@ -160,6 +166,10 @@ namespace LiteCAD
             {
                 infoPanel.Invoke((Action)(() => { infoPanel.AddError(str); }));
             };
+            DebugHelpers.Warning = (str) =>
+            {
+                infoPanel.Invoke((Action)(() => { infoPanel.AddWarning(str); }));
+            };
 
             infoPanel.Switch();
         }
@@ -169,6 +179,7 @@ namespace LiteCAD
         private void timer1_Tick(object sender, EventArgs e)
         {
             glControl.Invalidate();
+            label1.Text = "camera len: " + camera1.DirLen;
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -197,7 +208,7 @@ namespace LiteCAD
         bool loaded = false;
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();            
+            OpenFileDialog ofd = new OpenFileDialog();
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 loaded = false;
@@ -208,7 +219,10 @@ namespace LiteCAD
                         var prt = Part.FromStep(ofd.FileName);
                         var fi = new FileInfo(ofd.FileName);
                         loaded = true;
-                        Parts.Add(prt);
+                        lock (Parts)
+                        {
+                            Parts.Add(prt);
+                        }
                         infoPanel.AddInfo($"model loaded succesfully: {fi.Name}");
                         treeListView1.SetObjects(Parts);
                         fitAll();
@@ -255,9 +269,12 @@ namespace LiteCAD
         private void treeListView1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (treeListView1.SelectedObject == null) return;
-            var tag = treeListView1.SelectedObject as AbstractHelper;
+            var tag = treeListView1.SelectedObject;
             propertyGrid1.SelectedObject = tag;
-
+            if (tag is Part part)
+            {
+                updateFacesList(part);
+            }
             if (tag is IEditFieldsContainer c)
             {
                 var objs = c.GetObjects();
@@ -314,7 +331,7 @@ namespace LiteCAD
             cam.OrthoWidth = (float)Math.Max(dx, dy);
         }
 
-        void fitAll()
+        Vector3d[] getAllPoints()
         {
             List<Vector3d> vv = new List<Vector3d>();
             foreach (var item in Parts)
@@ -322,12 +339,38 @@ namespace LiteCAD
                 if (!(item is Part p)) continue;
                 var nn = p.Nodes.SelectMany(z => z.Triangles.SelectMany(u => u.Vertices.Select(zz => zz.Position))).ToArray();
                 vv.AddRange(nn);
-
+                foreach (var face in p.Faces)
+                {
+                    foreach (var ditem in face.Items)
+                    {
+                        if (ditem is LineItem li)
+                        {
+                            vv.Add(li.Start);
+                            vv.Add(li.End);
+                        }
+                    }
+                }
             }
-            if (vv.Count == 0) return;
-            FitToPoints(vv.ToArray(), camera1);
+            return vv.ToArray();
         }
+        void fitAll(bool changeCamera = true)
+        {
+            var vv = getAllPoints();
+            if (vv.Length == 0) return;
+            FitToPoints(vv, camera1);
+            if (changeCamera)
+                camToSelected(vv);
+        }
+        BRepFace selectedFace = null;
+        void updateFacesList(Part part)
+        {
+            listView2.Items.Clear();
+            foreach (var item in part.Faces)
+            {
+                listView2.Items.Add(new ListViewItem(new string[] { item.Id.ToString(), item.Surface.GetType().Name }) { Tag = item });
+            }
 
+        }
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
             fitAll();
@@ -359,8 +402,65 @@ namespace LiteCAD
 
         private void button5_Click(object sender, EventArgs e)
         {
-            if (!(treeListView1.SelectedObject is Part pp)) return;            
+            if (!(treeListView1.SelectedObject is Part pp)) return;
             pp.FixNormals();
+        }
+
+        private void checkBox3_CheckedChanged(object sender, EventArgs e)
+        {
+            Part.AutoExtractMeshOnLoad = checkBox3.Checked;
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            var len = camera1.DirLen;
+            var dir = camera1.Dir;
+            camera1.CamTo = Vector3.Zero;
+            camera1.CamFrom = camera1.CamTo - dir * len;
+        }
+
+
+        void camToSelected(Vector3d[] vv)
+        {
+            Vector3d cnt = Vector3d.Zero;
+            foreach (var item in vv)
+            {
+                cnt += item;
+            }
+            cnt /= vv.Length;
+            var len = camera1.DirLen;
+            var dir = camera1.Dir;
+            camera1.CamTo = cnt.ToVector3();
+            camera1.CamFrom = camera1.CamTo - dir * len;
+        }
+        private void button6_Click(object sender, EventArgs e)
+        {
+            var vv = getAllPoints();
+            camToSelected(vv);
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            if (!(treeListView1.SelectedObject is Part pp)) return;
+            pp.ExtractMesh();
+        }
+
+        private void listView2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listView2.SelectedItems.Count == 0) return;
+            if (selectedFace != null)
+            {
+                selectedFace.Selected = false;
+            }
+            selectedFace = listView2.SelectedItems[0].Tag as BRepFace;
+            selectedFace.Selected = true;
+        }
+
+        private void visibleSwitchToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var face = listView2.SelectedItems[0].Tag as BRepFace;
+            face.Visible = !face.Visible;
+
         }
     }
 }

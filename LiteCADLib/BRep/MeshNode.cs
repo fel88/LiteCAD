@@ -7,6 +7,8 @@ namespace LiteCAD.BRep
 {
     public class MeshNode
     {
+
+        public bool Visible { get; set; } = true;
         public BRepFace Parent;
         public List<TriangleInfo> Triangles = new List<TriangleInfo>();
 

@@ -55,7 +55,7 @@ namespace LiteCAD.Common
             ConstraintMesher.ScoutCounter = 0;
 
 
-            var trng = (new GenericMesher()).Triangulate(poly2, new ConstraintOptions(), new QualityOptions());
+            var trng = (new GenericMesher()).Triangulate(poly2, new ConstraintOptions() { }, new QualityOptions());
 
 
             var ret1 = trng.Triangles.Select(z => new Vector2d[] {
@@ -90,7 +90,7 @@ namespace LiteCAD.Common
             }
             return c;
         }
-        public static bool pnpoly(Vector2d[] verts, float testx, float testy)
+        public static bool pnpoly(Vector2d[] verts, double testx, double testy)
         {
             int nvert = verts.Length;
             int i, j;
@@ -173,10 +173,10 @@ namespace LiteCAD.Common
             if (crs1.Length > 1e-8)
             {
                 axis = -crs1.Normalized();
-            }            
+            }
             var mtr2 = Matrix4d.CreateFromAxisAngle(axis, -ang2);
             var trans = Vector3d.Transform(neg, mtr2);
-            
+
             return trans;
         }
     }

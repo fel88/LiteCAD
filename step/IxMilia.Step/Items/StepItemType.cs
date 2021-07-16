@@ -11,6 +11,10 @@ namespace IxMilia.Step.Items
         CartesianPoint,
         Circle,
         CylindricalSurface,
+        ConicalSurface,
+        ToroidalSurface,
+        SurfaceOfRevolution,
+        SurfaceOfLinearExtrusion,
         CurveSurface,
         PCurve,
         Direction,
@@ -35,6 +39,10 @@ namespace IxMilia.Step.Items
         public const string CartesianPointText = "CARTESIAN_POINT";
         public const string CircleText = "CIRCLE";
         public const string CylindricalSurfaceText = "CYLINDRICAL_SURFACE";
+        public const string ConicalSurfaceText = "CONICAL_SURFACE";
+        public const string ToroidalSurfaceText = "TOROIDAL_SURFACE";
+        public const string SurfaceOfRevolutionText = "SURFACE_OF_REVOLUTION";
+        public const string SurfaceOfLinearExtrusionText = "SURFACE_OF_LINEAR_EXTRUSION";
         public const string DirectionText = "DIRECTION";
         public const string EdgeCurveText = "EDGE_CURVE";
         public const string EdgeLoopText = "EDGE_LOOP";

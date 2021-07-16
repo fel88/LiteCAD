@@ -5,29 +5,33 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 
 namespace LiteCAD.Common
 {
-    public class Part : IDrawable
+    public class Part : AbstractDrawable
     {
         public string Name { get; set; }
 
         public List<BRepFace> Faces = new List<BRepFace>();
-        public List<MeshNode> Nodes = new List<MeshNode>();
+        public MeshNode[] Nodes
+        {
+            get
+            {
+                return Faces.Select(z => z.Node).Where(z => z != null).ToArray();
+            }
+        }
+
         public void ExtractMesh()
         {
             foreach (var item in Faces)
             {
-                //if (!(item is BRepCylinderSurfaceFace)) continue;
+                //if (!(item.Surface is BRepPlane)) continue;
                 try
                 {
                     var nd = item.ExtractMesh();
-                    if (nd != null)
-                    {
-                        Nodes.Add(nd);
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -36,7 +40,6 @@ namespace LiteCAD.Common
             }
         }
 
-        public bool Visible { get; set; } = true;
         public static Part FromStep(string fileName)
         {
             Part ret = new Part() { Name = new FileInfo(fileName).Name };
@@ -58,7 +61,7 @@ namespace LiteCAD.Common
                             var geom = face.FaceGeometry;
                             if (geom is StepCylindricalSurface cyl)
                             {
-                                var pface = new BRepCylinderSurfaceFace();
+                                var pface = new BRepCylinderSurfaceFace(ret);
                                 var loc = cyl.Position.Location;
                                 var loc2 = new Vector3d(loc.X, loc.Y, loc.Z);
                                 var nrm = cyl.Position.Axis;
@@ -148,12 +151,26 @@ namespace LiteCAD.Common
 
                                                 var dir2 = end1 - pos;
                                                 var dir1 = start - pos;
-                                                var ang2 = Vector3d.CalculateAngle(dir2, dir1);
+                                                //var ang2 = Vector3d.CalculateAngle(dir2, dir1); 
+                                                
+                                                var crs = Vector3d.Cross(dir2, dir1);
+                                                
+
+                                                var ang2 = Vector3d.CalculateAngle(dir1, dir2);
+                                                if (!(Vector3d.Dot(axis, crs) < 0))
+                                                {
+                                                    ang2 = (2 * Math.PI) - ang2;
+                                                }
+
+                                                
                                                 var sweep = ang2;
+
                                                 if ((start - end1).Length < 1e-8)
                                                 {
                                                     sweep = Math.PI * 2;
                                                 }
+
+                                           
 
                                                 edge.Curve = new BRepCircleCurve()
                                                 {
@@ -191,9 +208,19 @@ namespace LiteCAD.Common
                                                     SemiAxis2 = elp.SemiAxis2
                                                 };
                                             }
+                                            else if (csurf.EdgeGeometry is StepBSplineCurveWithKnots bspline)
+                                            {
+                                                edge.Curve = new BRepBSplineWithKnotsCurve()
+                                                {
+                                                    Degree = bspline.Degree,
+                                                    Closed = bspline.ClosedCurve,
+                                                    KnotMultiplicities = bspline.KnotMultiplicities.ToArray(),
+                                                    Knots = bspline.Knots.ToArray()
+                                                };
+                                            }
                                             else
                                             {
-
+                                                DebugHelpers.Warning($"unknown geometry: {csurf.EdgeGeometry}");
                                             }
                                         }
                                         else if (crv.EdgeGeometry is StepSeamCurve seam)
@@ -213,7 +240,7 @@ namespace LiteCAD.Common
                             }
                             else if (geom is StepPlane pl)
                             {
-                                var pface = new BRepFace() { };
+                                var pface = new BRepFace(ret) { };
                                 var loc = pl.Position.Location;
                                 var loc2 = new Vector3d(loc.X, loc.Y, loc.Z);
                                 var nrm = pl.Position.Axis;
@@ -253,7 +280,7 @@ namespace LiteCAD.Common
 
                                             var dot = Vector3d.Dot(dir2, dir1);
 
-                                            var ang2 = (Math.Acos(dot / dir2.Length / dir1.Length)) / Math.PI * 180f;
+                                            var ang2 = Vector3d.CalculateAngle(dir1, dir2);// (Math.Acos(dot / dir2.Length / dir1.Length)) / Math.PI * 180f;
 
                                             pnts.Add(pos + dir1);
                                             for (int i = 0; i < ang2; i++)
@@ -338,8 +365,11 @@ namespace LiteCAD.Common
                                                 var crs = Vector3d.Cross(dir2, dir1);
                                                 var dot = Vector3d.Dot(dir2, dir1);
 
-                                                var ang2 = (Math.Acos(dot / dir2.Length / dir1.Length));
-
+                                                var ang2 = Vector3d.CalculateAngle(dir1, dir2);// (Math.Acos(dot / dir2.Length / dir1.Length));
+                                                if (!(Vector3d.Dot(axis, crs) < 0))                                                
+                                                {
+                                                    ang2 = (2 * Math.PI) - ang2;
+                                                }
                                                 pnts.Add(pos + dir1);
                                                 cc.Axis = axis;
                                                 cc.Dir = dir1;
@@ -349,7 +379,8 @@ namespace LiteCAD.Common
                                                 {
                                                     cc.SweepAngle = Math.PI * 2;
                                                 }
-                                                for (int i = 0; i < ang2; i++)
+                                                var step = Math.PI * 15 / 180f;
+                                                for (double i = 0; i < ang2; i += step)
                                                 {
                                                     var mtr4 = Matrix4d.CreateFromAxisAngle(axis, i);
                                                     var res = Vector4d.Transform(new Vector4d(dir1), mtr4);
@@ -375,18 +406,29 @@ namespace LiteCAD.Common
                                     }
                                 }
                             }
+                            /* else if (geom is StepToroidalSurface tor)
+                             {
+
+                             }
+                             else if (geom is StepSurfaceOfLinearExtrusion ext)
+                             {
+
+                             }*/
                             else
                             {
-
+                                DebugHelpers.Warning($"unsupported surface: {geom.ToString()}");
                             }
                         }
                         break;
                 }
             }
-            ret.ExtractMesh();
+            if (AutoExtractMeshOnLoad)
+                ret.ExtractMesh();
             ret.FixNormals();
             return ret;
         }
+
+        public static bool AutoExtractMeshOnLoad = true;
 
         IEnumerable<Vector3d> getPoints()
         {
@@ -481,7 +523,7 @@ namespace LiteCAD.Common
                 int before = calculated.Count;
                 foreach (var rr in remain)
                 {
-                   
+
                     var edges = rr.Wires.SelectMany(z => z.Edges);
                     bool exit = false;
                     foreach (var item in calculated)
@@ -505,7 +547,7 @@ namespace LiteCAD.Common
                                     var nrm = GeometryUtils.CalcConjugateNormal(nm, point0, point1, new Segment3d() { Start = e1.Start, End = e1.End });
                                     if (rr is BRepCylinderSurfaceFace)
                                     {
-                                        (nd2 as CylinderMeshNode).SetNormal(nd2.Triangles[0],nrm);
+                                        (nd2 as CylinderMeshNode).SetNormal(nd2.Triangles[0], nrm);
                                     }
                                     else
                                     {
@@ -537,12 +579,13 @@ namespace LiteCAD.Common
         }
 
         public bool ShowNormals = false;
-        public void Draw()
+        public override void Draw()
         {
             if (!Visible) return;
             GL.Disable(EnableCap.Lighting);
             foreach (var item in Faces)
             {
+                if (!item.Visible) continue;
                 foreach (var pitem in item.Items)
                 {
                     pitem.Draw();
@@ -552,7 +595,17 @@ namespace LiteCAD.Common
 
             foreach (var item in Nodes)
             {
+
+                if (!item.Parent.Visible) continue;
+                GL.Enable(EnableCap.Lighting);
+
+                if (item.Parent.Selected)
+                {
+                    GL.Disable(EnableCap.Lighting);
+                    GL.Color3(Color.LightGreen);
+                }
                 GL.Begin(PrimitiveType.Triangles);
+
                 foreach (var zitem in item.Triangles)
                 {
                     foreach (var vv in zitem.Vertices)
@@ -567,11 +620,9 @@ namespace LiteCAD.Common
             if (ShowNormals)
             {
                 GL.Disable(EnableCap.Lighting);
-
                 foreach (var item in Nodes)
                 {
-
-
+                    if (!item.Parent.Visible) continue;
                     GL.Begin(PrimitiveType.Lines);
                     foreach (var tr in item.Triangles)
                     {

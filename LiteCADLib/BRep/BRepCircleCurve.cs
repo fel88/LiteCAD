@@ -11,8 +11,4 @@ namespace LiteCAD.BRep
 
         public double SweepAngle;
     }
-    public class BRepSeamCurve : BRepCurve
-    {
-        
-    }
 }

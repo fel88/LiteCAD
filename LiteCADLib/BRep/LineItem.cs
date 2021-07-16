@@ -1,5 +1,6 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using System.Drawing;
 
 namespace LiteCAD.BRep
 {
@@ -7,6 +8,11 @@ namespace LiteCAD.BRep
     {
         public override void Draw()
         {
+            GL.Color3(Color.Blue);
+            if (Selected)
+            {
+                GL.Color3(Color.Blue);
+            }
             GL.Begin(PrimitiveType.Lines);
             GL.Vertex3(Start);
             GL.Vertex3(End);

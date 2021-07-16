@@ -5,7 +5,7 @@ using System.Drawing;
 
 namespace LiteCAD.Common
 {
-    public class PlaneHelper : AbstractHelper, IEditFieldsContainer
+    public class PlaneHelper : AbstractDrawable, IEditFieldsContainer
     {
         public string Name { get; set; }
 

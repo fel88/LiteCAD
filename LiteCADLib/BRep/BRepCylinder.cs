@@ -30,6 +30,7 @@ namespace LiteCAD.BRep
             {
                 ang = -ang;
             }
+            if (ang < 0) ang += Math.PI * 2;
             return new Vector2d(ang, p);
         }
     }

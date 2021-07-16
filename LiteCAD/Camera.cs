@@ -13,11 +13,11 @@ namespace LiteCAD
 
         public Vector3 Dir
         {
-            get { return CamFrom - CamTo; }
+            get { return (CamFrom - CamTo).Normalized(); }
         }
         public float DirLen
         {
-            get { return Dir.Length; }
+            get { return (CamFrom - CamTo).Length; }
         }
 
         public Vector3 CameraFrom

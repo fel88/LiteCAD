@@ -38,6 +38,18 @@ namespace IxMilia.Step.Items
                     case StepItemTypeExtensions.CylindricalSurfaceText:
                         item = StepCylindricalSurface.CreateFromSyntaxList(binder, simpleItem.Parameters);
                         break;
+                    case StepItemTypeExtensions.SurfaceOfLinearExtrusionText:
+                        item = StepSurfaceOfLinearExtrusion.CreateFromSyntaxList(binder, simpleItem.Parameters);
+                        break;
+                    case StepItemTypeExtensions.ConicalSurfaceText:
+                        item = StepConicalSurface.CreateFromSyntaxList(binder, simpleItem.Parameters);
+                        break;
+                    case StepItemTypeExtensions.ToroidalSurfaceText:
+                        item = StepToroidalSurface.CreateFromSyntaxList(binder, simpleItem.Parameters);
+                        break;
+                    case StepItemTypeExtensions.SurfaceOfRevolutionText:
+                        item = StepSurfaceOfRevolution.CreateFromSyntaxList(binder, simpleItem.Parameters);
+                        break;
                     case StepItemTypeExtensions.DirectionText:
                         item = StepDirection.CreateFromSyntaxList(simpleItem.Parameters);
                         break;

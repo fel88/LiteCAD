@@ -50,6 +50,7 @@
     <Compile Include="BRep\BRepCylinder.cs" />
     <Compile Include="BRep\BRepCylinderSurfaceFace.cs" />
     <Compile Include="BRep\BRepPlane.cs" />
+    <Compile Include="BRep\BRepSeamCurve.cs" />
     <Compile Include="BRep\BRepSurface.cs" />
     <Compile Include="BRep\Contour.cs" />
     <Compile Include="BRep\DebugHelpers.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="Common\Draft.cs" />
     <Compile Include="Common\EditFieldAttribute.cs" />
     <Compile Include="Common\GeometryUtils.cs" />
+    <Compile Include="Common\IDrawable.cs" />
     <Compile Include="Common\IEditFieldsContainer.cs" />
     <Compile Include="Common\IName.cs" />
     <Compile Include="Common\IntFieldEditor.cs" />

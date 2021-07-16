@@ -4,14 +4,13 @@ using System.Collections.Generic;
 
 namespace LiteCAD.Common
 {
-    public class Draft : IDrawable
+    public class Draft : AbstractDrawable
     {
         public List<Vector3d> Points = new List<Vector3d>();
 
-        public void Draw()
+        public override void Draw()
         {
             throw new NotImplementedException();
         }
     }
-
 }

@@ -1,7 +1,9 @@
-﻿namespace LiteCAD.BRep
+﻿using LiteCAD.Common;
+
+namespace LiteCAD.BRep
 {
-    public class DrawItem
+    public class DrawItem : AbstractDrawable
     {
-        public virtual void Draw() { }
+        public override void Draw() { }
     }
 }

@@ -1,16 +1,10 @@
 ﻿namespace LiteCAD.Common
 {
-    public abstract class AbstractHelper : IDrawable
+    public abstract class AbstractDrawable : IDrawable
     {
-        public virtual void Draw()
-        {
-
-        }
+        public abstract void Draw();
         public bool Visible { get; set; } = true;
-    }
-    public interface IDrawable
-    {
-        void Draw();
+        public bool Selected { get; set; }
     }
 
 }

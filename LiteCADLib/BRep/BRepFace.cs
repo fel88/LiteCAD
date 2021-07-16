@@ -8,9 +8,24 @@ namespace LiteCAD.BRep
 {
     public class BRepFace
     {
-        public BRepFace()
+        public BRepFace(Part parent)
         {
+            Parent = parent;
             Id = NewId++;
+        }
+        public MeshNode Node;
+        public Part Parent;
+        bool _selected;
+        public bool Selected
+        {
+            get => _selected; set
+            {
+                _selected = value;
+                foreach (var item in Items)
+                {
+                    item.Selected = value;
+                }
+            }
         }
         public static int NewId = 0;
         public int Id { get; set; }
@@ -18,7 +33,7 @@ namespace LiteCAD.BRep
         public BRepSurface Surface;
         public List<BRepWire> Wires = new List<BRepWire>();
         public BRepWire OutterWire;
-
+        public bool Visible { get; set; } = true;
         public virtual MeshNode ExtractMesh()
         {
             MeshNode ret = null;
@@ -135,10 +150,13 @@ namespace LiteCAD.BRep
 
             if (cntrs.Count == 0) return null;
             if (!(cntrs[0].Elements.Count > 2)) return null;
-            DebugHelpers.ToBitmap(cntrs[0]);
+            int mult = 1;
+            DebugHelpers.ToBitmap(cntrs.ToArray(), mult);
 
             var triangls = GeometryUtils.TriangulateWithHoles(new[] { cntrs[0].Elements.Select(z => z.Start).ToArray() },
                 cntrs.Skip(1).Select(z => z.Elements.Select(u => u.Start).ToArray()).ToArray(), true);
+            DebugHelpers.ToBitmap(cntrs.ToArray(), triangls.ToArray(), mult);
+
             ret = new MeshNode();
             ret.Parent = this;
             List<TriangleInfo> tt = new List<TriangleInfo>();
@@ -155,7 +173,7 @@ namespace LiteCAD.BRep
             }
             ret.Triangles.AddRange(tt);
 
-
+            Node = ret;
             return ret;
         }
     }

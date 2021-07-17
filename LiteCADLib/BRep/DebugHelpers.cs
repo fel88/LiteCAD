@@ -14,6 +14,7 @@ namespace LiteCAD.BRep
 
         public static Action<string> Error;
         public static Action<string> Warning;
+        public static Action<bool, float> Progress;
         public static void ToBitmap(Contour[] cntrs, Vector2d[][] triangls, float mult = 1, bool withTriang = false)
         {
             if (!Debugger.IsAttached) return;
@@ -60,11 +61,18 @@ namespace LiteCAD.BRep
                 }
             }
 
-            Thread thread = new Thread(() => Clipboard.SetImage(bmp));
+            ExecuteSTA(() => Clipboard.SetImage(bmp));
+        }
+
+        public static void ExecuteSTA(Action act)
+        {
+            if (!Debugger.IsAttached) return;
+            Thread thread = new Thread(() => { act(); });
             thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
             thread.Join();
         }
+
         public static void ToBitmap(Contour[] cntrs, float mult = 1)
         {
             if (!Debugger.IsAttached) return;
@@ -98,10 +106,7 @@ namespace LiteCAD.BRep
                 }
             }
 
-            Thread thread = new Thread(() => Clipboard.SetImage(bmp));
-            thread.SetApartmentState(ApartmentState.STA);
-            thread.Start();
-            thread.Join();
+            ExecuteSTA(() => Clipboard.SetImage(bmp));
         }
     }
 }

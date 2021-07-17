@@ -22,4 +22,20 @@ namespace LiteCAD.BRep
             return proj;
         }
     }
+    public class BRepLinearExtrusionSurface : BRepSurface
+    {
+        public Vector3d Location;
+        public Vector3d Normal;
+        public double Length;
+        public Vector3d Vector;
+
+    }
+    public class BRepToroidalSurface : BRepSurface
+    {
+        public Vector3d Location;
+        public Vector3d Normal; 
+        public double MajorRadius { get; set; }
+        public double MinorRadius { get; set; }
+
+    }
 }

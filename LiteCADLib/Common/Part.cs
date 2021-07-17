@@ -26,8 +26,11 @@ namespace LiteCAD.Common
 
         public void ExtractMesh()
         {
-            foreach (var item in Faces)
+            for (int i = 0; i < Faces.Count; i++)
             {
+                BRepFace item = Faces[i];
+                float prog = (i / (float)Faces.Count) * 100;
+                DebugHelpers.Progress(true, prog);
                 //if (!(item.Surface is BRepPlane)) continue;
                 try
                 {
@@ -38,6 +41,7 @@ namespace LiteCAD.Common
                     DebugHelpers.Error($"mesh extract error #{item.Id}: {ex.Message}");
                 }
             }
+            DebugHelpers.Progress(true, 100);
         }
 
         public static Part FromStep(string fileName)
@@ -152,9 +156,9 @@ namespace LiteCAD.Common
                                                 var dir2 = end1 - pos;
                                                 var dir1 = start - pos;
                                                 //var ang2 = Vector3d.CalculateAngle(dir2, dir1); 
-                                                
+
                                                 var crs = Vector3d.Cross(dir2, dir1);
-                                                
+
 
                                                 var ang2 = Vector3d.CalculateAngle(dir1, dir2);
                                                 if (!(Vector3d.Dot(axis, crs) < 0))
@@ -162,7 +166,7 @@ namespace LiteCAD.Common
                                                     ang2 = (2 * Math.PI) - ang2;
                                                 }
 
-                                                
+
                                                 var sweep = ang2;
 
                                                 if ((start - end1).Length < 1e-8)
@@ -170,7 +174,7 @@ namespace LiteCAD.Common
                                                     sweep = Math.PI * 2;
                                                 }
 
-                                           
+
 
                                                 edge.Curve = new BRepCircleCurve()
                                                 {
@@ -366,7 +370,7 @@ namespace LiteCAD.Common
                                                 var dot = Vector3d.Dot(dir2, dir1);
 
                                                 var ang2 = Vector3d.CalculateAngle(dir1, dir2);// (Math.Acos(dot / dir2.Length / dir1.Length));
-                                                if (!(Vector3d.Dot(axis, crs) < 0))                                                
+                                                if (!(Vector3d.Dot(axis, crs) < 0))
                                                 {
                                                     ang2 = (2 * Math.PI) - ang2;
                                                 }
@@ -394,26 +398,171 @@ namespace LiteCAD.Common
                                                     pface.Items.Add(new LineItem() { Start = p0, End = p1 });
                                                 }
                                             }
+                                            else if (csurf.EdgeGeometry is StepBSplineCurveWithKnots bspline)
+                                            {
+                                                BRepEdge edge = new BRepEdge();
+                                                var cc = new BRepBSplineWithKnotsCurve();
+                                                edge.Start = start;
+                                                edge.End = end1;
+                                                cc.Degree = bspline.Degree;
+                                                cc.Closed = bspline.ClosedCurve;
+                                                cc.ControlPoints = bspline.ControlPointsList.Select(z => new Vector3d(z.X, z.Y, z.Z)).ToArray();
+                                                cc.KnotMultiplicities = bspline.KnotMultiplicities.ToArray();
+                                                cc.Knots = bspline.Knots.ToArray();
+                                                edge.Curve = cc;
+                                                wire.Edges.Add(edge);
+                                                pface.Items.Add(new LineItem() { Start = start, End = end1 });
+                                            }
                                             else
                                             {
+                                                DebugHelpers.Warning($"unsupported geometry: {csurf.EdgeGeometry}");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            DebugHelpers.Warning($"plane surface. unsupported: {crv}");
+                                        }
+                                    }
+                                }
+                            }
+                            else if (geom is StepToroidalSurface tor)
+                            {
+                                var pface = new BRepFace(ret) { };
+                                var loc = tor.Position.Location;
+                                var loc2 = new Vector3d(loc.X, loc.Y, loc.Z);
+                                var nrm = tor.Position.Axis;
+                                var nrm2 = new Vector3d(nrm.X, nrm.Y, nrm.Z);
+                                pface.Surface = new BRepToroidalSurface()
+                                {
+                                    Location = loc2,
+                                    Normal = nrm2,
+                                    MinorRadius = tor.MinorRadius,
+                                    MajorRadius = tor.MajorRadius
+                                };
+                                ret.Faces.Add(pface);
+                                foreach (var bitem in face.Bounds)
+                                {
+                                    var loop = bitem.Bound as StepEdgeLoop;
+                                    BRepWire wire = new BRepWire();
+                                    pface.Wires.Add(wire);
+                                    foreach (var litem in loop.EdgeList)
+                                    {
+                                        StepEdgeCurve crv = litem.EdgeElement as StepEdgeCurve;
+                                        var strt = (crv.EdgeStart as StepVertexPoint).Location;
+                                        var end = (crv.EdgeEnd as StepVertexPoint).Location;
+                                        var start = new Vector3d(strt.X, strt.Y, strt.Z);
+                                        var end1 = new Vector3d(end.X, end.Y, end.Z);
+
+
+                                        if (crv.EdgeGeometry is StepCircle circ)
+                                        {
+
+                                        }
+                                        else if (crv.EdgeGeometry is StepCurveSurface curve)
+                                        {
+                                            if(curve.EdgeGeometry is StepCircle _circle)
+                                            {
+
+                                            }
+                                            else if (curve.EdgeGeometry is StepBSplineCurveWithKnots bspline)
+                                            {
+                                                BRepEdge edge = new BRepEdge();
+                                                var cc = new BRepBSplineWithKnotsCurve();
+                                                edge.Start = start;
+                                                edge.End = end1;
+                                                cc.Degree = bspline.Degree;
+                                                cc.Closed = bspline.ClosedCurve;
+                                                cc.ControlPoints = bspline.ControlPointsList.Select(z => new Vector3d(z.X, z.Y, z.Z)).ToArray();
+                                                cc.KnotMultiplicities = bspline.KnotMultiplicities.ToArray();
+                                                cc.Knots = bspline.Knots.ToArray();
+                                                edge.Curve = cc;
+                                                wire.Edges.Add(edge);
+                                            }
+                                            else
+                                            {
+                                                DebugHelpers.Warning($"unsupported curve geometry: {curve.EdgeGeometry}");
 
                                             }
                                         }
                                         else
                                         {
-
+                                            DebugHelpers.Warning($"toroidal surface. unsupported curve: {crv}");
                                         }
                                     }
                                 }
                             }
-                            /* else if (geom is StepToroidalSurface tor)
-                             {
+                            else if (geom is StepSurfaceOfLinearExtrusion ext)
+                            {
+                                var pface = new BRepLinearExtrusionFace(ret) { };
 
-                             }
-                             else if (geom is StepSurfaceOfLinearExtrusion ext)
-                             {
+                                pface.Surface = new BRepLinearExtrusionSurface()
+                                {
+                                    Length = ext.Vector.Length,
+                                    Vector = new Vector3d(ext.Vector.Direction.X, ext.Vector.Direction.Y, ext.Vector.Direction.Z)
+                                };
+                                ret.Faces.Add(pface);
+                                foreach (var bitem in face.Bounds)
+                                {
+                                    var loop = bitem.Bound as StepEdgeLoop;
+                                    BRepWire wire = new BRepWire();
+                                    pface.Wires.Add(wire);
+                                    foreach (var litem in loop.EdgeList)
+                                    {
+                                        StepEdgeCurve crv = litem.EdgeElement as StepEdgeCurve;
+                                        var strt = (crv.EdgeStart as StepVertexPoint).Location;
+                                        var end = (crv.EdgeEnd as StepVertexPoint).Location;
+                                        var start = new Vector3d(strt.X, strt.Y, strt.Z);
+                                        var end1 = new Vector3d(end.X, end.Y, end.Z);
+                                        pface.Items.Add(new LineItem()
+                                        {
+                                            Start = start,
+                                            End = end1
+                                        });
+                                        if (crv.EdgeGeometry is StepCircle circ)
+                                        {
 
-                             }*/
+                                        }
+                                        else if (crv.EdgeGeometry is StepCurveSurface curve)
+                                        {
+                                            if (curve.EdgeGeometry is StepCircle circ2)
+                                            {
+
+                                            }
+                                            else if (curve.EdgeGeometry is StepBSplineCurveWithKnots bspline)
+                                            {
+                                                BRepEdge edge = new BRepEdge();
+                                                var cc = new BRepBSplineWithKnotsCurve();
+                                                edge.Start = start;
+                                                edge.End = end1;
+                                                cc.Degree = bspline.Degree;
+                                                cc.Closed = bspline.ClosedCurve;
+                                                cc.ControlPoints = bspline.ControlPointsList.Select(z => new Vector3d(z.X, z.Y, z.Z)).ToArray();
+                                                cc.KnotMultiplicities = bspline.KnotMultiplicities.ToArray();
+                                                cc.Knots = bspline.Knots.ToArray();
+                                                edge.Curve = cc;
+                                                wire.Edges.Add(edge);
+                                            }
+                                            else if (curve.EdgeGeometry is StepLine _line)
+                                            {                                                
+                                                BRepEdge edge = new BRepEdge();
+                                                var cc = new BRepLineCurve();
+                                                edge.Start = start;
+                                                edge.End = end1;
+                                                edge.Curve = cc;
+                                                wire.Edges.Add(edge);
+                                            }
+                                            else
+                                            {
+                                                DebugHelpers.Warning($"unsupported curve geometry: {curve.EdgeGeometry}");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            DebugHelpers.Warning($"linear extrusion surface. unsupported curve: {crv}");
+                                        }
+                                    }
+                                }
+                            }
                             else
                             {
                                 DebugHelpers.Warning($"unsupported surface: {geom.ToString()}");
@@ -425,6 +574,7 @@ namespace LiteCAD.Common
             if (AutoExtractMeshOnLoad)
                 ret.ExtractMesh();
             ret.FixNormals();
+            DebugHelpers.Progress(false, 0);
             return ret;
         }
 
@@ -542,8 +692,15 @@ namespace LiteCAD.Common
                                     var nd2 = Nodes.FirstOrDefault(z => z.Parent == rr);
                                     if (nd2 == null) continue;
                                     var nm2 = nd2.Triangles[0].Vertices[0].Normal;
-                                    var point0 = nd.Triangles.First(z => z.Contains(e1.Start) && z.Contains(e1.End)).Center();
-                                    var point1 = nd2.Triangles.First(z => z.Contains(e1.Start) && z.Contains(e1.End)).Center();
+
+                                    var _point0 = nd.Triangles.FirstOrDefault(z => z.Contains(e1.Start) && z.Contains(e1.End));
+                                    if (_point0 == null) continue;
+                                    var point0 = _point0.Center();
+                                    var _point1 = nd2.Triangles.FirstOrDefault(z => z.Contains(e1.Start) && z.Contains(e1.End));
+                                    if (_point1 == null) continue;
+
+                                    var point1 = _point1.Center();
+
                                     var nrm = GeometryUtils.CalcConjugateNormal(nm, point0, point1, new Segment3d() { Start = e1.Start, End = e1.End });
                                     if (rr is BRepCylinderSurfaceFace)
                                     {

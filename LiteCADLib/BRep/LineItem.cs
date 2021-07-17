@@ -11,7 +11,7 @@ namespace LiteCAD.BRep
             GL.Color3(Color.Blue);
             if (Selected)
             {
-                GL.Color3(Color.Blue);
+                GL.Color3(Color.Violet);
             }
             GL.Begin(PrimitiveType.Lines);
             GL.Vertex3(Start);

@@ -3,6 +3,7 @@ using OpenTK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace LiteCAD.BRep
 {
@@ -292,12 +293,81 @@ namespace LiteCAD.BRep
                 if (good) tops.Add(item);
             }
 
-            var triangls = GeometryUtils.TriangulateWithHoles(tops.Select(z => z.Elements.Select(u => u.Start).ToArray()).ToArray(),
-           cntrs.Except(tops).Select(z => z.Elements.Select(u => u.Start).ToArray()).ToArray(), true);
+            List<Vector2d[]> triangls = new List<Vector2d[]>();
+            foreach (var item in tops)
+            {
+                List<Contour> holes = new List<Contour>();
+                var pnts2 = item.Elements.Select(z => z.End).ToArray();
+
+                foreach (var xitem in cntrs.Except(tops))
+                    if (GeometryUtils.pnpoly(pnts2, xitem.Elements[0].Start.X, xitem.Elements[0].Start.Y))
+                        holes.Add(xitem);
+
+                double step = 15 / 180f * Math.PI;
+
+                PolyBoolCS.PolyBool pb = new PolyBoolCS.PolyBool();
+                PolyBoolCS.Polygon p1 = new PolyBoolCS.Polygon();
+                var pl1 = new PolyBoolCS.PointList();
+                p1.regions = new List<PolyBoolCS.PointList>();
+
+                pl1.AddRange(item.Elements.Select(z => z.Start).Select(z => new PolyBoolCS.Point(z.X, z.Y)).ToArray());
+                p1.regions.Add(pl1);
+                var maxy = pl1.Max(z => z.y) + 1;
+                var miny = pl1.Min(z => z.y) - 1;
+                double last = 0;
+                while (true)
+                //for (double i = step; i < (Math.PI * 2); i += step)
+                {
+
+                    var p0 = last;
+                    var p11 = p0 + step;
+                    last += step;
+
+                    p0 = Math.Min(p0, Math.PI * 2);
+                    p11 = Math.Min(p11, Math.PI * 2);
+
+                    if (Math.Abs(p0 - p11) < 1e-8) break;
+
+
+                    PolyBoolCS.Polygon p2 = new PolyBoolCS.Polygon();
+                    p2.regions = new List<PolyBoolCS.PointList>();
+                    var pl2 = new PolyBoolCS.PointList();
+
+                    pl2.Add(new PolyBoolCS.Point(p0, miny));
+                    pl2.Add(new PolyBoolCS.Point(p0, maxy));
+                    pl2.Add(new PolyBoolCS.Point(p11, maxy));
+                    pl2.Add(new PolyBoolCS.Point(p11, miny));
+
+
+                    p2.regions.Add(pl2);
+                    DebugHelpers.ExecuteSTA(() =>
+                    {
+                        Clipboard.SetText(p1.ToXml().ToString());
+                    });
+                    DebugHelpers.ExecuteSTA(() =>
+                    {
+                        Clipboard.SetText(p2.ToXml().ToString());
+                    });
+
+                    var res = pb.intersect(p1, p2);
+                    if (res.regions.Any())
+                    {
+                        foreach (var region in res.regions)
+                        {
+                            var triangls2 = GeometryUtils.TriangulateWithHoles(
+                                new[] { region.Select(z => new Vector2d(z.x, z.y)).ToArray() }
+                                ,
+                  holes.Select(z => z.Elements.Select(u => u.Start).ToArray()).ToArray(), true);
+                            triangls.AddRange(triangls2);
+                        }
+                    }
+                }
+            }
+
             int mult2 = 1;
 
-            DebugHelpers.ToBitmap(cntrs.ToArray(), triangls, mult2);
-            DebugHelpers.ToBitmap(cntrs.ToArray(), triangls, mult2, true);
+            DebugHelpers.ToBitmap(cntrs.ToArray(), triangls.ToArray(), mult2);
+            DebugHelpers.ToBitmap(cntrs.ToArray(), triangls.ToArray(), mult2, true);
 
             //transform back 2d->3d
             CylinderMeshNode node = new CylinderMeshNode();

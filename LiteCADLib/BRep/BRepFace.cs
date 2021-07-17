@@ -95,6 +95,21 @@ namespace LiteCAD.BRep
                             ll1.Add(new Segment() { Start = p0, End = p1 });
                         }
                     }
+                    else if (edge.Curve is BRepBSplineWithKnotsCurve spline)
+                    {
+                        List<Vector3d> pnts = new List<Vector3d>();
+                        pnts.Add(edge.Start);
+                        pnts.AddRange(spline.ControlPoints);
+                        pnts.Add(edge.End); 
+                        for (int i = 1; i < pnts.Count; i++)
+                        {
+                            var pp0 = pnts[i - 1];
+                            var pp1 = pnts[i];
+                            var p0 = pl.GetUVProjPoint(pp0, v1, axis2);
+                            var p1 = pl.GetUVProjPoint(pp1, v1, axis2);
+                            ll1.Add(new Segment() { Start = p0, End = p1 });
+                        }
+                    }
                     else
                     {
                         throw new LiteCadException("unsupported curve type");

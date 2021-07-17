@@ -134,7 +134,6 @@ namespace LiteCAD
             }
             GL.Disable(EnableCap.Lighting);
 
-
             glControl.SwapBuffers();
         }
 
@@ -142,9 +141,9 @@ namespace LiteCAD
         {
             InitializeComponent();
             checkBox3.Checked = Part.AutoExtractMeshOnLoad;
+            checkBox1.Checked = AllowPartLoadTimeout;
 
             glControl = new OpenTK.GLControl(new OpenTK.Graphics.GraphicsMode(32, 24, 0, 8));
-
 
             if (glControl.Context.GraphicsMode.Samples == 0)
             {
@@ -169,6 +168,14 @@ namespace LiteCAD
             DebugHelpers.Warning = (str) =>
             {
                 infoPanel.Invoke((Action)(() => { infoPanel.AddWarning(str); }));
+            };
+            DebugHelpers.Progress = (en, p) =>
+            {
+                infoPanel.Invoke((Action)(() =>
+                {
+                    toolStripProgressBar1.Visible = en;
+                    toolStripProgressBar1.Value = (int)Math.Round(p);
+                }));
             };
 
             infoPanel.Switch();
@@ -204,7 +211,7 @@ namespace LiteCAD
         }
 
         public List<IDrawable> Parts = new List<IDrawable>();
-
+        public bool AllowPartLoadTimeout = true;
         bool loaded = false;
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -248,7 +255,7 @@ namespace LiteCAD
                         if (loaded) break;
                     }
                 });
-                if (!Debugger.IsAttached)
+                if (!Debugger.IsAttached && AllowPartLoadTimeout)
                 {
                     th2.IsBackground = true;
                     th2.Start();
@@ -458,9 +465,21 @@ namespace LiteCAD
 
         private void visibleSwitchToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (listView2.SelectedItems.Count == 0) return;
             var face = listView2.SelectedItems[0].Tag as BRepFace;
             face.Visible = !face.Visible;
+        }
 
+        private void checkBox1_CheckedChanged_1(object sender, EventArgs e)
+        {
+            AllowPartLoadTimeout = checkBox1.Checked;
+        }
+
+        private void updateMeshToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listView2.SelectedItems.Count == 0) return;
+            var face = listView2.SelectedItems[0].Tag as BRepFace;
+            face.ExtractMesh();            
         }
     }
 }

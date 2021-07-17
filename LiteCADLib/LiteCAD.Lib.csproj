@@ -46,21 +46,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BRep\BRepBSplineWithKnotsCurve.cs" />
     <Compile Include="BRep\BRepCircleCurve.cs" />
     <Compile Include="BRep\BRepCylinder.cs" />
     <Compile Include="BRep\BRepCylinderSurfaceFace.cs" />
+    <Compile Include="BRep\BRepEllipseCurve.cs" />
+    <Compile Include="BRep\BRepLinearExtrusionFace.cs" />
     <Compile Include="BRep\BRepPlane.cs" />
     <Compile Include="BRep\BRepSeamCurve.cs" />
     <Compile Include="BRep\BRepSurface.cs" />
     <Compile Include="BRep\Contour.cs" />
     <Compile Include="BRep\DebugHelpers.cs" />
     <Compile Include="BRep\DrawItem.cs" />
+    <Compile Include="Common\Extensions.cs" />
     <Compile Include="BRep\LineItem.cs" />
     <Compile Include="BRep\MeshNode.cs" />
     <Compile Include="BRep\PlaneItem.cs" />
     <Compile Include="BRep\PointItem.cs" />
     <Compile Include="BRep\Segment.cs" />
     <Compile Include="BRep\TriangleInfo.cs" />
+    <Compile Include="PolyBool.cs" />
     <Compile Include="Common\AbstractHelper.cs" />
     <Compile Include="BRep\BRepCurve.cs" />
     <Compile Include="BRep\BRepEdge.cs" />

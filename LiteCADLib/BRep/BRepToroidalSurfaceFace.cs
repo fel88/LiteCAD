@@ -1,28 +1,34 @@
 ﻿using IxMilia.Step.Items;
 using LiteCAD.Common;
 using OpenTK;
+using System;
 using System.Linq;
 
 namespace LiteCAD.BRep
 {
-    public class BRepLinearExtrusionFace : BRepFace
+    public class BRepToroidalSurfaceFace : BRepFace
     {
-        public BRepLinearExtrusionFace(Part p) : base(p) { }
+        public BRepToroidalSurfaceFace(Part parent) : base(parent) { }
+
         public override MeshNode ExtractMesh()
         {
-            MeshNode ret = new MeshNode();
-            return ret;
+            throw new NotImplementedException();
         }
 
         public override void Load(StepAdvancedFace face, StepSurface _cyl)
         {
-            var ext = _cyl as StepSurfaceOfLinearExtrusion;
-            Surface = new BRepLinearExtrusionSurface()
+            var tor = _cyl as StepToroidalSurface;
+            var loc = tor.Position.Location;
+            var loc2 = new Vector3d(loc.X, loc.Y, loc.Z);
+            var nrm = tor.Position.Axis;
+            var nrm2 = new Vector3d(nrm.X, nrm.Y, nrm.Z);
+            Surface = new BRepToroidalSurface()
             {
-                Length = ext.Vector.Length,
-                Vector = new Vector3d(ext.Vector.Direction.X, ext.Vector.Direction.Y, ext.Vector.Direction.Z)
+                Location = loc2,
+                Normal = nrm2,
+                MinorRadius = tor.MinorRadius,
+                MajorRadius = tor.MajorRadius
             };
-            
             foreach (var bitem in face.Bounds)
             {
                 var loop = bitem.Bound as StepEdgeLoop;
@@ -35,18 +41,15 @@ namespace LiteCAD.BRep
                     var end = (crv.EdgeEnd as StepVertexPoint).Location;
                     var start = new Vector3d(strt.X, strt.Y, strt.Z);
                     var end1 = new Vector3d(end.X, end.Y, end.Z);
-                    Items.Add(new LineItem()
-                    {
-                        Start = start,
-                        End = end1
-                    });
+
+
                     if (crv.EdgeGeometry is StepCircle circ)
                     {
 
                     }
                     else if (crv.EdgeGeometry is StepCurveSurface curve)
                     {
-                        if (curve.EdgeGeometry is StepCircle circ2)
+                        if (curve.EdgeGeometry is StepCircle _circle)
                         {
 
                         }
@@ -64,23 +67,15 @@ namespace LiteCAD.BRep
                             edge.Curve = cc;
                             wire.Edges.Add(edge);
                         }
-                        else if (curve.EdgeGeometry is StepLine _line)
-                        {
-                            BRepEdge edge = new BRepEdge();
-                            var cc = new BRepLineCurve();
-                            edge.Start = start;
-                            edge.End = end1;
-                            edge.Curve = cc;
-                            wire.Edges.Add(edge);
-                        }
                         else
                         {
                             DebugHelpers.Warning($"unsupported curve geometry: {curve.EdgeGeometry}");
+
                         }
                     }
                     else
                     {
-                        DebugHelpers.Warning($"linear extrusion surface. unsupported curve: {crv}");
+                        DebugHelpers.Warning($"toroidal surface. unsupported curve: {crv}");
                     }
                 }
             }

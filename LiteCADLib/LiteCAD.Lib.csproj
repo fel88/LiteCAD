@@ -53,8 +53,10 @@
     <Compile Include="BRep\BRepEllipseCurve.cs" />
     <Compile Include="BRep\BRepLinearExtrusionFace.cs" />
     <Compile Include="BRep\BRepPlane.cs" />
+    <Compile Include="BRep\BRepPlaneFace.cs" />
     <Compile Include="BRep\BRepSeamCurve.cs" />
     <Compile Include="BRep\BRepSurface.cs" />
+    <Compile Include="BRep\BRepToroidalSurfaceFace.cs" />
     <Compile Include="BRep\Contour.cs" />
     <Compile Include="BRep\DebugHelpers.cs" />
     <Compile Include="BRep\DrawItem.cs" />

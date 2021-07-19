@@ -50,6 +50,9 @@ namespace IxMilia.Step.Items
                     case StepItemTypeExtensions.SurfaceOfRevolutionText:
                         item = StepSurfaceOfRevolution.CreateFromSyntaxList(binder, simpleItem.Parameters);
                         break;
+                    case StepItemTypeExtensions.BSplineSurfaceWithKnotsText:
+                        item = StepBSplineWithKnotsSurface.CreateFromSyntaxList(binder, simpleItem.Parameters);
+                        break;
                     case StepItemTypeExtensions.DirectionText:
                         item = StepDirection.CreateFromSyntaxList(simpleItem.Parameters);
                         break;

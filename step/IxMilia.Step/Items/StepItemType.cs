@@ -13,6 +13,7 @@ namespace IxMilia.Step.Items
         CylindricalSurface,
         ConicalSurface,
         ToroidalSurface,
+        BSplineWithKnotsSurface,
         SurfaceOfRevolution,
         SurfaceOfLinearExtrusion,
         CurveSurface,
@@ -36,6 +37,7 @@ namespace IxMilia.Step.Items
         public const string Axis2Placement2DText = "AXIS2_PLACEMENT_2D";
         public const string Axis2Placement3DText = "AXIS2_PLACEMENT_3D";
         public const string BSplineCurveWithKnotsText = "B_SPLINE_CURVE_WITH_KNOTS";
+        public const string BSplineSurfaceWithKnotsText = "B_SPLINE_SURFACE_WITH_KNOTS";
         public const string CartesianPointText = "CARTESIAN_POINT";
         public const string CircleText = "CIRCLE";
         public const string CylindricalSurfaceText = "CYLINDRICAL_SURFACE";

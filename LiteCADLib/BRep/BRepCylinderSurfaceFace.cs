@@ -1,4 +1,5 @@
-﻿using LiteCAD.Common;
+﻿using IxMilia.Step.Items;
+using LiteCAD.Common;
 using OpenTK;
 using System;
 using System.Collections.Generic;
@@ -405,5 +406,199 @@ namespace LiteCAD.BRep
             return ret;
 
         }
+
+        private BRepEdge extractCircleEdge(Vector3d start, Vector3d end1, StepCircle circ2)
+        {
+            var edge = new BRepEdge();
+
+
+            edge.Start = start;
+            edge.End = end1;
+
+            var axis3d = circ2.Position as StepAxis2Placement3D;
+            var axis = new Vector3d(axis3d.Axis.X, axis3d.Axis.Y, axis3d.Axis.Z);
+            var refdir = new Vector3d(axis3d.RefDirection.X, axis3d.RefDirection.Y, axis3d.RefDirection.Z);
+            var pos = new Vector3d(circ2.Position.Location.X,
+                circ2.Position.Location.Y,
+                circ2.Position.Location.Z);
+
+            var loc0 = circ2.Position.Location;
+            var loc1 = new Vector3d(loc0.X, loc0.Y, loc0.Z);
+
+            var dir2 = end1 - pos;
+            var dir1 = start - pos;
+            //var ang2 = Vector3d.CalculateAngle(dir2, dir1); 
+
+            var crs = Vector3d.Cross(dir2, dir1);
+
+
+            var ang2 = Vector3d.CalculateAngle(dir1, dir2);
+            if (!(Vector3d.Dot(axis, crs) < 0))
+            {
+                ang2 = (2 * Math.PI) - ang2;
+            }
+
+
+            var sweep = ang2;
+
+            if ((start - end1).Length < 1e-8)
+            {
+                sweep = Math.PI * 2;
+            }
+
+
+
+            edge.Curve = new BRepCircleCurve()
+            {
+                Location = loc1,
+                Radius = circ2.Radius,
+                Axis = axis,
+                Dir = dir1,
+                SweepAngle = sweep
+            };
+            return edge;
+        }
+
+        public override void Load(StepAdvancedFace face, StepSurface _cyl)
+        {
+            var cyl = _cyl as StepCylindricalSurface;
+            var loc = cyl.Position.Location;
+            var loc2 = new Vector3d(loc.X, loc.Y, loc.Z);
+            var nrm = cyl.Position.Axis;
+            var ref1 = cyl.Position.RefDirection;
+            var nrm2 = new Vector3d(nrm.X, nrm.Y, nrm.Z);
+            var ref2 = new Vector3d(ref1.X, ref1.Y, ref1.Z);
+            Surface = new BRepCylinder()
+            {
+                Location = loc2,
+                Radius = cyl.Radius,
+                Axis = nrm2,
+                RefDir = ref2
+            };
+
+            var rad = cyl.Radius;
+            foreach (var bitem in face.Bounds)
+            {
+                BRepWire wire = new BRepWire();
+                Wires.Add(wire);
+                var loop = bitem.Bound as StepEdgeLoop;
+                foreach (var litem in loop.EdgeList)
+                {
+                    StepEdgeCurve crv = litem.EdgeElement as StepEdgeCurve;
+
+                    var strt = (crv.EdgeStart as StepVertexPoint).Location;
+                    var end = (crv.EdgeEnd as StepVertexPoint).Location;
+                    var start = new Vector3d(strt.X, strt.Y, strt.Z);
+                    var end1 = new Vector3d(end.X, end.Y, end.Z);
+
+
+                    if (crv.EdgeGeometry is StepCircle circ)
+                    {
+                        var edge = extractCircleEdge(start, end1, circ);                        
+                        wire.Edges.Add(edge);
+                    }
+                    else if (crv.EdgeGeometry is StepLine lin)
+                    {
+                        var edge = new BRepEdge();
+                        wire.Edges.Add(edge);
+
+                        edge.Curve = new BRepLineCurve() { };
+                        edge.Start = start;
+                        edge.End = end1;
+
+                        /*var c = crv.EdgeStart as StepVertexPoint;
+                        var c0 = c.Location;
+                        var c1 = crv.EdgeEnd as StepVertexPoint;
+                        var c01 = c1.Location;
+
+                        Items.Add(new LineItem()
+                        {
+                            Start = new Vector3d(
+                                c0.X, c0.Y, c0.Z
+                            ),
+                            End = new Vector3d(
+                                c01.X, c01.Y, c01.Z
+                            )
+                        });*/
+                    }
+                    else if (crv.EdgeGeometry is StepCurveSurface csurf)
+                    {                      
+                        if (csurf.EdgeGeometry is StepCircle circ2)
+                        {
+                            var edge = extractCircleEdge(start, end1, circ2);
+                            wire.Edges.Add(edge);                            
+                        }
+                        else if (csurf.EdgeGeometry is StepLine lin2)
+                        {
+                            var edge = new BRepEdge();
+                            wire.Edges.Add(edge);
+                            edge.Start = start;
+                            edge.End = end1;
+
+                            var pos = new Vector3d(lin2.Point.X,
+                              lin2.Point.Y,
+                              lin2.Point.Z);
+                            var vec = new Vector3d(lin2.Vector.Direction.X,
+                          lin2.Vector.Direction.Y,
+                          lin2.Vector.Direction.Z);
+                            edge.Curve = new BRepLineCurve() { Point = pos, Vector = vec };
+                        }
+                        else if (csurf.EdgeGeometry is StepEllipse elp)
+                        {
+                            var edge = new BRepEdge();
+                            wire.Edges.Add(edge);
+                            edge.Start = start;
+                            edge.End = end1;
+                            var pos = new Vector3d(elp.Position.Location.X,
+                             elp.Position.Location.Y,
+                             elp.Position.Location.Z);
+                            var vec = new Vector3d(elp.Position.RefDirection.X,
+                          elp.Position.RefDirection.Y,
+                          elp.Position.RefDirection.Z);
+                            edge.Curve = new BRepEllipseCurve()
+                            {
+                                Location = pos,
+                                RefDir = vec,
+                                SemiAxis1 = elp.SemiAxis1,
+                                SemiAxis2 = elp.SemiAxis2
+                            };
+                        }
+                        else if (csurf.EdgeGeometry is StepBSplineCurveWithKnots bspline)
+                        {
+                            var edge = new BRepEdge();
+                            wire.Edges.Add(edge);
+                            edge.Start = start;
+                            edge.End = end1;
+                            edge.Curve = new BRepBSplineWithKnotsCurve()
+                            {
+                                Degree = bspline.Degree,
+                                Closed = bspline.ClosedCurve,
+                                KnotMultiplicities = bspline.KnotMultiplicities.ToArray(),
+                                Knots = bspline.Knots.ToArray()
+                            };
+                        }
+                        else
+                        {
+                            DebugHelpers.Warning($"unknown geometry: {csurf.EdgeGeometry}");
+                        }
+                    }
+                    else if (crv.EdgeGeometry is StepSeamCurve seam)
+                    {
+                        var edge = new BRepEdge();
+                        wire.Edges.Add(edge);
+                        edge.Curve = new BRepSeamCurve();
+                        edge.Start = start;
+                        edge.End = end1;
+                    }
+                    else
+                    {
+
+                    }
+                }
+            }
+        }
+
+
+
     }
-}
+    }

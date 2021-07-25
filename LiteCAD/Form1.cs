@@ -1,5 +1,6 @@
 ﻿using LiteCAD.BRep;
 using LiteCAD.Common;
+using LiteCADLib.Parsers.Step;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
@@ -213,6 +214,7 @@ namespace LiteCAD
         public List<IDrawable> Parts = new List<IDrawable>();
         public bool AllowPartLoadTimeout = true;
         bool loaded = false;
+        bool useInternalStepParser = false;
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
@@ -223,7 +225,16 @@ namespace LiteCAD
                 {
                     try
                     {
-                        var prt = Part.FromStep(ofd.FileName);
+                        Part prt = null;
+
+                        if (useInternalStepParser)
+                        {
+                            prt = StepParser.Parse(ofd.FileName);
+                        }
+                        else
+                        {
+                            prt = Part.FromStep(ofd.FileName);
+                        }
                         var fi = new FileInfo(ofd.FileName);
                         loaded = true;
                         lock (Parts)
@@ -479,7 +490,12 @@ namespace LiteCAD
         {
             if (listView2.SelectedItems.Count == 0) return;
             var face = listView2.SelectedItems[0].Tag as BRepFace;
-            face.ExtractMesh();            
+            face.ExtractMesh();
+        }
+
+        private void checkBox4_CheckedChanged(object sender, EventArgs e)
+        {
+            useInternalStepParser = checkBox4.Checked;
         }
     }
 }

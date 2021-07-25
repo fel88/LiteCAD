@@ -1,5 +1,6 @@
 ﻿using IxMilia.Step.Items;
 using LiteCAD.Common;
+using LiteCADLib.Parsers.Step;
 using OpenTK;
 using System;
 using System.Collections.Generic;
@@ -406,59 +407,43 @@ namespace LiteCAD.BRep
             return ret;
 
         }
-
-        private BRepEdge extractCircleEdge(Vector3d start, Vector3d end1, StepCircle circ2)
+        
+        public static BRepEdge ExtractCircleEdge(Vector3d start, Vector3d end1, Vector3d pos, Vector3d axis
+            , double radius)
         {
             var edge = new BRepEdge();
 
-
             edge.Start = start;
             edge.End = end1;
-
-            var axis3d = circ2.Position as StepAxis2Placement3D;
-            var axis = new Vector3d(axis3d.Axis.X, axis3d.Axis.Y, axis3d.Axis.Z);
-            var refdir = new Vector3d(axis3d.RefDirection.X, axis3d.RefDirection.Y, axis3d.RefDirection.Z);
-            var pos = new Vector3d(circ2.Position.Location.X,
-                circ2.Position.Location.Y,
-                circ2.Position.Location.Z);
-
-            var loc0 = circ2.Position.Location;
-            var loc1 = new Vector3d(loc0.X, loc0.Y, loc0.Z);
+            var loc1 = pos;
 
             var dir2 = end1 - pos;
-            var dir1 = start - pos;
-            //var ang2 = Vector3d.CalculateAngle(dir2, dir1); 
+            var dir1 = start - pos;            
 
             var crs = Vector3d.Cross(dir2, dir1);
-
-
             var ang2 = Vector3d.CalculateAngle(dir1, dir2);
             if (!(Vector3d.Dot(axis, crs) < 0))
             {
                 ang2 = (2 * Math.PI) - ang2;
             }
 
-
             var sweep = ang2;
-
             if ((start - end1).Length < 1e-8)
             {
                 sweep = Math.PI * 2;
             }
 
-
-
             edge.Curve = new BRepCircleCurve()
             {
                 Location = loc1,
-                Radius = circ2.Radius,
+                Radius = radius,
                 Axis = axis,
                 Dir = dir1,
                 SweepAngle = sweep
             };
             return edge;
         }
-
+        
         public override void Load(StepAdvancedFace face, StepSurface _cyl)
         {
             var cyl = _cyl as StepCylindricalSurface;
@@ -494,7 +479,9 @@ namespace LiteCAD.BRep
 
                     if (crv.EdgeGeometry is StepCircle circ)
                     {
-                        var edge = extractCircleEdge(start, end1, circ);                        
+                        var axis3d = circ.Position as StepAxis2Placement3D;
+                        var edge = ExtractCircleEdge(start, end1, circ.Position.Location.ToVector3d(),
+                          axis3d.Axis.ToVector3d(), circ.Radius);
                         wire.Edges.Add(edge);
                     }
                     else if (crv.EdgeGeometry is StepLine lin)
@@ -522,11 +509,13 @@ namespace LiteCAD.BRep
                         });*/
                     }
                     else if (crv.EdgeGeometry is StepCurveSurface csurf)
-                    {                      
+                    {
                         if (csurf.EdgeGeometry is StepCircle circ2)
                         {
-                            var edge = extractCircleEdge(start, end1, circ2);
-                            wire.Edges.Add(edge);                            
+                            var axis3d = circ2.Position as StepAxis2Placement3D;
+                            var edge = ExtractCircleEdge(start, end1, circ2.Position.Location.ToVector3d(),
+                              axis3d.Axis.ToVector3d(), circ2.Radius);
+                            wire.Edges.Add(edge);
                         }
                         else if (csurf.EdgeGeometry is StepLine lin2)
                         {
@@ -601,4 +590,4 @@ namespace LiteCAD.BRep
 
 
     }
-    }
+}

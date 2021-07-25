@@ -51,6 +51,7 @@
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.contextMenuStrip2 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.visibleSwitchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.updateMeshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
@@ -60,6 +61,7 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.button1 = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.button8 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.button7 = new System.Windows.Forms.Button();
@@ -76,9 +78,8 @@
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
-            this.updateMeshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkBox4 = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.treeListView1)).BeginInit();
@@ -280,7 +281,7 @@
             this.visibleSwitchToolStripMenuItem,
             this.updateMeshToolStripMenuItem});
             this.contextMenuStrip2.Name = "contextMenuStrip2";
-            this.contextMenuStrip2.Size = new System.Drawing.Size(181, 70);
+            this.contextMenuStrip2.Size = new System.Drawing.Size(145, 48);
             // 
             // visibleSwitchToolStripMenuItem
             // 
@@ -288,6 +289,13 @@
             this.visibleSwitchToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.visibleSwitchToolStripMenuItem.Text = "visible switch";
             this.visibleSwitchToolStripMenuItem.Click += new System.EventHandler(this.visibleSwitchToolStripMenuItem_Click);
+            // 
+            // updateMeshToolStripMenuItem
+            // 
+            this.updateMeshToolStripMenuItem.Name = "updateMeshToolStripMenuItem";
+            this.updateMeshToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.updateMeshToolStripMenuItem.Text = "update mesh";
+            this.updateMeshToolStripMenuItem.Click += new System.EventHandler(this.updateMeshToolStripMenuItem_Click);
             // 
             // tabControl1
             // 
@@ -378,6 +386,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.checkBox4);
             this.tabPage3.Controls.Add(this.checkBox1);
             this.tabPage3.Controls.Add(this.button8);
             this.tabPage3.Controls.Add(this.label1);
@@ -392,6 +401,17 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Debug";
             this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(19, 248);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(104, 17);
+            this.checkBox1.TabIndex = 6;
+            this.checkBox1.Text = "part load timeout";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged_1);
             // 
             // button8
             // 
@@ -494,7 +514,7 @@
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -503,7 +523,7 @@
             this.exportAsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.stepToolStripMenuItem});
             this.exportAsToolStripMenuItem.Name = "exportAsToolStripMenuItem";
-            this.exportAsToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.exportAsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exportAsToolStripMenuItem.Text = "Export as";
             // 
             // stepToolStripMenuItem
@@ -539,29 +559,22 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(13, 17);
             this.toolStripStatusLabel1.Text = "..";
             // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(19, 248);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(104, 17);
-            this.checkBox1.TabIndex = 6;
-            this.checkBox1.Text = "part load timeout";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged_1);
-            // 
             // toolStripProgressBar1
             // 
             this.toolStripProgressBar1.Name = "toolStripProgressBar1";
             this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
             this.toolStripProgressBar1.Visible = false;
             // 
-            // updateMeshToolStripMenuItem
+            // checkBox4
             // 
-            this.updateMeshToolStripMenuItem.Name = "updateMeshToolStripMenuItem";
-            this.updateMeshToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.updateMeshToolStripMenuItem.Text = "update mesh";
-            this.updateMeshToolStripMenuItem.Click += new System.EventHandler(this.updateMeshToolStripMenuItem_Click);
+            this.checkBox4.AutoSize = true;
+            this.checkBox4.Location = new System.Drawing.Point(17, 271);
+            this.checkBox4.Name = "checkBox4";
+            this.checkBox4.Size = new System.Drawing.Size(143, 17);
+            this.checkBox4.TabIndex = 7;
+            this.checkBox4.Text = "use internal STEP parser";
+            this.checkBox4.UseVisualStyleBackColor = true;
+            this.checkBox4.CheckedChanged += new System.EventHandler(this.checkBox4_CheckedChanged);
             // 
             // Form1
             // 
@@ -647,6 +660,7 @@
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
         private System.Windows.Forms.ToolStripMenuItem updateMeshToolStripMenuItem;
+        private System.Windows.Forms.CheckBox checkBox4;
     }
 }
 

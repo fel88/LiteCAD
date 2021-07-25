@@ -167,26 +167,25 @@ namespace LiteCAD.BRep
             Node = ret;
             return ret;
         }
-
-        private BRepEdge extractCircleEdge(Vector3d start, Vector3d end1, StepCircle circ)
+        public static BRepEdge ExtractCircleEdge(BRepFace face, Vector3d start, Vector3d end1, double radius,
+            Vector3d axis, Vector3d location)
         {
             BRepEdge edge = new BRepEdge();
 
-            var rad = circ.Radius;
+            var rad = radius;
             var cc = new BRepCircleCurve();
             edge.Curve = cc;
             cc.Radius = rad;
-
+            var pos = location;
             edge.Start = start;
             edge.End = end1;
 
-
-            var axis3d = circ.Position as StepAxis2Placement3D;
-            var axis = new Vector3d(axis3d.Axis.X, axis3d.Axis.Y, axis3d.Axis.Z);
-            var refdir = new Vector3d(axis3d.RefDirection.X, axis3d.RefDirection.Y, axis3d.RefDirection.Z);
-            var pos = new Vector3d(circ.Position.Location.X,
-                circ.Position.Location.Y,
-                circ.Position.Location.Z);
+            //var axis3d = circ.Axis as Axis2Placement3d;
+            //var axis = new Vector3d(axis3d.Dir1.X, axis3d.Dir1.Y, axis3d.Dir1.Z);
+            //var refdir = new Vector3d(axis3d.RefDirection.X, axis3d.RefDirection.Y, axis3d.RefDirection.Z);
+            /*var pos = new Vector3d(circ.Axis.Location.X,
+                circ.Axis.Location.Y,
+                circ.Axis.Location.Z);*/
             var dir1 = start - pos;
             var dir2 = end1 - pos;
             List<Vector3d> pnts = new List<Vector3d>();
@@ -223,14 +222,14 @@ namespace LiteCAD.BRep
             {
                 var p0 = pnts[j - 1];
                 var p1 = pnts[j];
-                Items.Add(new LineItem() { Start = p0, End = p1 });
+                face.Items.Add(new LineItem() { Start = p0, End = p1 });
             }
             return edge;
-        }
+        }        
 
         public override void Load(StepAdvancedFace face, StepSurface _pl)
         {
-            var pl = _pl as StepPlane;
+            var pl = _pl as IxMilia.Step.Items.StepPlane;
             var loc = pl.Position.Location;
             var loc2 = new Vector3d(loc.X, loc.Y, loc.Z);
             var nrm = pl.Position.Axis;
@@ -254,64 +253,11 @@ namespace LiteCAD.BRep
                     var end1 = new Vector3d(end.X, end.Y, end.Z);
                     if (crv.EdgeGeometry is StepCircle circ)
                     {
-                        var edge = extractCircleEdge(start, end1, circ);
+                        var pp = circ.Position as StepAxis2Placement3D;
+                        var edge = ExtractCircleEdge(this, start, end1, 
+                            circ.Radius, 
+                            pp.Axis.ToVector3d(), circ.Position.Location.ToVector3d());
                         wire.Edges.Add(edge);
-
-                        //var rad = circ.Radius;
-                        //var cc = new BRepCircleCurve();
-                        //edge.Curve = cc;
-                        //cc.Radius = rad;
-
-                        //edge.Start = start;
-                        //edge.End = end1;
-
-
-                        //var axis3d = circ.Position as StepAxis2Placement3D;
-                        //var axis = new Vector3d(axis3d.Axis.X, axis3d.Axis.Y, axis3d.Axis.Z);
-                        //var refdir = new Vector3d(axis3d.RefDirection.X, axis3d.RefDirection.Y, axis3d.RefDirection.Z);
-                        //var pos = new Vector3d(circ.Position.Location.X,
-                        //    circ.Position.Location.Y,
-                        //    circ.Position.Location.Z);
-                        //var dir1 = start - pos;
-                        //var dir2 = end1 - pos;
-                        //List<Vector3d> pnts = new List<Vector3d>();
-
-
-
-                        //var dot = Vector3d.Dot(dir2, dir1);
-                        //var crs = Vector3d.Cross(dir2, dir1);
-                        //var ang2 = Vector3d.CalculateAngle(dir1, dir2);
-
-                        //if (!(Vector3d.Dot(axis, crs) < 0))
-                        //{
-                        //    ang2 = (2 * Math.PI) - ang2;
-                        //}
-
-                        //pnts.Add(pos + dir1);
-                        //cc.Axis = axis;
-                        //cc.Dir = dir1;
-                        //cc.Location = pos;
-                        //cc.SweepAngle = ang2;
-                        //if ((start - end1).Length < 1e-8)
-                        //{
-                        //    cc.SweepAngle = Math.PI * 2;
-                        //}
-                        //var step = Math.PI * 15 / 180f;
-                        //for (double i = 0; i < ang2; i += step)
-                        //{
-                        //    var mtr4 = Matrix4d.CreateFromAxisAngle(axis, i);
-                        //    var res = Vector4d.Transform(new Vector4d(dir1), mtr4);
-                        //    //var rot = new Vector4d(dir1) * mtr4;
-                        //    pnts.Add(pos + res.Xyz);
-                        //}
-                        //pnts.Add(pos + dir2);
-                        //for (int j = 1; j < pnts.Count; j++)
-                        //{
-                        //    var p0 = pnts[j - 1];
-                        //    var p1 = pnts[j];
-                        //    Items.Add(new LineItem() { Start = p0, End = p1 });
-                        //}
-
                     }
                     else if (crv.EdgeGeometry is StepLine lin)
                     {
@@ -349,60 +295,11 @@ namespace LiteCAD.BRep
                         }
                         else if (csurf.EdgeGeometry is StepCircle circ2)
                         {
-                            var edge = extractCircleEdge(start, end1, circ2);
-                            wire.Edges.Add(edge);
-
-                            //var rad = circ2.Radius;
-                            //var cc = new BRepCircleCurve();
-                            //edge.Curve = cc;
-                            //cc.Radius = rad;
-
-                            //edge.Start = start;
-                            //edge.End = end1;
-
-
-                            //var axis3d = circ2.Position as StepAxis2Placement3D;
-                            //var axis = new Vector3d(axis3d.Axis.X, axis3d.Axis.Y, axis3d.Axis.Z);
-                            //var refdir = new Vector3d(axis3d.RefDirection.X, axis3d.RefDirection.Y, axis3d.RefDirection.Z);
-                            //var pos = new Vector3d(circ2.Position.Location.X,
-                            //    circ2.Position.Location.Y,
-                            //    circ2.Position.Location.Z);
-
-                            //var dir1 = start - pos;
-                            //var dir2 = end1 - pos;
-                            //List<Vector3d> pnts = new List<Vector3d>();
-
-                            //var crs = Vector3d.Cross(dir2, dir1);
-                            //var dot = Vector3d.Dot(dir2, dir1);
-
-                            //var ang2 = Vector3d.CalculateAngle(dir1, dir2);// (Math.Acos(dot / dir2.Length / dir1.Length));
-                            //if (!(Vector3d.Dot(axis, crs) < 0))
-                            //{
-                            //    ang2 = (2 * Math.PI) - ang2;
-                            //}
-                            //pnts.Add(pos + dir1);
-                            //cc.Axis = axis;
-                            //cc.Dir = dir1;
-                            //cc.Location = pos;
-                            //cc.SweepAngle = ang2;
-                            //if ((start - end1).Length < 1e-8)
-                            //{
-                            //    cc.SweepAngle = Math.PI * 2;
-                            //}
-                            //var step = Math.PI * 15 / 180f;
-                            //for (double i = 0; i < ang2; i += step)
-                            //{
-                            //    var mtr4 = Matrix4d.CreateFromAxisAngle(axis, i);
-                            //    var res = Vector4d.Transform(new Vector4d(dir1), mtr4);
-                            //    pnts.Add(pos + res.Xyz);
-                            //}
-                            //pnts.Add(pos + dir2);
-                            //for (int j = 1; j < pnts.Count; j++)
-                            //{
-                            //    var p0 = pnts[j - 1];
-                            //    var p1 = pnts[j];
-                            //    Items.Add(new LineItem() { Start = p0, End = p1 });
-                            //}
+                            var pp = circ2.Position as StepAxis2Placement3D;
+                            var edge = ExtractCircleEdge(this, start, end1,
+                                circ2.Radius,
+                                pp.Axis.ToVector3d(), circ2.Position.Location.ToVector3d());
+                            wire.Edges.Add(edge);                            
                         }
                         else if (csurf.EdgeGeometry is StepBSplineCurveWithKnots bspline)
                         {

@@ -1,5 +1,6 @@
 ﻿using IxMilia.Step.Items;
 using LiteCAD.Common;
+using LiteCADLib.Parsers.Step;
 using System.Collections.Generic;
 
 namespace LiteCAD.BRep
@@ -33,7 +34,8 @@ namespace LiteCAD.BRep
         public List<BRepWire> Wires = new List<BRepWire>();
         public BRepWire OutterWire;
         public bool Visible { get; set; } = true;
-        public abstract void Load(StepAdvancedFace face, StepSurface _cyl);
+        public abstract void Load(StepAdvancedFace face, StepSurface surf);
+        public abstract void Load(AdvancedFace face);
         public abstract MeshNode ExtractMesh();
 
     }

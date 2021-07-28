@@ -48,14 +48,17 @@
   <ItemGroup>
     <Compile Include="BRep\BRepBSplineWithKnotsCurve.cs" />
     <Compile Include="BRep\BRepCircleCurve.cs" />
+    <Compile Include="BRep\BRepConicalSurfaceFace.cs" />
     <Compile Include="BRep\BRepCylinder.cs" />
     <Compile Include="BRep\BRepCylinderSurfaceFace.cs" />
     <Compile Include="BRep\BRepEllipseCurve.cs" />
     <Compile Include="BRep\BRepLinearExtrusionFace.cs" />
+    <Compile Include="BRep\BRepLinearExtrusionSurface.cs" />
     <Compile Include="BRep\BRepPlane.cs" />
     <Compile Include="BRep\BRepPlaneFace.cs" />
     <Compile Include="BRep\BRepSeamCurve.cs" />
     <Compile Include="BRep\BRepSurface.cs" />
+    <Compile Include="BRep\BRepToroidalSurface.cs" />
     <Compile Include="BRep\BRepToroidalSurfaceFace.cs" />
     <Compile Include="BRep\Contour.cs" />
     <Compile Include="BRep\CylinderMeshNode.cs" />
@@ -73,14 +76,17 @@
     <Compile Include="Parsers\Step\Axis2Placement3d.cs" />
     <Compile Include="Parsers\Step\CircleParseItem.cs" />
     <Compile Include="Parsers\Step\ClosedShell.cs" />
+    <Compile Include="Parsers\Step\ConicalSurfaceParseItem.cs" />
     <Compile Include="Parsers\Step\CylindricalSurfaceParseItem.cs" />
     <Compile Include="Parsers\Step\DefinitionalRepresentation.cs" />
     <Compile Include="Parsers\Step\DefinitionalRepresentationParseItem.cs" />
     <Compile Include="Parsers\Step\EdgeCurve.cs" />
     <Compile Include="Parsers\Step\EdgeCurveParseItem.cs" />
     <Compile Include="Parsers\Step\EdgeLoopParseItem.cs" />
+    <Compile Include="Parsers\Step\EllipseParseItem.cs" />
     <Compile Include="Parsers\Step\FaceBoundParseItem.cs" />
     <Compile Include="Parsers\Step\FaceOuterBoundParseItem.cs" />
+    <Compile Include="Parsers\Step\LinearExtrusionSurfaceParseItem.cs" />
     <Compile Include="Parsers\Step\LineParseItem.cs" />
     <Compile Include="Parsers\Step\OrientedEdge.cs" />
     <Compile Include="Parsers\Step\OrientedEdgeParseItem.cs" />
@@ -88,6 +94,7 @@
     <Compile Include="Parsers\Step\PCurve.cs" />
     <Compile Include="Parsers\Step\PCurveParseItem.cs" />
     <Compile Include="Parsers\Step\PlaneSurfaceParseItem.cs" />
+    <Compile Include="Parsers\Step\SeamCurveParseItem.cs" />
     <Compile Include="Parsers\Step\ShellParseItem.cs" />
     <Compile Include="Parsers\Step\Step.cs" />
     <Compile Include="Parsers\Step\StepLineItem.cs" />

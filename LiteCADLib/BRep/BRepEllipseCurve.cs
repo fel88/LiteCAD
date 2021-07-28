@@ -9,5 +9,10 @@ namespace LiteCAD.BRep
 
         public double SemiAxis1;
         public double SemiAxis2;
+        
+        public Vector3d Axis;
+        public Vector3d Dir;        
+
+        public double SweepAngle;
     }
 }

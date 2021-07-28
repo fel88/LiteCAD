@@ -1,4 +1,5 @@
 ﻿using OpenTK;
+using System;
 
 namespace LiteCAD.BRep
 {
@@ -21,21 +22,10 @@ namespace LiteCAD.BRep
             var proj = point - dist * nrm;
             return proj;
         }
-    }
-    public class BRepLinearExtrusionSurface : BRepSurface
-    {
-        public Vector3d Location;
-        public Vector3d Normal;
-        public double Length;
-        public Vector3d Vector;
 
-    }
-    public class BRepToroidalSurface : BRepSurface
-    {
-        public Vector3d Location;
-        public Vector3d Normal; 
-        public double MajorRadius { get; set; }
-        public double MinorRadius { get; set; }
-
+        public override bool IsOnSurface(Vector3d v, double eps = 1E-08)
+        {
+            return (Math.Abs(Vector3d.Dot(Location - v, Normal)) < eps);
+        }
     }
 }

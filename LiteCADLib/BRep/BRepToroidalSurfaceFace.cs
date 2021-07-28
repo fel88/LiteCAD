@@ -1,5 +1,6 @@
 ﻿using IxMilia.Step.Items;
 using LiteCAD.Common;
+using LiteCADLib.Parsers.Step;
 using OpenTK;
 using System;
 using System.Linq;
@@ -79,6 +80,11 @@ namespace LiteCAD.BRep
                     }
                 }
             }
+        }
+
+        public override void Load(AdvancedFace face)
+        {
+            throw new NotImplementedException();
         }
     }
 }

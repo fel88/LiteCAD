@@ -33,6 +33,8 @@ namespace LiteCAD
             Redraw();
 
         }
+
+        bool drawAxes = true;
         void Redraw()
         {
             ViewManager.Update();
@@ -95,27 +97,30 @@ namespace LiteCAD
             GL.PopMatrix();
             camera1.Setup(glControl);
 
-            GL.PushMatrix();
+            if (drawAxes)
+            {
+                GL.PushMatrix();
 
-            GL.LineWidth(2);
-            GL.Color3(Color.Red);
-            GL.Begin(PrimitiveType.Lines);
-            GL.Vertex3(0, 0, 0);
-            GL.Vertex3(100, 0, 0);
-            GL.End();
+                GL.LineWidth(2);
+                GL.Color3(Color.Red);
+                GL.Begin(PrimitiveType.Lines);
+                GL.Vertex3(0, 0, 0);
+                GL.Vertex3(100, 0, 0);
+                GL.End();
 
-            GL.Color3(Color.Green);
-            GL.Begin(PrimitiveType.Lines);
-            GL.Vertex3(0, 0, 0);
-            GL.Vertex3(0, 100, 0);
-            GL.End();
+                GL.Color3(Color.Green);
+                GL.Begin(PrimitiveType.Lines);
+                GL.Vertex3(0, 0, 0);
+                GL.Vertex3(0, 100, 0);
+                GL.End();
 
-            GL.Color3(Color.Blue);
-            GL.Begin(PrimitiveType.Lines);
-            GL.Vertex3(0, 0, 0);
-            GL.Vertex3(0, 0, 100);
-            GL.End();
-            GL.PopMatrix();
+                GL.Color3(Color.Blue);
+                GL.Begin(PrimitiveType.Lines);
+                GL.Vertex3(0, 0, 0);
+                GL.Vertex3(0, 0, 100);
+                GL.End();
+                GL.PopMatrix();
+            }
 
             GL.Color3(Color.Blue);
             GL.Enable(EnableCap.Lighting);
@@ -218,6 +223,7 @@ namespace LiteCAD
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "STEP files (*.stp;*.step)|*.stp;*.step|All files (*.*)|*.*";
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 loaded = false;
@@ -496,6 +502,11 @@ namespace LiteCAD
         private void checkBox4_CheckedChanged(object sender, EventArgs e)
         {
             useInternalStepParser = checkBox4.Checked;
+        }
+
+        private void checkBox5_CheckedChanged(object sender, EventArgs e)
+        {
+            drawAxes = checkBox5.Checked;
         }
     }
 }

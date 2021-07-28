@@ -80,6 +80,96 @@ namespace LiteCAD.BRep
                     foreach (var edge in wire.Edges)
                     {
                         List<Segment> ll1 = new List<Segment>();
+                        if (edge.Curve is BRepEllipseCurve elc)
+                        {
+                            List<Vector3d> pnts = new List<Vector3d>();
+                            var step = Math.PI * 15 / 180f;
+                            var norm = elc.Dir.Normalized();
+                            var angb = Vector3d.CalculateAngle(norm, elc.RefDir);
+                            for (double i = 0; i < elc.SweepAngle; i += step)
+                            {
+                                var realAng = angb + i;
+                                var mtr4 = Matrix4d.CreateFromAxisAngle(elc.Axis, i);
+                                var rad = elc.SemiAxis1 * elc.SemiAxis2 / (Math.Sqrt(Math.Pow(elc.SemiAxis1 * Math.Sin(realAng), 2) + Math.Pow(elc.SemiAxis2 * Math.Cos(realAng), 2)));
+                                var res = Vector4d.Transform(new Vector4d(norm * rad), mtr4);
+                                pnts.Add(elc.Location + res.Xyz);
+                            }
+                            if ((pnts.Last() - edge.End).Length > 1e-8 && (pnts.First() - edge.End).Length > 1e-8)
+                            {
+                                pnts.Add(edge.End);
+                            }
+                            for (int i = 1; i < pnts.Count; i++)
+                            {
+                                var pp0 = pnts[i - 1];
+                                var pp1 = pnts[i];
+                                var p0 = cl.GetProj(pp0);
+                                var p1 = cl.GetProj(pp1);
+                                if (p0.X >= (Math.PI * 2 - 2 * step) && p1.X < 2 * step)
+                                {
+                                    var dy = p1.Y - p0.Y;
+                                    var dx = (p1.X + Math.PI * 2) - p0.X;
+                                    var tx = (Math.PI * 2 - p0.X) / dx;
+                                    var ty = dy * tx;
+
+                                    ll1.Add(new Segment() { Start = p0, End = new Vector2d(Math.PI * 2, ty + p0.Y) });
+                                    ll1.Add(new Segment() { Start = new Vector2d(0, ty + p0.Y), End = p1 });
+                                    ll1.RemoveAll(z => z.Length() < 1e-16);
+
+                                }
+                                else if (p1.X >= (Math.PI * 2 - 2 * step) && p0.X < 2 * step)
+                                {
+                                    var dy = p0.Y - p1.Y;
+                                    var dx = (p0.X + Math.PI * 2) - p1.X;
+                                    var tx = (Math.PI * 2 - p1.X) / dx;
+                                    var ty = dy * tx;
+
+                                    ll1.Add(new Segment() { Start = p1, End = new Vector2d(Math.PI * 2, ty + p1.Y) });
+                                    ll1.Add(new Segment() { Start = new Vector2d(0, ty + p1.Y), End = p0 });
+                                    ll1.RemoveAll(z => z.Length() < 1e-16);
+                                }
+                                else
+                                if (Math.Abs((p0 - p1).Length - step) > step)
+                                {
+
+                                    if (Math.Abs(p0.X) < 1e-16)
+                                    {
+                                        p0.X += Math.PI * 2;
+                                        if (Math.Abs((p0 - p1).Length - step) > step)
+                                        {
+                                            throw new LiteCadException("wrong angles");
+
+                                        }
+                                        else
+                                        {
+                                            ll1.Add(new Segment() { Start = p0, End = p1 });
+                                        }
+                                    }
+                                    else if (Math.Abs(p1.X) < 1e-16)
+                                    {
+                                        p1.X += Math.PI * 2;
+                                        if (Math.Abs((p0 - p1).Length - step) > step)
+                                        {
+                                            throw new LiteCadException("wrong angles");
+
+                                        }
+                                        else
+                                        {
+                                            ll1.Add(new Segment() { Start = p0, End = p1 });
+                                        }
+                                    }
+                                    else
+                                    {
+                                        throw new LiteCadException("wrong angles");
+
+                                    }
+                                }
+                                else
+                                {
+                                    ll1.Add(new Segment() { Start = p0, End = p1 });
+                                }
+                            }
+                        }
+                        else
                         if (edge.Curve is BRepCircleCurve cc)
                         {
                             List<Vector3d> pnts = new List<Vector3d>();
@@ -407,7 +497,44 @@ namespace LiteCAD.BRep
             return ret;
 
         }
-        
+        public static BRepEdge ExtractEllipseEdge(Vector3d start, Vector3d end1, Vector3d pos, Vector3d axis, Vector3d refDir
+            , double radius1, double radius2)
+        {
+            var edge = new BRepEdge();
+
+            edge.Start = start;
+            edge.End = end1;
+            var loc1 = pos;
+
+            var dir2 = end1 - pos;
+            var dir1 = start - pos;
+
+            var crs = Vector3d.Cross(dir2, dir1);
+            var ang2 = Vector3d.CalculateAngle(dir1, dir2);
+            if (!(Vector3d.Dot(axis, crs) < 0))
+            {
+                ang2 = (2 * Math.PI) - ang2;
+            }
+
+            var sweep = ang2;
+            if ((start - end1).Length < 1e-8)
+            {
+                sweep = Math.PI * 2;
+            }
+
+            edge.Curve = new BRepEllipseCurve()
+            {
+                Location = loc1,
+                SemiAxis1 = radius1,
+                SemiAxis2 = radius2,
+                RefDir = refDir,
+                Axis = axis,
+                Dir = dir1,
+                SweepAngle = sweep
+            };
+            return edge;
+        }
+
         public static BRepEdge ExtractCircleEdge(Vector3d start, Vector3d end1, Vector3d pos, Vector3d axis
             , double radius)
         {
@@ -418,7 +545,7 @@ namespace LiteCAD.BRep
             var loc1 = pos;
 
             var dir2 = end1 - pos;
-            var dir1 = start - pos;            
+            var dir1 = start - pos;
 
             var crs = Vector3d.Cross(dir2, dir1);
             var ang2 = Vector3d.CalculateAngle(dir1, dir2);
@@ -443,7 +570,7 @@ namespace LiteCAD.BRep
             };
             return edge;
         }
-        
+
         public override void Load(StepAdvancedFace face, StepSurface _cyl)
         {
             var cyl = _cyl as StepCylindricalSurface;
@@ -547,7 +674,7 @@ namespace LiteCAD.BRep
                             edge.Curve = new BRepEllipseCurve()
                             {
                                 Location = pos,
-                                RefDir = vec,
+                                Dir = vec,
                                 SemiAxis1 = elp.SemiAxis1,
                                 SemiAxis2 = elp.SemiAxis2
                             };
@@ -587,7 +714,80 @@ namespace LiteCAD.BRep
             }
         }
 
+        public override void Load(AdvancedFace face)
+        {
+            var ss = (face.Surface as CylindricalSurface);
 
+            Surface = new BRepCylinder()
+            {
+                Location = face.Surface.Axis.Location,
+                Radius = ss.Radius,
+                Axis = ss.Axis.Dir1,
+                RefDir = ss.Axis.Dir2
+            };
+            foreach (var item in face.Bounds)
+            {
+                BRepWire wire = new BRepWire();
+                Wires.Add(wire);
+                foreach (var litem in item.Loop.Edges)
+                {
+                    var crv = litem.Curve.EdgeGeometry;
+                    var start = litem.Curve.Start.Point;
+                    var end = litem.Curve.End.Point;
+                    if (crv is SurfaceCurve sc)
+                    {
+                        if (sc.Geometry is Line ln2)
+                        {
+                            BRepEdge edge = new BRepEdge();
+                            edge.Curve = new BRepLineCurve() { Point = ln2.Point, Vector = ln2.Vector.Location };
+                            wire.Edges.Add(edge);
+                            edge.Start = litem.Curve.Start.Point;
+                            edge.End = litem.Curve.End.Point;
+                            Items.Add(new LineItem() { Start = edge.Start, End = edge.End });
+                        }
+                        else
+                        if (sc.Geometry is Circle circ2)
+                        {
+                            wire.Edges.Add(ExtractCircleEdge(start, end, circ2.Axis.Location,
+                             circ2.Axis.Dir1, circ2.Radius));
+                        }
+                        else
+                        if (sc.Geometry is Ellipse elp2)
+                        {
+                            wire.Edges.Add(ExtractEllipseEdge(start, end, elp2.Axis.Location, elp2.Axis.Dir1, elp2.Axis.Dir2, elp2.MajorRadius, elp2.MinorRadius));
+                        }
+                        else
+                        {
+                            throw new StepParserException($"unsupported geometry: {sc.Geometry}");
+                        }
+                    }
+                    else
+                    if (crv is Line ln)
+                    {
+                        BRepEdge edge = new BRepEdge();
+                        edge.Curve = new BRepLineCurve() { Point = ln.Point, Vector = ln.Vector.Location };
+                        wire.Edges.Add(edge);
+                        edge.Start = litem.Curve.Start.Point;
+                        edge.End = litem.Curve.End.Point;
+                        Items.Add(new LineItem() { Start = edge.Start, End = edge.End });
+                    }
+                    else
+                    if (crv is SeamCurve seam)
+                    {
+                        BRepEdge edge = new BRepEdge();
+                        edge.Curve = new BRepSeamCurve() { };
+                        wire.Edges.Add(edge);
+                        edge.Start = litem.Curve.Start.Point;
+                        edge.End = litem.Curve.End.Point;
+                        Items.Add(new LineItem() { Start = edge.Start, End = edge.End });
+                    }
+                    else
+                    {
+                        throw new StepParserException($"unsupported curve: {crv}");
+                    }
+                }
+            }
 
+        }
     }
 }

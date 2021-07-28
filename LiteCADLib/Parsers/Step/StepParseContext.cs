@@ -1,4 +1,5 @@
-﻿using LiteCAD.Common;
+﻿using LiteCAD.BRep;
+using LiteCAD.Common;
 using OpenTK;
 using System;
 using System.Collections.Generic;
@@ -18,10 +19,14 @@ namespace LiteCADLib.Parsers.Step
             ItemParsers.Add(new OrientedEdgeParseItem());
             ItemParsers.Add(new AdvancedFaceParseItem());
             ItemParsers.Add(new EdgeCurveParseItem());
+            ItemParsers.Add(new SeamCurveParseItem());
             ItemParsers.Add(new SurfaceCurveParseItem());
             ItemParsers.Add(new CylindricalSurfaceParseItem());
+            ItemParsers.Add(new ConicalSurfaceParseItem());
+            ItemParsers.Add(new LinearExtrusionSurfaceParseItem());
             ItemParsers.Add(new PlaneSurfaceParseItem());
             ItemParsers.Add(new CircleParseItem());
+            ItemParsers.Add(new EllipseParseItem());
             ItemParsers.Add(new LineParseItem());
             ItemParsers.Add(new PCurveParseItem());
             ItemParsers.Add(new DefinitionalRepresentationParseItem());
@@ -30,7 +35,56 @@ namespace LiteCADLib.Parsers.Step
             if (ItemParsers.GroupBy(z => z.Key).Any(z => z.Count() > 1))
                 throw new StepParserException("duplicate parser items");
         }
+        public Part ToPart()
+        {
+            Part ret = new Part();
+            foreach (var item in Shells.Select(z => z.Value.Tag).OfType<ClosedShell>())
+            {
+                foreach (var face in item.Faces)
+                {
+                    var ee = toFace(ret, face);
+                    if (ee == null) continue;
+                    ret.Faces.Add(ee);
+                }
+            }
+            return ret;
+        }
+        BRepFace toFace(Part p, AdvancedFace face)
+        {
+            if (face.Surface is StepPlane)
+            {
+                BRepPlaneFace ret = new BRepPlaneFace(p);
+                ret.Load(face);
+                //return toPlaneFace(p, face);
+                return ret;
+            }
+            else
+            if (face.Surface is CylindricalSurface)
+            {
+                BRepCylinderSurfaceFace ret = new BRepCylinderSurfaceFace(p);
+                ret.Load(face);
+                //return toCylinderFace(p, face);
+                return ret;
 
+            }
+            else
+            if (face.Surface is LinearExtrusionSurface)
+            {
+                BRepLinearExtrusionFace ret = new BRepLinearExtrusionFace(p);
+                ret.Load(face);
+                return ret;
+
+            }
+            else
+            if (face.Surface is ConicalSurface)
+            {
+                BRepConicalSurfaceFace ret = new BRepConicalSurfaceFace(p);
+                ret.Load(face);
+                return ret;
+
+            }
+            throw new NotImplementedException();
+        }
         public List<ParserItem> ItemParsers = new List<ParserItem>();
         public Dictionary<int, StepLineItem> Cache = new Dictionary<int, StepLineItem>();
         public Dictionary<int, StepLineItem> Shells = new Dictionary<int, StepLineItem>();
@@ -155,7 +209,7 @@ namespace LiteCADLib.Parsers.Step
             }
             catch (Exception ex)
             {
-
+                DebugHelpers.Error(ex.Message);
             }
             if (item.Tag == null)
             {
@@ -184,6 +238,16 @@ namespace LiteCADLib.Parsers.Step
     {
         public double Radius;
     }
+    public class LinearExtrusionSurface : Surface
+    {
+        public Vector Vector;
+        public Curve Curve;
+    }
+    public class ConicalSurface : Surface
+    {
+        public double Radius;
+        public double SemiAngle;
+    }
     public class Vector
     {
         public Vector3d Location;
@@ -198,10 +262,20 @@ namespace LiteCADLib.Parsers.Step
     {
 
     }
-    public class Circle : Curve
+    public class Circle : Curve, IAxis
     {
         public double Radius;
-        public Axis2Placement3d Axis;
+        public Axis2Placement3d Axis { get; set; }
+    }
+    public class Ellipse : Curve, IAxis
+    {
+        public double MinorRadius;
+        public double MajorRadius;
+        public Axis2Placement3d Axis { get; set; }
+    }
+    public interface IAxis
+    {
+         Axis2Placement3d Axis { get; }
     }
     public class Line : Curve
     {

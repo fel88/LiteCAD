@@ -10,13 +10,13 @@ namespace LiteCAD.BRep
         public Vector3d Axis;
         public Vector3d RefDir;
 
-        public bool IsOnSurface(Vector3d v, double eps = 1e-8)
+        public override bool IsOnSurface(Vector3d v, double eps = 1e-8)
         {
             BRepPlane plane = new BRepPlane() { Location = Location, Normal = Axis };
             var proj0 = plane.GetProjPoint(v);
             return Math.Abs(Vector3d.Distance(proj0, Location) - Radius) <= eps;
-
         }
+
         public Vector2d GetProj(Vector3d v)
         {
             if (!IsOnSurface(v)) throw new ArgumentException("point is not on surface");

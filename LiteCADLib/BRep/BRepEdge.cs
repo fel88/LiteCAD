@@ -9,6 +9,9 @@ namespace LiteCAD.BRep
         public Vector3d Start { get; set; }
         public Vector3d End { get; set; }
 
+        public double Param1;
+        public double Param2;
+
         public bool IsSame(BRepEdge e0, double eps = 1e-8)
         {
             if (e0.Curve is BRepLineCurve && Curve is BRepLineCurve)

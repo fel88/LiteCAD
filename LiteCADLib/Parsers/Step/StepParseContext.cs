@@ -197,10 +197,6 @@ namespace LiteCAD.Parsers.Step
         public double MajorRadius;
         public Axis2Placement3d Axis { get; set; }
     }
-    public class BSplineCurveWithKnots : Curve
-    {
-        public Vector3d[] ControlPoints;
-    }
     public interface IAxis
     {
         Axis2Placement3d Axis { get; }
@@ -225,10 +221,19 @@ namespace LiteCAD.Parsers.Step
     {
         public int Degree;
     }
+
     public class RationalBSplineSurface : SurfaceCurve
     {
-
+        public double[] Weights;
+        public void Parse(TokenList list)
+        {
+            var l1 = (list.Tokens.First(z => z is ListTokenItem) as ListTokenItem).List.Tokens.ToArray();            
+            var z1 = l1.Where(z => z is StringTokenItem).ToArray();
+            
+            Weights = z1.Select(z => z as StringTokenItem).Where(z => z.Token.Any(char.IsDigit)).Select(u => double.Parse(u.Token.Replace(",", "."), CultureInfo.InvariantCulture)).ToArray();            
+        }
     }
+
     public class BSplineSurfaceWithKnots : BSplineSurface
     {
 

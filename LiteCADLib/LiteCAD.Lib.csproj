@@ -78,6 +78,8 @@
     <Compile Include="Parsers\Step\BoundedCurve.cs" />
     <Compile Include="Parsers\Step\BoundedCurveParseItem.cs" />
     <Compile Include="Parsers\Step\BoundeSurfaceParseItem.cs" />
+    <Compile Include="Parsers\Step\BSplineCurve.cs" />
+    <Compile Include="Parsers\Step\BSplineCurveWithKnots.cs" />
     <Compile Include="Parsers\Step\BSplineCurveWithKnotsParseItem.cs" />
     <Compile Include="Parsers\Step\BSplineSurfaceWithKnotsParseItem.cs" />
     <Compile Include="Parsers\Step\CartesianPointParseItem.cs" />

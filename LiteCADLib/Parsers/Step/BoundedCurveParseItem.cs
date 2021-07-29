@@ -10,7 +10,7 @@ namespace LiteCAD.Parsers.Step
 
         public override bool IsApplicable(StepLineItem item)
         {
-            return item.Value.Trim().TrimStart('(').StartsWith(Key);            
+            return item.Value.Trim().TrimStart('(').StartsWith(Key);
         }
 
         public override object Parse(StepParseContext ctx, StepLineItem item)
@@ -21,7 +21,8 @@ namespace LiteCAD.Parsers.Step
             var spl = item.Value.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
             List<TokenList> lists = new List<TokenList>();
             Stack<TokenList> stack = new Stack<TokenList>();
-            stack.Push(new TokenList());
+            TokenList top = new TokenList();
+            stack.Push(top);
             for (int i = 0; i < tkns.Length; i++)
             {
                 if (tkns[i] == "(")
@@ -35,6 +36,36 @@ namespace LiteCAD.Parsers.Step
                     stack.Peek().Tokens.Add(new StringTokenItem() { Token = tkns[i] });
                 }
             }
+            var topt = (top.Tokens[0] as ListTokenItem).List.Tokens;
+            for (int j = 0; j < topt.Count; j++)
+            {
+                ITokenItem xx = topt[j];
+                if (xx is StringTokenItem sti)
+                    if (sti.Token == "B_SPLINE_CURVE_WITH_KNOTS")
+                    {
+                        var z1 = topt[j + 1];
+                        var list1 = (z1 as ListTokenItem);
+                        var k = new BSplineCurveWithKnots();
+                        k.Parse(list1.List);
+                        ret.Curves.Add(k);
+                    }
+                    else if (sti.Token == "RATIONAL_B_SPLINE_CURVE")
+                    {
+                        var z1 = topt[j + 1];
+                        var list1 = (z1 as ListTokenItem);
+                        var k = new RationalBSplineSurface();
+                        k.Parse(list1.List);
+                        ret.Curves.Add(k);
+                    }
+                    else if (sti.Token == "B_SPLINE_CURVE")
+                    {
+                        var z1 = topt[j + 1];
+                        var list1 = (z1 as ListTokenItem);
+                        var k = new BSplineCurve();
+                        k.Parse(ctx, list1.List);
+                        ret.Curves.Add(k);
+                    }
+            }
 
             spl = spl.Where(z => !z.Contains('\'')).ToArray();
             //var zz = spl.Skip(2).Select(z => double.Parse(z, CultureInfo.InvariantCulture)).ToArray();
@@ -43,7 +74,7 @@ namespace LiteCAD.Parsers.Step
             //var objs = refs.Select(z => ctx.GetRefObj(z)).ToArray();
             var objs1 = refs1.Select(z => ctx.GetRefObj(z)).ToArray();
 
-            
+
 
             return ret;
         }

@@ -10,5 +10,6 @@ namespace LiteCAD.Parsers.Step
         public List<double> Knots = new List<double>();
         public List<int> Multiplicities = new List<int>();
         public int Degree;
+        public List<Curve> Curves = new List<Curve>();
     }
 }

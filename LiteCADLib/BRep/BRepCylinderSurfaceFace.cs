@@ -780,6 +780,44 @@ namespace LiteCAD.BRep
                         edge.End = end;
                         BRepSpline spl = new BRepSpline();
                         edge.Curve = spl;
+                        if (bcrv.Curves.Any(z => z is BSplineCurveWithKnots))
+                        {
+                            var t1 = bcrv.Curves.First(z => z is BSplineCurveWithKnots) as BSplineCurveWithKnots;
+                            spl.Knots = new List<double>() { t1.Param1, t1.Param2 };
+                            spl.Multiplicities = t1.Degree.ToList();
+                            edge.Param1 = t1.Param1;
+                            edge.Param2 = t1.Param2;
+                        }
+                        if (bcrv.Curves.Any(z => z is BSplineCurve))
+                        {
+                            var t1 = bcrv.Curves.First(z => z is BSplineCurve) as BSplineCurve;
+                            spl.Poles = t1.Poles.ToList();
+                            spl.Degree = t1.Degree;
+                        }
+                        if (bcrv.Curves.Any(z => z is RationalBSplineSurface))
+                        {
+                            var t1 = bcrv.Curves.First(z => z is RationalBSplineSurface) as RationalBSplineSurface;
+                            spl.Weights = t1.Weights.ToList();
+                        }
+
+                        if (spl.Poles.Count == (spl.Multiplicities.Sum() - spl.Degree - 1))
+                        {
+                            spl.IsNonPeriodic = true;
+                        }
+                        if (spl.Poles.Count == (spl.Multiplicities.Sum() - spl.Multiplicities.First()))
+                        {
+                            spl.IsPeriodic = true;
+                        }
+
+                        var pnts = spl.GetPoints(edge);
+
+                        for (int j = 1; j < pnts.Length; j++)
+                        {
+                            var p0 = pnts[j - 1];
+                            var p1 = pnts[j];
+                            Items.Add(new LineItem() { Start = p0, End = p1 });
+                        }
+
                         wire.Edges.Add(edge);
                     }
                     else if (crv is Line ln)
@@ -799,6 +837,11 @@ namespace LiteCAD.BRep
                         edge.Start = litem.Curve.Start.Point;
                         edge.End = litem.Curve.End.Point;
                         Items.Add(new LineItem() { Start = edge.Start, End = edge.End });
+                    }
+                    else if (crv is Circle circ)
+                    {
+                        wire.Edges.Add(ExtractCircleEdge(start, end, circ.Axis.Location,
+                         circ.Axis.Dir1, circ.Radius));
                     }
                     else
                     {

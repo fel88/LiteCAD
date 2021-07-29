@@ -60,9 +60,9 @@ namespace LiteCAD.BRep
                 wpnts.Add(n.WeightedPointSeries.First());
             }
             stepSize *= Math.Abs(last - first);
-            //first = edge.Param1;
-            //last = edge.Param2;
-            throw new NotImplementedException();
+            first = edge.Param1;
+            last = edge.Param2;
+            
             var pnts = n.BSplineCurve(wpnts.ToArray(), deg, knt, stepSize, first, last);
             double epsilon = 1e-3;
             if (!((pnts[0] - edge.Start).Length < epsilon || (pnts[pnts.Length - 1] - edge.Start).Length < epsilon))

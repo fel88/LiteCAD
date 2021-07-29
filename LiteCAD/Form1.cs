@@ -1,6 +1,6 @@
 ﻿using LiteCAD.BRep;
 using LiteCAD.Common;
-using LiteCADLib.Parsers.Step;
+using LiteCAD.Parsers.Step;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
@@ -171,6 +171,10 @@ namespace LiteCAD
             {
                 infoPanel.Invoke((Action)(() => { infoPanel.AddError(str); }));
             };
+            DebugHelpers.Exception = (ex) =>
+            {
+                infoPanel.Invoke((Action)(() => { infoPanel.AddError(ex.Message, ex.StackTrace); }));
+            };
             DebugHelpers.Warning = (str) =>
             {
                 infoPanel.Invoke((Action)(() => { infoPanel.AddWarning(str); }));
@@ -219,7 +223,7 @@ namespace LiteCAD
         public List<IDrawable> Parts = new List<IDrawable>();
         public bool AllowPartLoadTimeout = true;
         bool loaded = false;
-        bool useInternalStepParser = false;
+        bool useInternalStepParser = true;
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
@@ -254,7 +258,7 @@ namespace LiteCAD
                     catch (Exception ex)
                     {
                         loaded = true;
-                        DebugHelpers.Error(ex.Message);
+                        DebugHelpers.Exception(ex);
                     }
                 });
                 Thread th2 = new Thread(() =>
@@ -400,7 +404,7 @@ namespace LiteCAD
             fitAll();
         }
 
-        private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+        void deleteItem()
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;
             if (Helpers.ShowQuestion($"Are you sure to delete {treeListView1.SelectedObjects.Count} items?", Text) != DialogResult.Yes) return;
@@ -409,6 +413,11 @@ namespace LiteCAD
                 Parts.Remove(item as IDrawable);
             }
             treeListView1.SetObjects(Parts);
+        }
+
+        private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            deleteItem();
         }
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
@@ -507,6 +516,31 @@ namespace LiteCAD
         private void checkBox5_CheckedChanged(object sender, EventArgs e)
         {
             drawAxes = checkBox5.Checked;
+        }
+
+        private void switchNormalsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listView2.SelectedItems.Count == 0) return;
+            var face = listView2.SelectedItems[0].Tag as BRepFace;
+            face.Node.SwitchNormal();
+        }
+
+        private void treeListView1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                deleteItem();
+            }
+        }
+
+        private void checkBox6_CheckedChanged(object sender, EventArgs e)
+        {
+            StepParseContext.DebugInfoEnabled = checkBox6.Checked;
+        }
+
+        private void checkBox7_CheckedChanged(object sender, EventArgs e)
+        {
+            StepParseContext.SkipFaceOnException = checkBox7.Checked;
         }
     }
 }

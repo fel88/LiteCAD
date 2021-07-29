@@ -81,6 +81,9 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
+            this.switchNormalsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkBox6 = new System.Windows.Forms.CheckBox();
+            this.checkBox7 = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.treeListView1)).BeginInit();
@@ -153,6 +156,7 @@
             this.treeListView1.View = System.Windows.Forms.View.Details;
             this.treeListView1.VirtualMode = true;
             this.treeListView1.SelectedIndexChanged += new System.EventHandler(this.treeListView1_SelectedIndexChanged);
+            this.treeListView1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.treeListView1_KeyDown);
             // 
             // olvColumn1
             // 
@@ -280,21 +284,22 @@
             // 
             this.contextMenuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.visibleSwitchToolStripMenuItem,
-            this.updateMeshToolStripMenuItem});
+            this.updateMeshToolStripMenuItem,
+            this.switchNormalsToolStripMenuItem});
             this.contextMenuStrip2.Name = "contextMenuStrip2";
-            this.contextMenuStrip2.Size = new System.Drawing.Size(145, 48);
+            this.contextMenuStrip2.Size = new System.Drawing.Size(155, 70);
             // 
             // visibleSwitchToolStripMenuItem
             // 
             this.visibleSwitchToolStripMenuItem.Name = "visibleSwitchToolStripMenuItem";
-            this.visibleSwitchToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.visibleSwitchToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.visibleSwitchToolStripMenuItem.Text = "visible switch";
             this.visibleSwitchToolStripMenuItem.Click += new System.EventHandler(this.visibleSwitchToolStripMenuItem_Click);
             // 
             // updateMeshToolStripMenuItem
             // 
             this.updateMeshToolStripMenuItem.Name = "updateMeshToolStripMenuItem";
-            this.updateMeshToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.updateMeshToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.updateMeshToolStripMenuItem.Text = "update mesh";
             this.updateMeshToolStripMenuItem.Click += new System.EventHandler(this.updateMeshToolStripMenuItem_Click);
             // 
@@ -387,6 +392,8 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.checkBox7);
+            this.tabPage3.Controls.Add(this.checkBox6);
             this.tabPage3.Controls.Add(this.checkBox5);
             this.tabPage3.Controls.Add(this.checkBox4);
             this.tabPage3.Controls.Add(this.checkBox1);
@@ -420,6 +427,8 @@
             // checkBox4
             // 
             this.checkBox4.AutoSize = true;
+            this.checkBox4.Checked = true;
+            this.checkBox4.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox4.Location = new System.Drawing.Point(17, 271);
             this.checkBox4.Name = "checkBox4";
             this.checkBox4.Size = new System.Drawing.Size(143, 17);
@@ -431,7 +440,7 @@
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(19, 248);
+            this.checkBox1.Location = new System.Drawing.Point(17, 248);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(104, 17);
             this.checkBox1.TabIndex = 6;
@@ -591,6 +600,37 @@
             this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
             this.toolStripProgressBar1.Visible = false;
             // 
+            // switchNormalsToolStripMenuItem
+            // 
+            this.switchNormalsToolStripMenuItem.Name = "switchNormalsToolStripMenuItem";
+            this.switchNormalsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.switchNormalsToolStripMenuItem.Text = "switch normals";
+            this.switchNormalsToolStripMenuItem.Click += new System.EventHandler(this.switchNormalsToolStripMenuItem_Click);
+            // 
+            // checkBox6
+            // 
+            this.checkBox6.AutoSize = true;
+            this.checkBox6.Location = new System.Drawing.Point(17, 294);
+            this.checkBox6.Name = "checkBox6";
+            this.checkBox6.Size = new System.Drawing.Size(104, 17);
+            this.checkBox6.TabIndex = 9;
+            this.checkBox6.Text = "show debug info";
+            this.checkBox6.UseVisualStyleBackColor = true;
+            this.checkBox6.CheckedChanged += new System.EventHandler(this.checkBox6_CheckedChanged);
+            // 
+            // checkBox7
+            // 
+            this.checkBox7.AutoSize = true;
+            this.checkBox7.Checked = true;
+            this.checkBox7.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox7.Location = new System.Drawing.Point(17, 225);
+            this.checkBox7.Name = "checkBox7";
+            this.checkBox7.Size = new System.Drawing.Size(133, 17);
+            this.checkBox7.TabIndex = 10;
+            this.checkBox7.Text = "skip face on exception";
+            this.checkBox7.UseVisualStyleBackColor = true;
+            this.checkBox7.CheckedChanged += new System.EventHandler(this.checkBox7_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -677,6 +717,9 @@
         private System.Windows.Forms.ToolStripMenuItem updateMeshToolStripMenuItem;
         private System.Windows.Forms.CheckBox checkBox4;
         private System.Windows.Forms.CheckBox checkBox5;
+        private System.Windows.Forms.ToolStripMenuItem switchNormalsToolStripMenuItem;
+        private System.Windows.Forms.CheckBox checkBox6;
+        private System.Windows.Forms.CheckBox checkBox7;
     }
 }
 

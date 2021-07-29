@@ -1,4 +1,4 @@
-﻿namespace LiteCADLib.Parsers.Step
+﻿namespace LiteCAD.Parsers.Step
 {
     public class PCurve : Curve
     {

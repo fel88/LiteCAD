@@ -1,12 +1,13 @@
 ﻿using OpenTK;
 using System;
+using System.Globalization;
 using System.Linq;
 
 namespace LiteCAD.Parsers.Step
 {
-    public class VertexPointParseItem : ParserItem
+    public class ColourRGBParseItem : ParserItem
     {
-        public override string Key => "VERTEX_POINT";
+        public override string Key => "COLOUR_RGB";
 
         public override bool IsApplicable(StepLineItem item)
         {
@@ -15,15 +16,14 @@ namespace LiteCAD.Parsers.Step
 
         public override object Parse(StepParseContext ctx, StepLineItem item)
         {
-            VertexPoint ret = new VertexPoint();
+            Vector3d ret = new Vector3d();
             var spl = item.Value.Split(new char[] { ',', '(', ')', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
-
-            var refs = spl.Skip(1).Where(z => !z.Contains('\'')).Take(1).Select(z => int.Parse(z.TrimStart('#'))).ToArray();
-            var objs = refs.Select(z => ctx.GetRefObj(z)).ToArray();
-            ret.Point = (Vector3d)objs[0];
-
+            var zz = spl.Skip(1).Where(z => !z.Contains('\'')).Select(z => double.Parse(z, CultureInfo.InvariantCulture)).ToArray();
+            ret.X = zz[0];
+            ret.Y = zz[1];
+            ret.Z = zz[2];
             return ret;
-
         }
     }
+
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace LiteCADLib.Parsers.Step
+namespace LiteCAD.Parsers.Step
 {
     public class PCurveParseItem : ParserItem
     {

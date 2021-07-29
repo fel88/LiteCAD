@@ -30,8 +30,7 @@ namespace LiteCAD.Common
             {
                 BRepFace item = Faces[i];
                 float prog = (i / (float)Faces.Count) * 100;
-                DebugHelpers.Progress(true, prog);
-                //if (!(item.Surface is BRepPlane)) continue;
+                DebugHelpers.Progress(true, prog);                
                 try
                 {
                     var nd = item.ExtractMesh();

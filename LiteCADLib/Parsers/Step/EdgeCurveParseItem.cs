@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace LiteCADLib.Parsers.Step
+namespace LiteCAD.Parsers.Step
 {
     public class EdgeCurveParseItem : ParserItem
     {
@@ -28,4 +28,5 @@ namespace LiteCADLib.Parsers.Step
             return ret;
         }
     }
+
 }

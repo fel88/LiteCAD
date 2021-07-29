@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LiteCADLib.Parsers.Step
+namespace LiteCAD.Parsers.Step
 {
     public class StepParserException : Exception
     {

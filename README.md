@@ -12,3 +12,4 @@
 * polybooljs (https://github.com/velipso/polybooljs)
 * polyBoolCS (https://github.com/StagPoint/PolyBoolCS)
 * clipper (http://www.angusj.com/delphi/clipper.php)
+* NURBS (https://www.codeproject.com/Articles/1095142/Generate-and-understand-NURBS-curves)

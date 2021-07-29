@@ -65,7 +65,7 @@ namespace LiteCAD
                 BackColor = Color.White,
                 ForeColor = Color.Blue
             };
-            addMessage(l, InfoPanelItemType.Info);   
+            addMessage(l, InfoPanelItemType.Info);
         }
 
         void addMessage(ListViewItem l, InfoPanelItemType type)
@@ -79,7 +79,7 @@ namespace LiteCAD
             }));
         }
 
-        public void AddError(string info)
+        public void AddError(string info, string auxInfo = null)
         {
             List<string> ss = new List<string>();
             ss.Add(GetDate());
@@ -89,7 +89,8 @@ namespace LiteCAD
             var l = new ListViewItem(ss.ToArray())
             {
                 BackColor = Color.Red,
-                ForeColor = Color.White
+                ForeColor = Color.White,
+                Tag = auxInfo
             };
             addMessage(l, InfoPanelItemType.Error);
 
@@ -115,6 +116,20 @@ namespace LiteCAD
         {
             Messages.Clear();
             listView1.Items.Clear();
+        }
+
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (listView1.SelectedItems.Count == 0) return;
+            if(listView1.SelectedItems[0].Tag is string ss)
+            {
+                MessageBox.Show(ss, ParentForm.Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
     }
 }

@@ -6,15 +6,26 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-namespace LiteCADLib.Parsers.Step
+namespace LiteCAD.Parsers.Step
 {
     public class StepParseContext
     {
         public StepParseContext()
         {
+            binds = new Type[][] {
+                new[] { typeof(Plane), typeof(BRepPlaneFace) } ,
+                new[] { typeof(CylindricalSurface), typeof(BRepCylinderSurfaceFace) } ,
+                new[] { typeof(LinearExtrusionSurface), typeof(BRepLinearExtrusionFace) } ,
+                new[] { typeof(ConicalSurface), typeof(BRepConicalSurfaceFace) } ,
+            };
             ItemParsers.Add(new VertexPointParseItem());
             ItemParsers.Add(new EdgeLoopParseItem());
+            ItemParsers.Add(new VectorParseItem());
+            ItemParsers.Add(new Axis2Placement3dParseItem());
+            ItemParsers.Add(new DirectionParseItem());
+            ItemParsers.Add(new ColourRGBParseItem());
             ItemParsers.Add(new FaceBoundParseItem());
+            ItemParsers.Add(new CartesianPointParseItem());
             ItemParsers.Add(new FaceOuterBoundParseItem());
             ItemParsers.Add(new OrientedEdgeParseItem());
             ItemParsers.Add(new AdvancedFaceParseItem());
@@ -27,6 +38,10 @@ namespace LiteCADLib.Parsers.Step
             ItemParsers.Add(new PlaneSurfaceParseItem());
             ItemParsers.Add(new CircleParseItem());
             ItemParsers.Add(new EllipseParseItem());
+            ItemParsers.Add(new BoundedCurveParseItem());
+            ItemParsers.Add(new BoundedSurfaceParseItem());
+            ItemParsers.Add(new BSplineCurveWithKnotsParseItem());
+            ItemParsers.Add(new BSplineSurfaceWithKnotsParseItem());
             ItemParsers.Add(new LineParseItem());
             ItemParsers.Add(new PCurveParseItem());
             ItemParsers.Add(new DefinitionalRepresentationParseItem());
@@ -35,6 +50,7 @@ namespace LiteCADLib.Parsers.Step
             if (ItemParsers.GroupBy(z => z.Key).Any(z => z.Count() > 1))
                 throw new StepParserException("duplicate parser items");
         }
+        public static bool SkipFaceOnException = true;
         public Part ToPart()
         {
             Part ret = new Part();
@@ -42,47 +58,38 @@ namespace LiteCADLib.Parsers.Step
             {
                 foreach (var face in item.Faces)
                 {
-                    var ee = toFace(ret, face);
-                    if (ee == null) continue;
-                    ret.Faces.Add(ee);
+                    try
+                    {
+                        var ee = toFace(ret, face);
+                        if (ee == null)
+                        {
+                            DebugHelpers.Warning($"null face");
+                            continue;
+                        }
+                        ret.Faces.Add(ee);
+                    }
+                    catch when (SkipFaceOnException)
+                    {
+                        DebugHelpers.Error($"face error. skipped");
+                    }
                 }
             }
             return ret;
         }
+
+        Type[][] binds;
         BRepFace toFace(Part p, AdvancedFace face)
         {
-            if (face.Surface is StepPlane)
+            foreach (var item in binds)
             {
-                BRepPlaneFace ret = new BRepPlaneFace(p);
-                ret.Load(face);
-                //return toPlaneFace(p, face);
-                return ret;
+                if (face.Surface.GetType() == item[0])
+                {
+                    var ret = Activator.CreateInstance(item[1], p) as BRepFace;
+                    ret.Load(face);
+                    return ret;
+                }
             }
-            else
-            if (face.Surface is CylindricalSurface)
-            {
-                BRepCylinderSurfaceFace ret = new BRepCylinderSurfaceFace(p);
-                ret.Load(face);
-                //return toCylinderFace(p, face);
-                return ret;
 
-            }
-            else
-            if (face.Surface is LinearExtrusionSurface)
-            {
-                BRepLinearExtrusionFace ret = new BRepLinearExtrusionFace(p);
-                ret.Load(face);
-                return ret;
-
-            }
-            else
-            if (face.Surface is ConicalSurface)
-            {
-                BRepConicalSurfaceFace ret = new BRepConicalSurfaceFace(p);
-                ret.Load(face);
-                return ret;
-
-            }
             throw new NotImplementedException();
         }
         public List<ParserItem> ItemParsers = new List<ParserItem>();
@@ -98,7 +105,6 @@ namespace LiteCADLib.Parsers.Step
             Cache.Add(s.Index, s);
         }
 
-
         public object GetRefObj(int z)
         {
             updateRef(z);
@@ -109,67 +115,6 @@ namespace LiteCADLib.Parsers.Step
         {
             if (Cache[ritem].Tag != null) return;
             parseItem(Cache[ritem]);
-        }
-
-        public Vector ParseVector(StepLineItem item)
-        {
-            Vector ret = new Vector();
-            var spl = item.Value.Split(new char[] { ',', '(', ')', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
-            spl = spl.Where(z => !z.Contains('\'')).ToArray();
-            var zz = spl.Skip(2).Select(z => double.Parse(z, CultureInfo.InvariantCulture)).ToArray();
-            var refs = spl.Skip(1).Take(1).Select(z => int.Parse(z.TrimStart('#'))).ToArray();
-            foreach (var ritem in refs)
-            {
-                if (Cache[ritem].Tag != null) continue;
-                parseItem(Cache[ritem]);
-            }
-
-            var objs = refs.Select(z => Cache[z].Tag).ToArray();
-
-            ret.Location = (Vector3d)objs[0];
-            ret.Length = zz[0];
-
-            return ret;
-        }
-
-        public Vector3d ParseCartesianPoint(StepLineItem item)
-        {
-            var spl = item.Value.Split(new char[] { ',', '(', ')', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
-            var zz = spl.Skip(1).Where(z => !z.Contains('\'')).Select(z => double.Parse(z, CultureInfo.InvariantCulture)).ToArray();
-            if (zz.Length < 1 || zz.Length > 3)
-            {
-                throw new WrongArgumentsException();
-            }
-            Vector3d ret = new Vector3d();
-            if (zz.Length >= 1)
-                ret.X = zz[0];
-            if (zz.Length >= 2)
-                ret.Y = zz[1];
-            if (zz.Length >= 3)
-                ret.Z = zz[2];
-
-            return ret;
-        }
-
-        public Axis2Placement3d ParseAxis2Placement3d(StepLineItem item)
-        {
-            Axis2Placement3d ret = new Axis2Placement3d();
-            var spl = item.Value.Split(new char[] { '\'', ',', '(', ')', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
-            var aa = spl.Skip(1).Select(z => z.Trim()).ToArray();
-
-            var refs = aa.Where(z => z.StartsWith("#")).Select(z => int.Parse(z.TrimStart('#'))).ToArray();
-            foreach (var ritem in refs)
-            {
-                if (Cache[ritem].Tag != null) continue;
-                parseItem(Cache[ritem]);
-            }
-            var objs = refs.Select(z => Cache[z].Tag).ToArray();
-            ret.Location = (Vector3d)objs[0];
-            ret.Dir1 = (Vector3d)objs[1];
-            ret.Dir2 = (Vector3d)objs[2];
-
-
-            return ret;
         }
 
         void parseItem(StepLineItem item)
@@ -184,32 +129,10 @@ namespace LiteCADLib.Parsers.Step
                         return;
                     }
                 }
-                if (item.Value.Contains("AXIS2_PLACEMENT_3D"))
-                {
-
-                    item.Tag = ParseAxis2Placement3d(item);
-
-                }
-                else
-                if (item.Value.Contains("CARTESIAN_POINT"))
-                {
-                    item.Tag = ParseCartesianPoint(item);
-                }
-                else
-                if (item.Value.Contains("DIRECTION"))
-                {
-                    item.Tag = ParseCartesianPoint(item);
-                }
-                else
-                if (item.Value.Contains("VECTOR"))
-                {
-                    item.Tag = ParseVector(item);
-                }
-
             }
             catch (Exception ex)
             {
-                DebugHelpers.Error(ex.Message);
+                DebugHelpers.Exception(ex);
             }
             if (item.Tag == null)
             {
@@ -254,7 +177,7 @@ namespace LiteCADLib.Parsers.Step
         public double Length;
     }
 
-    public class StepPlane : Surface
+    public class Plane : Surface
     {
 
     }
@@ -267,15 +190,20 @@ namespace LiteCADLib.Parsers.Step
         public double Radius;
         public Axis2Placement3d Axis { get; set; }
     }
+
     public class Ellipse : Curve, IAxis
     {
         public double MinorRadius;
         public double MajorRadius;
         public Axis2Placement3d Axis { get; set; }
     }
+    public class BSplineCurveWithKnots : Curve
+    {
+        public Vector3d[] ControlPoints;
+    }
     public interface IAxis
     {
-         Axis2Placement3d Axis { get; }
+        Axis2Placement3d Axis { get; }
     }
     public class Line : Curve
     {
@@ -283,12 +211,17 @@ namespace LiteCADLib.Parsers.Step
         public Vector Vector;
     }
 
-    public class BoundedCurve : SurfaceCurve
+
+    public class SplineCurve : Curve
     {
 
     }
+    public class BoundedSurface : Surface
+    {
+        public List<Surface> Surfaces = new List<Surface>();
+    }
 
-    public class BSplineSurface : SurfaceCurve
+    public class BSplineSurface : Surface
     {
         public int Degree;
     }

@@ -1,6 +1,6 @@
 ﻿using IxMilia.Step.Items;
 using LiteCAD.Common;
-using LiteCADLib.Parsers.Step;
+using LiteCAD.Parsers.Step;
 using OpenTK;
 using System;
 using System.Collections.Generic;
@@ -284,6 +284,17 @@ namespace LiteCAD.BRep
                                     aa.Elements.Add(new Segment() { Start = p0, End = p1 });
                                     l1.Add(aa);
                                 }
+                            }
+                        }
+                        else if (edge.Curve is BRepSpline spl)
+                        {
+                            var pnts = spl.GetPoints(edge);
+                            var projs = pnts.Select(z => cl.GetProj(z)).ToArray();
+                            for (int j = 1; j < projs.Length; j++)
+                            {
+                                var p0 = projs[j - 1];
+                                var p1 = projs[j];
+                                ll1.Add(new Segment() { Start = p0, End = p1 });
                             }
                         }
                         else
@@ -756,13 +767,22 @@ namespace LiteCAD.BRep
                         {
                             wire.Edges.Add(ExtractEllipseEdge(start, end, elp2.Axis.Location, elp2.Axis.Dir1, elp2.Axis.Dir2, elp2.MajorRadius, elp2.MinorRadius));
                         }
+
                         else
                         {
                             throw new StepParserException($"unsupported geometry: {sc.Geometry}");
                         }
                     }
-                    else
-                    if (crv is Line ln)
+                    else if (crv is BoundedCurve bcrv)
+                    {
+                        BRepEdge edge = new BRepEdge();
+                        edge.Start = start;
+                        edge.End = end;
+                        BRepSpline spl = new BRepSpline();
+                        edge.Curve = spl;
+                        wire.Edges.Add(edge);
+                    }
+                    else if (crv is Line ln)
                     {
                         BRepEdge edge = new BRepEdge();
                         edge.Curve = new BRepLineCurve() { Point = ln.Point, Vector = ln.Vector.Location };
@@ -771,8 +791,7 @@ namespace LiteCAD.BRep
                         edge.End = litem.Curve.End.Point;
                         Items.Add(new LineItem() { Start = edge.Start, End = edge.End });
                     }
-                    else
-                    if (crv is SeamCurve seam)
+                    else if (crv is SeamCurve seam)
                     {
                         BRepEdge edge = new BRepEdge();
                         edge.Curve = new BRepSeamCurve() { };

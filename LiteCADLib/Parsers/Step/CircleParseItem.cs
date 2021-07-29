@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Linq;
 
-namespace LiteCADLib.Parsers.Step
+namespace LiteCAD.Parsers.Step
 {
     public class CircleParseItem : ParserItem
     {

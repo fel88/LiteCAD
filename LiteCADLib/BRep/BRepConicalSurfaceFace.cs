@@ -1,6 +1,6 @@
 ﻿using IxMilia.Step.Items;
 using LiteCAD.Common;
-using LiteCADLib.Parsers.Step;
+using LiteCAD.Parsers.Step;
 using System;
 
 namespace LiteCAD.BRep

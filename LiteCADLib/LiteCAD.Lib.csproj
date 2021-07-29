@@ -74,12 +74,21 @@
     <Compile Include="Parsers\Step\AdvancedFace.cs" />
     <Compile Include="Parsers\Step\AdvancedFaceParseItem.cs" />
     <Compile Include="Parsers\Step\Axis2Placement3d.cs" />
+    <Compile Include="Parsers\Step\Axis2Placement3dParseItem.cs" />
+    <Compile Include="Parsers\Step\BoundedCurve.cs" />
+    <Compile Include="Parsers\Step\BoundedCurveParseItem.cs" />
+    <Compile Include="Parsers\Step\BoundeSurfaceParseItem.cs" />
+    <Compile Include="Parsers\Step\BSplineCurveWithKnotsParseItem.cs" />
+    <Compile Include="Parsers\Step\BSplineSurfaceWithKnotsParseItem.cs" />
+    <Compile Include="Parsers\Step\CartesianPointParseItem.cs" />
     <Compile Include="Parsers\Step\CircleParseItem.cs" />
     <Compile Include="Parsers\Step\ClosedShell.cs" />
+    <Compile Include="Parsers\Step\ColourRGBParseItem.cs" />
     <Compile Include="Parsers\Step\ConicalSurfaceParseItem.cs" />
     <Compile Include="Parsers\Step\CylindricalSurfaceParseItem.cs" />
     <Compile Include="Parsers\Step\DefinitionalRepresentation.cs" />
     <Compile Include="Parsers\Step\DefinitionalRepresentationParseItem.cs" />
+    <Compile Include="Parsers\Step\DirectionParseItem.cs" />
     <Compile Include="Parsers\Step\EdgeCurve.cs" />
     <Compile Include="Parsers\Step\EdgeCurveParseItem.cs" />
     <Compile Include="Parsers\Step\EdgeLoopParseItem.cs" />
@@ -88,20 +97,24 @@
     <Compile Include="Parsers\Step\FaceOuterBoundParseItem.cs" />
     <Compile Include="Parsers\Step\LinearExtrusionSurfaceParseItem.cs" />
     <Compile Include="Parsers\Step\LineParseItem.cs" />
+    <Compile Include="NURBS\NURBS.cs" />
     <Compile Include="Parsers\Step\OrientedEdge.cs" />
     <Compile Include="Parsers\Step\OrientedEdgeParseItem.cs" />
     <Compile Include="Parsers\Step\ParserItem.cs" />
     <Compile Include="Parsers\Step\PCurve.cs" />
     <Compile Include="Parsers\Step\PCurveParseItem.cs" />
     <Compile Include="Parsers\Step\PlaneSurfaceParseItem.cs" />
+    <Compile Include="NURBS\RationalBSplinePoint.cs" />
     <Compile Include="Parsers\Step\SeamCurveParseItem.cs" />
     <Compile Include="Parsers\Step\ShellParseItem.cs" />
+    <Compile Include="BRep\BRepSpline.cs" />
     <Compile Include="Parsers\Step\Step.cs" />
     <Compile Include="Parsers\Step\StepLineItem.cs" />
     <Compile Include="Parsers\Step\StepParseContext.cs" />
     <Compile Include="Parsers\Step\StepParserException.cs" />
     <Compile Include="Parsers\Step\SurfaceCurve.cs" />
     <Compile Include="Parsers\Step\SurfaceCurveParseItem.cs" />
+    <Compile Include="Parsers\Step\VectorParseItem.cs" />
     <Compile Include="Parsers\Step\VertexPointParseItem.cs" />
     <Compile Include="Parsers\Step\WrongArgumentsException.cs" />
     <Compile Include="PolyBool.cs" />
@@ -144,5 +157,6 @@
       <Name>Triangle</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

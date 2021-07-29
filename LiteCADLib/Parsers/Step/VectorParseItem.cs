@@ -5,26 +5,27 @@ using System.Linq;
 
 namespace LiteCAD.Parsers.Step
 {
-    public class LineParseItem : ParserItem
+    public class VectorParseItem : ParserItem
     {
-        public override string Key => "LINE";
+        public override string Key => "VECTOR";
 
         public override bool IsApplicable(StepLineItem item)
         {
-            return item.Value.Trim().StartsWith(Key);
+            return item.Value.Contains(Key);
         }
 
         public override object Parse(StepParseContext ctx, StepLineItem item)
         {
-            Line ret = new Line();
+            Vector ret = new Vector();
             var spl = item.Value.Split(new char[] { ',', '(', ')', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
-
-            var refs = spl.Skip(1).Where(z => !z.Contains('\'')).Select(z => int.Parse(z.TrimStart('#'))).ToArray();
+            spl = spl.Where(z => !z.Contains('\'')).ToArray();
+            var zz = spl.Skip(2).Select(z => double.Parse(z, CultureInfo.InvariantCulture)).ToArray();
+            var refs = spl.Skip(1).Take(1).Select(z => int.Parse(z.TrimStart('#'))).ToArray();
 
             var objs = refs.Select(z => ctx.GetRefObj(z)).ToArray();
 
-            ret.Point = (Vector3d)objs[0];
-            ret.Vector = objs[1] as Vector;
+            ret.Location = (Vector3d)objs[0];
+            ret.Length = zz[0];
 
             return ret;
         }

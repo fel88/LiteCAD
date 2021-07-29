@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace LiteCADLib.Parsers.Step
+namespace LiteCAD.Parsers.Step
 {
     public class PlaneSurfaceParseItem : ParserItem
     {
@@ -14,7 +14,7 @@ namespace LiteCADLib.Parsers.Step
 
         public override object Parse(StepParseContext ctx, StepLineItem item)
         {
-            StepPlane ret = new StepPlane();
+            Plane ret = new Plane();
             var spl = item.Value.Split(new char[] { '\'', ',', '(', ')', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
             var aa = spl.Skip(1).Select(z => z.Trim()).ToArray();            
             var refs = aa.Where(z=>z.StartsWith("#")).Select(z => int.Parse(z.TrimStart('#'))).ToArray();

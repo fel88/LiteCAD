@@ -1,6 +1,6 @@
 ﻿using OpenTK;
 
-namespace LiteCADLib.Parsers.Step
+namespace LiteCAD.Parsers.Step
 {
     public class Axis2Placement3d
     {

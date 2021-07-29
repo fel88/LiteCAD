@@ -11,8 +11,9 @@ namespace LiteCAD.BRep
         public int[] KnotMultiplicities;
         public Vector3d[] ControlPoints;
 
-        public double[] Knots;
-                
+        public double[] Knots;                
 
     }
+
+    
 }

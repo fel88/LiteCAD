@@ -1,4 +1,6 @@
-﻿namespace LiteCADLib.Parsers.Step
+﻿using System.Collections.Generic;
+
+namespace LiteCAD.Parsers.Step
 {
     public class StepLineItem
     {
@@ -10,5 +12,25 @@
         public string Value;
 
         public object Tag;
+        public string[] Tokens()
+        {
+            return StepParser.Tokenize(Value);
+        }
+    }
+    public class StringTokenItem : ITokenItem
+    {
+        public string Token;
+    }
+    public class ListTokenItem : ITokenItem
+    {
+        public TokenList List;
+    }
+    public interface ITokenItem
+    {
+
+    }
+    public class TokenList
+    {
+        public List<ITokenItem> Tokens = new List<ITokenItem>();
     }
 }

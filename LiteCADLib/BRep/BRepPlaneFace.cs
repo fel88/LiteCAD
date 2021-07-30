@@ -1,7 +1,6 @@
 ﻿using IxMilia.Step.Items;
 using LiteCAD.Common;
 using LiteCAD.Parsers.Step;
-using LiteCAD.Parsers.Step;
 using OpenTK;
 using System;
 using System.Collections.Generic;
@@ -115,6 +114,17 @@ namespace LiteCAD.BRep
                             var pp1 = pnts[i];
                             var p0 = pl.GetUVProjPoint(pp0, v1, axis2);
                             var p1 = pl.GetUVProjPoint(pp1, v1, axis2);
+                            ll1.Add(new Segment() { Start = p0, End = p1 });
+                        }
+                    }
+                    else if (edge.Curve is BRepSpline spl)
+                    {
+                        var pnts = spl.GetPoints(edge);
+                        var projs = pnts.Select(z => pl.GetUVProjPoint(z, v1, axis2)).ToArray();
+                        for (int j = 1; j < projs.Length; j++)
+                        {
+                            var p0 = projs[j - 1];
+                            var p1 = projs[j];
                             ll1.Add(new Segment() { Start = p0, End = p1 });
                         }
                     }
@@ -435,12 +445,13 @@ namespace LiteCAD.BRep
                 Wires.Add(wire);
                 foreach (var litem in item.Loop.Edges)
                 {
+                    var start = litem.Curve.Start.Point;
+                    var end = litem.Curve.End.Point;
                     var crv = litem.Curve.EdgeGeometry;
                     if (crv is SurfaceCurve sc)
                     {
                         if (sc.Geometry is Line ln2)
                         {
-
                             BRepEdge edge = new BRepEdge();
                             edge.Curve = new BRepLineCurve() { Point = ln2.Point, Vector = ln2.Vector.Location };
                             wire.Edges.Add(edge);
@@ -451,15 +462,11 @@ namespace LiteCAD.BRep
                         else
                         if (sc.Geometry is Circle circ2)
                         {
-                            var start = litem.Curve.Start.Point;
-                            var end = litem.Curve.End.Point;
                             wire.Edges.Add(ExtractCircleEdge(this, start, end, circ2.Radius, circ2.Axis.Dir1, circ2.Axis.Location));
                         }
                         else
                         if (sc.Geometry is Ellipse elp2)
                         {
-                            var start = litem.Curve.Start.Point;
-                            var end = litem.Curve.End.Point;
                             wire.Edges.Add(ExtractEllipseEdge(this,
                                 start,
                                 end,
@@ -487,12 +494,93 @@ namespace LiteCAD.BRep
                     else
                     if (crv is Circle circ)
                     {
+                        wire.Edges.Add(ExtractCircleEdge(this, start, end, circ.Radius, circ.Axis.Dir1, circ.Axis.Location));
+                    }
+                    else
+                    if (crv is BSplineCurveWithKnots bcrv)
+                    {
                         BRepEdge edge = new BRepEdge();
-                        edge.Curve = new BRepCircleCurve() { Radius = circ.Radius, Location = circ.Axis.Location };
+                        edge.Start = start;
+                        edge.End = end;
+                        BRepSpline spl = new BRepSpline();
+
+                        edge.Curve = spl;
+
+                        spl.Multiplicities = bcrv.Multiplicities.ToList();
+                        spl.Poles = bcrv.ControlPoints.ToList();
+                        spl.Knots = bcrv.Knots.ToList();
+                        spl.Weights = bcrv.Weights.ToList();
+                        edge.Param1 = bcrv.Param1;
+                        edge.Param2 = bcrv.Param2;
+                        spl.IsBSpline = true;
+                        spl.Degree = bcrv.Degree[0];
+
+                        if (spl.Poles.Count == (spl.Multiplicities.Sum() - spl.Degree - 1))
+                        {
+                            spl.IsNonPeriodic = true;
+                        }
+                        if (spl.Poles.Count == (spl.Multiplicities.Sum() - spl.Multiplicities.First()))
+                        {
+                            spl.IsPeriodic = true;
+                        }
+
+                        var pnts = spl.GetPoints(edge);
+
+                        for (int j = 1; j < pnts.Length; j++)
+                        {
+                            var p0 = pnts[j - 1];
+                            var p1 = pnts[j];
+                            Items.Add(new LineItem() { Start = p0, End = p1 });
+                        }
+
                         wire.Edges.Add(edge);
-                        edge.Start = litem.Curve.Start.Point;
-                        edge.End = litem.Curve.End.Point;
-                        //ret.Items.Add(new LineItem() { Start = edge.Start, End = edge.End });
+                    }
+                    else if (crv is BoundedCurve bcrv2)
+                    {
+                        BRepEdge edge = new BRepEdge();
+                        edge.Start = start;
+                        edge.End = end;
+                        BRepSpline spl = new BRepSpline();
+                        edge.Curve = spl;
+                        if (bcrv2.Curves.Any(z => z is BSplineCurveWithKnots))
+                        {
+                            var t1 = bcrv2.Curves.First(z => z is BSplineCurveWithKnots) as BSplineCurveWithKnots;
+                            spl.Knots = new List<double>() { t1.Param1, t1.Param2 };
+                            spl.Multiplicities = t1.Degree.ToList();
+                            edge.Param1 = t1.Param1;
+                            edge.Param2 = t1.Param2;
+                        }
+                        if (bcrv2.Curves.Any(z => z is BSplineCurve))
+                        {
+                            var t1 = bcrv2.Curves.First(z => z is BSplineCurve) as BSplineCurve;
+                            spl.Poles = t1.Poles.ToList();
+                            spl.Degree = t1.Degree;
+                        }
+                        if (bcrv2.Curves.Any(z => z is RationalBSplineSurface))
+                        {
+                            var t1 = bcrv2.Curves.First(z => z is RationalBSplineSurface) as RationalBSplineSurface;
+                            spl.Weights = t1.Weights.ToList();
+                        }
+
+                        if (spl.Poles.Count == (spl.Multiplicities.Sum() - spl.Degree - 1))
+                        {
+                            spl.IsNonPeriodic = true;
+                        }
+                        if (spl.Poles.Count == (spl.Multiplicities.Sum() - spl.Multiplicities.First()))
+                        {
+                            spl.IsPeriodic = true;
+                        }
+
+                        var pnts = spl.GetPoints(edge);
+
+                        for (int j = 1; j < pnts.Length; j++)
+                        {
+                            var p0 = pnts[j - 1];
+                            var p1 = pnts[j];
+                            Items.Add(new LineItem() { Start = p0, End = p1 });
+                        }
+
+                        wire.Edges.Add(edge);
                     }
                     else
                     {

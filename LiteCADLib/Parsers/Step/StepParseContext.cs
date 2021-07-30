@@ -17,6 +17,7 @@ namespace LiteCAD.Parsers.Step
                 new[] { typeof(CylindricalSurface), typeof(BRepCylinderSurfaceFace) } ,
                 new[] { typeof(LinearExtrusionSurface), typeof(BRepLinearExtrusionFace) } ,
                 new[] { typeof(ConicalSurface), typeof(BRepConicalSurfaceFace) } ,
+                new[] { typeof(BSplineSurfaceWithKnots), typeof(BRepBSplineWithKnotsSurfaceFace) } ,
             };
             ItemParsers.Add(new VertexPointParseItem());
             ItemParsers.Add(new EdgeLoopParseItem());
@@ -68,9 +69,9 @@ namespace LiteCAD.Parsers.Step
                         }
                         ret.Faces.Add(ee);
                     }
-                    catch when (SkipFaceOnException)
+                    catch (Exception ex) when (SkipFaceOnException)
                     {
-                        DebugHelpers.Error($"face error. skipped");
+                        DebugHelpers.Error($"face error. skipped {ex.Message}");
                     }
                 }
             }
@@ -89,8 +90,7 @@ namespace LiteCAD.Parsers.Step
                     return ret;
                 }
             }
-
-            throw new NotImplementedException();
+            throw new StepParserException($"unknown surface face: {face.Surface}");
         }
         public List<ParserItem> ItemParsers = new List<ParserItem>();
         public Dictionary<int, StepLineItem> Cache = new Dictionary<int, StepLineItem>();
@@ -227,15 +227,17 @@ namespace LiteCAD.Parsers.Step
         public double[] Weights;
         public void Parse(TokenList list)
         {
-            var l1 = (list.Tokens.First(z => z is ListTokenItem) as ListTokenItem).List.Tokens.ToArray();            
+            var l1 = (list.Tokens.First(z => z is ListTokenItem) as ListTokenItem).List.Tokens.ToArray();
             var z1 = l1.Where(z => z is StringTokenItem).ToArray();
-            
-            Weights = z1.Select(z => z as StringTokenItem).Where(z => z.Token.Any(char.IsDigit)).Select(u => double.Parse(u.Token.Replace(",", "."), CultureInfo.InvariantCulture)).ToArray();            
+
+            Weights = z1.Select(z => z as StringTokenItem).Where(z => z.Token.Any(char.IsDigit)).Select(u => double.Parse(u.Token.Replace(",", "."), CultureInfo.InvariantCulture)).ToArray();
         }
     }
 
     public class BSplineSurfaceWithKnots : BSplineSurface
     {
-
+        public int uDegree;
+        public int vDegree;
+        public Vector3d[][] ControPoints;
     }
 }

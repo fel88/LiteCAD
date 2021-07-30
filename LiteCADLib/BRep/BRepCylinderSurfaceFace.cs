@@ -294,7 +294,33 @@ namespace LiteCAD.BRep
                             {
                                 var p0 = projs[j - 1];
                                 var p1 = projs[j];
-                                ll1.Add(new Segment() { Start = p0, End = p1 });
+                                double step = 0.1;
+                                if (p0.X >= (Math.PI * 2 - 2 * step) && p1.X < 2 * step)
+                                {
+                                    var dy = p1.Y - p0.Y;
+                                    var dx = (p1.X + Math.PI * 2) - p0.X;
+                                    var tx = (Math.PI * 2 - p0.X) / dx;
+                                    var ty = dy * tx;
+
+                                    ll1.Add(new Segment() { Start = p0, End = new Vector2d(Math.PI * 2, ty + p0.Y) });
+                                    ll1.Add(new Segment() { Start = new Vector2d(0, ty + p0.Y), End = p1 });
+                                    ll1.RemoveAll(z => z.Length() < 1e-16);
+
+                                }
+                                else if (p1.X >= (Math.PI * 2 - 2 * step) && p0.X < 2 * step)
+                                {
+                                    var dy = p0.Y - p1.Y;
+                                    var dx = (p0.X + Math.PI * 2) - p1.X;
+                                    var tx = (Math.PI * 2 - p1.X) / dx;
+                                    var ty = dy * tx;
+
+                                    ll1.Add(new Segment() { Start = p1, End = new Vector2d(Math.PI * 2, ty + p1.Y) });
+                                    ll1.Add(new Segment() { Start = new Vector2d(0, ty + p1.Y), End = p0 });
+                                    ll1.RemoveAll(z => z.Length() < 1e-16);
+                                }
+                                else
+
+                                    ll1.Add(new Segment() { Start = p0, End = p1 });
                             }
                         }
                         else
@@ -365,6 +391,7 @@ namespace LiteCAD.BRep
                 {
                     if ((item.Start - item.End).Length > 1e-8)
                     {
+                        if (Math.Abs(item.Start.X - item.End.X) > 1e-8) throw new LiteCadException("wrong cylinder face contour");
                         item.Elements.Add(new Segment() { Start = item.End, End = item.Start });
                     }
                 }
@@ -767,10 +794,48 @@ namespace LiteCAD.BRep
                         {
                             wire.Edges.Add(ExtractEllipseEdge(start, end, elp2.Axis.Location, elp2.Axis.Dir1, elp2.Axis.Dir2, elp2.MajorRadius, elp2.MinorRadius));
                         }
+                        else
+                        if (sc.Geometry is BSplineCurveWithKnots bcrv2)
+                        {
+                            BRepEdge edge = new BRepEdge();
+                            edge.Start = start;
+                            edge.End = end;
+                            BRepSpline spl = new BRepSpline();
+                            
+                            edge.Curve = spl;
+                            
+                            spl.Multiplicities = bcrv2.Multiplicities.ToList();
+                            spl.Poles = bcrv2.ControlPoints.ToList();
+                            spl.Knots = bcrv2.Knots.ToList();
+                            spl.Weights = bcrv2.Weights.ToList();
+                            edge.Param1 = bcrv2.Param1;
+                            edge.Param2 = bcrv2.Param2;
+                            spl.IsBSpline = true;
+                            spl.Degree = bcrv2.Degree[0];
 
+                            if (spl.Poles.Count == (spl.Multiplicities.Sum() - spl.Degree - 1))
+                            {
+                                spl.IsNonPeriodic = true;
+                            }
+                            if (spl.Poles.Count == (spl.Multiplicities.Sum() - spl.Multiplicities.First()))
+                            {
+                                spl.IsPeriodic = true;
+                            }
+
+                            var pnts = spl.GetPoints(edge);
+
+                            for (int j = 1; j < pnts.Length; j++)
+                            {
+                                var p0 = pnts[j - 1];
+                                var p1 = pnts[j];
+                                Items.Add(new LineItem() { Start = p0, End = p1 });
+                            }
+
+                            wire.Edges.Add(edge);
+                        }
                         else
                         {
-                            throw new StepParserException($"unsupported geometry: {sc.Geometry}");
+                            throw new UnsupportedCurveException($"unsupported geometry: {sc.Geometry}");
                         }
                     }
                     else if (crv is BoundedCurve bcrv)
@@ -845,7 +910,7 @@ namespace LiteCAD.BRep
                     }
                     else
                     {
-                        throw new StepParserException($"unsupported curve: {crv}");
+                        throw new UnsupportedCurveException($"unsupported curve: {crv}");
                     }
                 }
             }

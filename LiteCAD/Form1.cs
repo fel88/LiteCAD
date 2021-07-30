@@ -222,6 +222,7 @@ namespace LiteCAD
 
         public List<IDrawable> Parts = new List<IDrawable>();
         public bool AllowPartLoadTimeout = true;
+        public int PartLoadTimeout = 15000;
         bool loaded = false;
         bool useInternalStepParser = true;
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -266,7 +267,7 @@ namespace LiteCAD
                     Stopwatch sw = Stopwatch.StartNew();
                     while (true)
                     {
-                        if (!Debugger.IsAttached && sw.Elapsed.TotalSeconds > 5)
+                        if (!Debugger.IsAttached && sw.Elapsed.TotalSeconds > PartLoadTimeout)
                         {
                             th.Abort();
                             DebugHelpers.Error("load timeout");
@@ -541,6 +542,20 @@ namespace LiteCAD
         private void checkBox7_CheckedChanged(object sender, EventArgs e)
         {
             StepParseContext.SkipFaceOnException = checkBox7.Checked;
+        }
+
+        private void updateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listView2.SelectedItems.Count == 0) return;
+            var face = listView2.SelectedItems[0].Tag as BRepFace;
+            face.ExtractMesh();
+        }
+
+        private void deleteToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            if (listView2.SelectedItems.Count == 0) return;
+            var face = listView2.SelectedItems[0].Tag as BRepFace;
+            face.Node=null;
         }
     }
 }

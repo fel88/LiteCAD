@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BRep\BRepBSplineWithKnotsCurve.cs" />
+    <Compile Include="BRep\BRepBSplineWithKnotsSurfaceFace.cs" />
     <Compile Include="BRep\BRepCircleCurve.cs" />
     <Compile Include="BRep\BRepConicalSurfaceFace.cs" />
     <Compile Include="BRep\BRepCylinder.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="BRep\BRepToroidalSurfaceFace.cs" />
     <Compile Include="BRep\Contour.cs" />
     <Compile Include="BRep\CylinderMeshNode.cs" />
+    <Compile Include="BRep\UnsupportedCurveException.cs" />
     <Compile Include="Common\DebugHelpers.cs" />
     <Compile Include="BRep\DrawItem.cs" />
     <Compile Include="Common\Extensions.cs" />

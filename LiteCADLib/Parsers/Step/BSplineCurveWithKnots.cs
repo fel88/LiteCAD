@@ -1,4 +1,5 @@
 ﻿using OpenTK;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
@@ -10,7 +11,9 @@ namespace LiteCAD.Parsers.Step
         public double Param1;
         public double Param2;
         public int[] Degree;
-
+        public List<double> Knots = new List<double>();
+        public List<double> Weights = new List<double>();
+        public List<int> Multiplicities = new List<int>();
         internal void Parse(TokenList list1)
         {
             var l1 = (list1.Tokens.First(z => z is ListTokenItem) as ListTokenItem).List.Tokens.ToArray();

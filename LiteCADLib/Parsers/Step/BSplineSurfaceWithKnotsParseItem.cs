@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTK;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,7 +22,8 @@ namespace LiteCAD.Parsers.Step
             var spl = item.Value.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
             List<TokenList> lists = new List<TokenList>();
             Stack<TokenList> stack = new Stack<TokenList>();
-            stack.Push(new TokenList());
+            TokenList top = new TokenList();
+            stack.Push(top);
             for (int i = 0; i < tkns.Length; i++)
             {
                 if (tkns[i] == "(")
@@ -36,6 +38,20 @@ namespace LiteCAD.Parsers.Step
                 }
             }
 
+            var top1 = (top.Tokens[1] as ListTokenItem).List;
+            var dg = top1.Tokens.Where(z => z is StringTokenItem ss && ss.Token.All(char.IsDigit)).Select(z => z as StringTokenItem).ToArray();
+            ret.uDegree = int.Parse(dg[0].Token);
+            ret.vDegree = int.Parse(dg[1].Token);
+
+            var cp = (top1.Tokens.First(z => z is ListTokenItem) as ListTokenItem).List.Tokens;
+            List<Vector3d[]> list = new List<Vector3d[]>();
+            foreach (var sub1 in cp.Where(z => z is ListTokenItem))
+            {
+                var ar1 = (sub1 as ListTokenItem).List.Tokens.Where(z => z is StringTokenItem ss && ss.Token.Trim().StartsWith("#")).Select(z => z as StringTokenItem).Select(z => z.Token).ToArray();
+                var refs1 = ar1.Select(z => ctx.GetRefObj(int.Parse(z.Trim().TrimStart('#'))));
+                list.Add(refs1.Select(z=>(Vector3d)z).ToArray());
+            }
+            ret.ControPoints = list.ToArray();
             spl = spl.Where(z => !z.Contains('\'')).ToArray();
             //var zz = spl.Skip(2).Select(z => double.Parse(z, CultureInfo.InvariantCulture)).ToArray();
             //var refs = spl.Skip(1).Take(1).Select(z => int.Parse(z.TrimStart('#'))).ToArray();            

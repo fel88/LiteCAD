@@ -46,21 +46,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BRep\BRepBSplineWithKnotsCurve.cs" />
-    <Compile Include="BRep\BRepBSplineWithKnotsSurfaceFace.cs" />
-    <Compile Include="BRep\BRepCircleCurve.cs" />
-    <Compile Include="BRep\BRepConicalSurfaceFace.cs" />
-    <Compile Include="BRep\BRepCylinder.cs" />
-    <Compile Include="BRep\BRepCylinderSurfaceFace.cs" />
-    <Compile Include="BRep\BRepEllipseCurve.cs" />
-    <Compile Include="BRep\BRepLinearExtrusionFace.cs" />
-    <Compile Include="BRep\BRepLinearExtrusionSurface.cs" />
-    <Compile Include="BRep\BRepPlane.cs" />
-    <Compile Include="BRep\BRepPlaneFace.cs" />
-    <Compile Include="BRep\BRepSeamCurve.cs" />
+    <Compile Include="BRep\Curves\BRepBSplineWithKnotsCurve.cs" />
+    <Compile Include="BRep\Faces\BRepBSplineWithKnotsSurfaceFace.cs" />
+    <Compile Include="BRep\Curves\BRepCircleCurve.cs" />
+    <Compile Include="BRep\Faces\BRepConicalSurfaceFace.cs" />
+    <Compile Include="BRep\Surfaces\BRepBSplineWithKnotsSurface.cs" />
+    <Compile Include="BRep\Surfaces\BRepConicalSurface.cs" />
+    <Compile Include="BRep\Surfaces\BRepCylinder.cs" />
+    <Compile Include="BRep\Faces\BRepCylinderSurfaceFace.cs" />
+    <Compile Include="BRep\Curves\BRepEllipseCurve.cs" />
+    <Compile Include="BRep\Faces\BRepLinearExtrusionFace.cs" />
+    <Compile Include="BRep\Surfaces\BRepLinearExtrusionSurface.cs" />
+    <Compile Include="BRep\Surfaces\BRepPlane.cs" />
+    <Compile Include="BRep\Faces\BRepPlaneFace.cs" />
+    <Compile Include="BRep\Curves\BRepSeamCurve.cs" />
     <Compile Include="BRep\BRepSurface.cs" />
-    <Compile Include="BRep\BRepToroidalSurface.cs" />
-    <Compile Include="BRep\BRepToroidalSurfaceFace.cs" />
+    <Compile Include="BRep\Surfaces\BRepToroidalSurface.cs" />
+    <Compile Include="BRep\Faces\BRepToroidalSurfaceFace.cs" />
     <Compile Include="BRep\Contour.cs" />
     <Compile Include="BRep\CylinderMeshNode.cs" />
     <Compile Include="BRep\UnsupportedCurveException.cs" />
@@ -111,8 +113,8 @@
     <Compile Include="NURBS\RationalBSplinePoint.cs" />
     <Compile Include="Parsers\Step\SeamCurveParseItem.cs" />
     <Compile Include="Parsers\Step\ShellParseItem.cs" />
-    <Compile Include="BRep\BRepSpline.cs" />
-    <Compile Include="Parsers\Step\Step.cs" />
+    <Compile Include="BRep\Curves\BRepSpline.cs" />
+    <Compile Include="Parsers\Step\StepParser.cs" />
     <Compile Include="Parsers\Step\StepLineItem.cs" />
     <Compile Include="Parsers\Step\StepParseContext.cs" />
     <Compile Include="Parsers\Step\StepParserException.cs" />
@@ -126,7 +128,7 @@
     <Compile Include="BRep\BRepCurve.cs" />
     <Compile Include="BRep\BRepEdge.cs" />
     <Compile Include="BRep\BRepFace.cs" />
-    <Compile Include="BRep\BRepLineCurve.cs" />
+    <Compile Include="BRep\Curves\BRepLineCurve.cs" />
     <Compile Include="BRep\BRepWire.cs" />
     <Compile Include="Common\Draft.cs" />
     <Compile Include="Common\EditFieldAttribute.cs" />

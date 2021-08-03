@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using LiteCAD.BRep.Curves;
+using OpenTK;
 using System;
 
 namespace LiteCAD.BRep

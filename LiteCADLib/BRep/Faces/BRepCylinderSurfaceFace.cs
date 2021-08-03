@@ -1,4 +1,6 @@
 ﻿using IxMilia.Step.Items;
+using LiteCAD.BRep.Curves;
+using LiteCAD.BRep.Surfaces;
 using LiteCAD.Common;
 using LiteCAD.Parsers.Step;
 using OpenTK;
@@ -7,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace LiteCAD.BRep
+namespace LiteCAD.BRep.Faces
 {
     public class BRepCylinderSurfaceFace : BRepFace
     {

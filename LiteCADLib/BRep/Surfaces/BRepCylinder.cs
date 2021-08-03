@@ -1,7 +1,7 @@
 ﻿using OpenTK;
 using System;
 
-namespace LiteCAD.BRep
+namespace LiteCAD.BRep.Surfaces
 {
     public class BRepCylinder : BRepSurface
     {

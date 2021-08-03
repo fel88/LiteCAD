@@ -1,12 +1,11 @@
-﻿using LiteCAD.BRep;
-using LiteCAD.Common;
+﻿using LiteCAD.Common;
 using LiteCADLib.NURBS;
 using OpenTK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace LiteCAD.BRep
+namespace LiteCAD.BRep.Curves
 {
     public class BRepSpline : BRepCurve
     {

@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL;
+﻿using LiteCAD.BRep.Surfaces;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 

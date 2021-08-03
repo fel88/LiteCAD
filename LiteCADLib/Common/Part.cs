@@ -1,6 +1,8 @@
 ﻿using IxMilia.Step;
 using IxMilia.Step.Items;
 using LiteCAD.BRep;
+using LiteCAD.BRep.Faces;
+using LiteCAD.BRep.Surfaces;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;

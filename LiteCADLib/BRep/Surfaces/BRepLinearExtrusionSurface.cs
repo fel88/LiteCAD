@@ -1,6 +1,6 @@
 ﻿using OpenTK;
 
-namespace LiteCAD.BRep
+namespace LiteCAD.BRep.Surfaces
 {
     public class BRepLinearExtrusionSurface : BRepSurface
     {

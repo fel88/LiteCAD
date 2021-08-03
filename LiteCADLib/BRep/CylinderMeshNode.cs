@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using LiteCAD.BRep.Surfaces;
+using OpenTK;
 
 namespace LiteCAD.BRep
 {

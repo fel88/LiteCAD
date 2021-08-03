@@ -1,4 +1,5 @@
 ﻿using LiteCAD.BRep;
+using LiteCAD.BRep.Surfaces;
 using OpenTK;
 using System;
 using System.Drawing;

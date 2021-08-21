@@ -75,6 +75,7 @@
     <Compile Include="BRep\PointItem.cs" />
     <Compile Include="BRep\Segment.cs" />
     <Compile Include="BRep\TriangleInfo.cs" />
+    <Compile Include="Common\PlyStuff.cs" />
     <Compile Include="Parsers\Step\AdvancedFace.cs" />
     <Compile Include="Parsers\Step\AdvancedFaceParseItem.cs" />
     <Compile Include="Parsers\Step\Axis2Placement3d.cs" />

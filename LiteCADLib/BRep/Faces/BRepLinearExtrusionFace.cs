@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace LiteCAD.BRep.Faces
 {
-    public class BRepLinearExtrusionFace : BRepFace
+    public class BRepLinearExtrusionFace : BRepPlaneFace
     {
         public BRepLinearExtrusionFace(Part p) : base(p) { }
         public override MeshNode ExtractMesh()
@@ -353,7 +353,7 @@ namespace LiteCAD.BRep.Faces
                         }
                         else if (curve.Geometry is Ellipse elp2)
                         {
-                            var edge = BRepPlaneFace.ExtractEllipseEdge(this, start, end, elp2.MinorRadius, elp2.MajorRadius, elp2.Axis.Dir1,
+                            var edge = ExtractEllipseEdge(start, end, elp2.MinorRadius, elp2.MajorRadius, elp2.Axis.Dir1,
                                 elp2.Axis.Dir2, elp2.Axis.Location);
                             wire.Edges.Add(edge);
                         }

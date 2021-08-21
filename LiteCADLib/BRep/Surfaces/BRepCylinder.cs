@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using LiteCAD.Common;
+using OpenTK;
 using System;
 
 namespace LiteCAD.BRep.Surfaces
@@ -19,7 +20,7 @@ namespace LiteCAD.BRep.Surfaces
 
         public Vector2d GetProj(Vector3d v)
         {
-            if (!IsOnSurface(v)) throw new ArgumentException("point is not on surface");
+            if (!IsOnSurface(v)) throw new LiteCadException("point is not on surface");
             BRepPlane plane = new BRepPlane() { Location = Location, Normal = Axis };
             var proj0 = plane.GetProjPoint(v) - Location;
             var p = Vector3d.Dot(v - Location, Axis);

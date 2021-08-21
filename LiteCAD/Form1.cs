@@ -42,8 +42,6 @@ namespace LiteCAD
             GL.ClearColor(Color.LightGray);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-
-
             GL.Viewport(0, 0, glControl.Width, glControl.Height);
             var o2 = Matrix4.CreateOrthographic(glControl.Width, glControl.Height, 1, 1000);
 
@@ -53,8 +51,6 @@ namespace LiteCAD
             Matrix4 modelview2 = Matrix4.LookAt(0, 0, 70, 0, 0, 0, 0, 1, 0);
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadMatrix(ref modelview2);
-
-
 
             GL.Enable(EnableCap.DepthTest);
 
@@ -556,6 +552,27 @@ namespace LiteCAD
             if (listView2.SelectedItems.Count == 0) return;
             var face = listView2.SelectedItems[0].Tag as BRepFace;
             face.Node=null;
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            if (!(treeListView1.SelectedObject is Part pp)) return;
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "PLY files (*.ply)|*.ply";
+            if (sfd.ShowDialog() != DialogResult.OK) return;
+            List<Vector3d> ret = new List<Vector3d>();
+            foreach (var item in pp. Nodes)
+            {
+                foreach (var t in item.Triangles)
+                {
+                    foreach (var v in t.Vertices)
+                    {
+                        ret.Add( v.Position);
+                    }
+                }
+            }
+
+            PlyStuff.Save(sfd.FileName, ret.ToArray());            
         }
     }
 }

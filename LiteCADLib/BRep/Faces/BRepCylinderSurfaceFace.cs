@@ -14,6 +14,77 @@ namespace LiteCAD.BRep.Faces
     public class BRepCylinderSurfaceFace : BRepFace
     {
         public BRepCylinderSurfaceFace(Part parent) : base(parent) { }
+
+        Segment[] getSegments(Vector3d pp0, Vector3d pp1, double step = 0.1)
+        {
+            var cl = Surface as BRepCylinder;
+            List<Segment> ll1 = new List<Segment>();
+            var p0 = cl.GetProj(pp0);
+            var p1 = cl.GetProj(pp1);
+            if (p0.X >= (Math.PI * 2 - 2 * step) && p1.X < 2 * step)
+            {
+                var dy = p1.Y - p0.Y;
+                var dx = (p1.X + Math.PI * 2) - p0.X;
+                var tx = (Math.PI * 2 - p0.X) / dx;
+                var ty = dy * tx;
+
+                ll1.Add(new Segment() { Start = p0, End = new Vector2d(Math.PI * 2, ty + p0.Y) });
+                ll1.Add(new Segment() { Start = new Vector2d(0, ty + p0.Y), End = p1 });
+                ll1.RemoveAll(z => z.Length() < 1e-16);
+
+            }
+            else if (p1.X >= (Math.PI * 2 - 2 * step) && p0.X < 2 * step)
+            {
+                var dy = p0.Y - p1.Y;
+                var dx = (p0.X + Math.PI * 2) - p1.X;
+                var tx = (Math.PI * 2 - p1.X) / dx;
+                var ty = dy * tx;
+
+                ll1.Add(new Segment() { Start = p1, End = new Vector2d(Math.PI * 2, ty + p1.Y) });
+                ll1.Add(new Segment() { Start = new Vector2d(0, ty + p1.Y), End = p0 });
+                ll1.RemoveAll(z => z.Length() < 1e-16);
+            }
+            else
+            if (Math.Abs(Math.Abs(p0.X - p1.X) - step) > step)
+            {
+
+                if (Math.Abs(p0.X) < 1e-16)
+                {
+                    p0.X += Math.PI * 2;
+                    if (Math.Abs((p0 - p1).Length - step) > step)
+                    {
+                        throw new LiteCadException("wrong angles");
+                    }
+                    else
+                    {
+                        ll1.Add(new Segment() { Start = p0, End = p1 });
+                    }
+                }
+                else if (Math.Abs(p1.X) < 1e-16)
+                {
+                    p1.X += Math.PI * 2;
+                    if (Math.Abs((p0 - p1).Length - step) > step)
+                    {
+                        throw new LiteCadException("wrong angles");
+
+                    }
+                    else
+                    {
+                        ll1.Add(new Segment() { Start = p0, End = p1 });
+                    }
+                }
+                else
+                {
+                    throw new LiteCadException("wrong angles");
+
+                }
+            }
+            else
+            {
+                ll1.Add(new Segment() { Start = p0, End = p1 });
+            }
+            return ll1.ToArray();
+        }
         public override MeshNode ExtractMesh()
         {
             MeshNode ret = null;
@@ -26,339 +97,239 @@ namespace LiteCAD.BRep.Faces
 
             List<Contour> cntrs = new List<Contour>();
             var len = Math.PI * 2 * cl.Radius;
-
+            double eps = 1e-8;
             bool special = false;
             Vector3d vec0 = Vector3d.Zero;
             Vector2d[] seamp = null;
-            //special case 1
-            /*   if (Wires.Count == 1 && Wires[0].Edges.Count(z => z.Curve is BRepSeamCurve) == 2)
-               {
-                   special = true;
-                   var wr = Wires[0];
-                   var cc = wr.Edges.Where(z => z.Curve is BRepCircleCurve).ToArray();
 
-                   var pl0 = cc[0].Curve as BRepCircleCurve;
-                   var loc0 = pl0.Location;
 
-                   vec0 = cc[0].Start - loc0;
-                   var pl1 = cc[1].Curve as BRepCircleCurve;
-                   var loc1 = pl1.Location;
 
-                   var len2 = (loc0 - loc1).Length;
-                   int steps = 32;
-                   var step1 = len / steps;
-                   Contour cc1 = new Contour();
-                   List<double> xx = new List<double>();
-                   for (int i = 0; i <= steps; i++)
-                   {
-                       var x = step1 * i;
-                       xx.Add((x / len) * 2.0 * Math.PI);
-                   }
-                   for (int i = 1; i < xx.Count; i++)
-                   {
-                       var x0 = xx[i - 1];
-                       var x1 = xx[i];
-                       cc1.Elements.Add(new Segment() { Start = new Vector2d(x0, 0), End = new Vector2d(x1, 0) });
-                   }
-                   cc1.Elements.Add(new Segment() { Start = cc1.Elements.Last().End, End = new Vector2d(xx[xx.Count - 1], len2) });
-
-                   for (int i = xx.Count - 1; i >= 1; i--)
-                   {
-                       var x0 = xx[i];
-                       var x1 = xx[i - 1];
-
-                       cc1.Elements.Add(new Segment() { Start = new Vector2d(x0, len2), End = new Vector2d(x1, len2) });
-                   }
-                   cc1.Elements.Add(new Segment() { Start = cc1.Elements.Last().End, End = cc1.Elements.First().Start });
-                   cntrs.Add(cc1);
-               }
-               else*/
+            foreach (var wire in Wires)
             {
+                List<Contour> l1 = new List<Contour>();
 
-                foreach (var wire in Wires)
+                foreach (var edge in wire.Edges)
                 {
-                    List<Contour> l1 = new List<Contour>();
-
-                    foreach (var edge in wire.Edges)
+                    List<Segment> ll1 = new List<Segment>();
+                    if (edge.Curve is BRepEllipseCurve elc)
                     {
-                        List<Segment> ll1 = new List<Segment>();
-                        if (edge.Curve is BRepEllipseCurve elc)
-                        {
-                            List<Vector3d> pnts = new List<Vector3d>();
-                            var step = Math.PI * 15 / 180f;
-                            var norm = elc.Dir.Normalized();
-                            var angb = Vector3d.CalculateAngle(norm, elc.RefDir);
-                            for (double i = 0; i < elc.SweepAngle; i += step)
-                            {
-                                var realAng = angb + i;
-                                var mtr4 = Matrix4d.CreateFromAxisAngle(elc.Axis, i);
-                                var rad = elc.SemiAxis1 * elc.SemiAxis2 / (Math.Sqrt(Math.Pow(elc.SemiAxis1 * Math.Sin(realAng), 2) + Math.Pow(elc.SemiAxis2 * Math.Cos(realAng), 2)));
-                                var res = Vector4d.Transform(new Vector4d(norm * rad), mtr4);
-                                pnts.Add(elc.Location + res.Xyz);
-                            }
-                            if ((pnts.Last() - edge.End).Length > 1e-8 && (pnts.First() - edge.End).Length > 1e-8)
-                            {
-                                pnts.Add(edge.End);
-                            }
-                            for (int i = 1; i < pnts.Count; i++)
-                            {
-                                var pp0 = pnts[i - 1];
-                                var pp1 = pnts[i];
-                                var p0 = cl.GetProj(pp0);
-                                var p1 = cl.GetProj(pp1);
-                                if (p0.X >= (Math.PI * 2 - 2 * step) && p1.X < 2 * step)
-                                {
-                                    var dy = p1.Y - p0.Y;
-                                    var dx = (p1.X + Math.PI * 2) - p0.X;
-                                    var tx = (Math.PI * 2 - p0.X) / dx;
-                                    var ty = dy * tx;
-
-                                    ll1.Add(new Segment() { Start = p0, End = new Vector2d(Math.PI * 2, ty + p0.Y) });
-                                    ll1.Add(new Segment() { Start = new Vector2d(0, ty + p0.Y), End = p1 });
-                                    ll1.RemoveAll(z => z.Length() < 1e-16);
-
-                                }
-                                else if (p1.X >= (Math.PI * 2 - 2 * step) && p0.X < 2 * step)
-                                {
-                                    var dy = p0.Y - p1.Y;
-                                    var dx = (p0.X + Math.PI * 2) - p1.X;
-                                    var tx = (Math.PI * 2 - p1.X) / dx;
-                                    var ty = dy * tx;
-
-                                    ll1.Add(new Segment() { Start = p1, End = new Vector2d(Math.PI * 2, ty + p1.Y) });
-                                    ll1.Add(new Segment() { Start = new Vector2d(0, ty + p1.Y), End = p0 });
-                                    ll1.RemoveAll(z => z.Length() < 1e-16);
-                                }
-                                else
-                                if (Math.Abs((p0 - p1).Length - step) > step)
-                                {
-
-                                    if (Math.Abs(p0.X) < 1e-16)
-                                    {
-                                        p0.X += Math.PI * 2;
-                                        if (Math.Abs((p0 - p1).Length - step) > step)
-                                        {
-                                            throw new LiteCadException("wrong angles");
-
-                                        }
-                                        else
-                                        {
-                                            ll1.Add(new Segment() { Start = p0, End = p1 });
-                                        }
-                                    }
-                                    else if (Math.Abs(p1.X) < 1e-16)
-                                    {
-                                        p1.X += Math.PI * 2;
-                                        if (Math.Abs((p0 - p1).Length - step) > step)
-                                        {
-                                            throw new LiteCadException("wrong angles");
-
-                                        }
-                                        else
-                                        {
-                                            ll1.Add(new Segment() { Start = p0, End = p1 });
-                                        }
-                                    }
-                                    else
-                                    {
-                                        throw new LiteCadException("wrong angles");
-
-                                    }
-                                }
-                                else
-                                {
-                                    ll1.Add(new Segment() { Start = p0, End = p1 });
-                                }
-                            }
+                        List<Vector3d> pnts = new List<Vector3d>();
+                        var step = Math.PI * 5 / 180f;
+                        var norm = elc.Dir.Normalized();
+                        var angb = Vector3d.CalculateAngle(norm, elc.RefDir);
+                        for (double i = 0; i < elc.SweepAngle; i += step)
+                        {                            
+                            var mtr4 = Matrix4d.CreateFromAxisAngle(elc.Axis, i);                            
+                            var res = Vector4d.Transform(new Vector4d(norm ), mtr4);
+                            var realAng = Vector3d.CalculateAngle(res.Xyz, elc.RefDir);
+                            var rad = elc.SemiAxis1 * elc.SemiAxis2 / (Math.Sqrt(Math.Pow(elc.SemiAxis1 * Math.Sin(realAng), 2) + Math.Pow(elc.SemiAxis2 * Math.Cos(realAng), 2)));
+                            res *= rad;
+                            pnts.Add(elc.Location + res.Xyz);
                         }
-                        else
-                        if (edge.Curve is BRepCircleCurve cc)
+                        if ((pnts.First() - edge.Start).Length > eps)
                         {
-                            List<Vector3d> pnts = new List<Vector3d>();
-                            var step = Math.PI * 15 / 180f;
-                            for (double i = 0; i < cc.SweepAngle; i += step)
-                            {
-                                var mtr4 = Matrix4d.CreateFromAxisAngle(cc.Axis, i);
-                                var res = Vector4d.Transform(new Vector4d(cc.Dir), mtr4);
-                                pnts.Add(cc.Location + res.Xyz);
-                            }
-                            if ((pnts.Last() - edge.End).Length > 1e-8 && (pnts.First() - edge.End).Length > 1e-8)
-                            {
-                                pnts.Add(edge.End);
-                            }
-                            for (int i = 1; i < pnts.Count; i++)
-                            {
-                                var pp0 = pnts[i - 1];
-                                var pp1 = pnts[i];
-                                var p0 = cl.GetProj(pp0);
-                                var p1 = cl.GetProj(pp1);
-                                if (p0.X >= (Math.PI * 2 - 2 * step) && p1.X < 2 * step)
-                                {
-                                    var dy = p1.Y - p0.Y;
-                                    var dx = (p1.X + Math.PI * 2) - p0.X;
-                                    var tx = (Math.PI * 2 - p0.X) / dx;
-                                    var ty = dy * tx;
-
-                                    ll1.Add(new Segment() { Start = p0, End = new Vector2d(Math.PI * 2, ty + p0.Y) });
-                                    ll1.Add(new Segment() { Start = new Vector2d(0, ty + p0.Y), End = p1 });
-                                    ll1.RemoveAll(z => z.Length() < 1e-16);
-
-                                }
-                                else if (p1.X >= (Math.PI * 2 - 2 * step) && p0.X < 2 * step)
-                                {
-                                    var dy = p0.Y - p1.Y;
-                                    var dx = (p0.X + Math.PI * 2) - p1.X;
-                                    var tx = (Math.PI * 2 - p1.X) / dx;
-                                    var ty = dy * tx;
-
-                                    ll1.Add(new Segment() { Start = p1, End = new Vector2d(Math.PI * 2, ty + p1.Y) });
-                                    ll1.Add(new Segment() { Start = new Vector2d(0, ty + p1.Y), End = p0 });
-                                    ll1.RemoveAll(z => z.Length() < 1e-16);
-                                }
-                                else
-                                if (Math.Abs((p0 - p1).Length - step) > step)
-                                {
-
-                                    if (Math.Abs(p0.X) < 1e-16)
-                                    {
-                                        p0.X += Math.PI * 2;
-                                        if (Math.Abs((p0 - p1).Length - step) > step)
-                                        {
-                                            throw new LiteCadException("wrong angles");
-
-                                        }
-                                        else
-                                        {
-                                            ll1.Add(new Segment() { Start = p0, End = p1 });
-                                        }
-                                    }
-                                    else if (Math.Abs(p1.X) < 1e-16)
-                                    {
-                                        p1.X += Math.PI * 2;
-                                        if (Math.Abs((p0 - p1).Length - step) > step)
-                                        {
-                                            throw new LiteCadException("wrong angles");
-
-                                        }
-                                        else
-                                        {
-                                            ll1.Add(new Segment() { Start = p0, End = p1 });
-                                        }
-                                    }
-                                    else
-                                    {
-                                        throw new LiteCadException("wrong angles");
-
-                                    }
-                                }
-                                else
-                                {
-                                    ll1.Add(new Segment() { Start = p0, End = p1 });
-                                }
-                            }
+                            throw new LiteCadException("wrong point");
                         }
-                        else if (edge.Curve is BRepLineCurve lnc)
+                        if ((pnts.Last() - edge.End).Length > eps && (pnts.First() - edge.End).Length > eps)
                         {
-                            var p0 = cl.GetProj(edge.Start);
-                            var p1 = cl.GetProj(edge.End);
-                            ll1.Add(new Segment() { Start = p0, End = p1 });
+                            pnts.Add(edge.End);
                         }
-                        else if (edge.Curve is BRepBSplineWithKnotsCurve bspline)
+                        for (int i = 1; i < pnts.Count; i++)
                         {
-                            var p0 = cl.GetProj(edge.Start);
-                            var p1 = cl.GetProj(edge.End);
-                            ll1.Add(new Segment() { Start = p0, End = p1 });
+                            var pp0 = pnts[i - 1];
+                            var pp1 = pnts[i];
+                            ll1.AddRange(getSegments(pp0, pp1, step));
                         }
-                        else if (edge.Curve is BRepSeamCurve seam)
+                        ll1.RemoveAll(z => z.Length() < 1e-16);
+                    }
+                    else
+                    if (edge.Curve is BRepCircleCurve cc)
+                    {
+                        List<Vector3d> pnts = new List<Vector3d>();
+                        var step = Math.PI * 15 / 180f;
+                        for (double i = 0; i < cc.SweepAngle; i += step)
                         {
-                            if (seamp == null)
+                            var mtr4 = Matrix4d.CreateFromAxisAngle(cc.Axis, i);
+                            var res = Vector4d.Transform(new Vector4d(cc.Dir), mtr4);
+                            pnts.Add(cc.Location + res.Xyz);
+                        }
+                        if ((pnts.Last() - edge.End).Length > 1e-8 && (pnts.First() - edge.End).Length > 1e-8)
+                        {
+                            pnts.Add(edge.End);
+                        }
+                        for (int i = 1; i < pnts.Count; i++)
+                        {
+                            var pp0 = pnts[i - 1];
+                            var pp1 = pnts[i];
+                            var p0 = cl.GetProj(pp0);
+                            var p1 = cl.GetProj(pp1);
+                            if (p0.X >= (Math.PI * 2 - 2 * step) && p1.X < 2 * step)
                             {
-                                var p0 = cl.GetProj(edge.Start);
-                                var p1 = cl.GetProj(edge.End);
+                                var dy = p1.Y - p0.Y;
+                                var dx = (p1.X + Math.PI * 2) - p0.X;
+                                var tx = (Math.PI * 2 - p0.X) / dx;
+                                var ty = dy * tx;
 
-                                seamp = new[] { p0, p1 };
-                                ll1.Add(new Segment() { Start = p0, End = p1 });
-                                if (Math.Abs(p0.X) < 1e-16 && Math.Abs(p1.X) < 1e-16)
+                                ll1.Add(new Segment() { Start = p0, End = new Vector2d(Math.PI * 2, ty + p0.Y) });
+                                ll1.Add(new Segment() { Start = new Vector2d(0, ty + p0.Y), End = p1 });
+                                ll1.RemoveAll(z => z.Length() < 1e-16);
+
+                            }
+                            else if (p1.X >= (Math.PI * 2 - 2 * step) && p0.X < 2 * step)
+                            {
+                                var dy = p0.Y - p1.Y;
+                                var dx = (p0.X + Math.PI * 2) - p1.X;
+                                var tx = (Math.PI * 2 - p1.X) / dx;
+                                var ty = dy * tx;
+
+                                ll1.Add(new Segment() { Start = p1, End = new Vector2d(Math.PI * 2, ty + p1.Y) });
+                                ll1.Add(new Segment() { Start = new Vector2d(0, ty + p1.Y), End = p0 });
+                                ll1.RemoveAll(z => z.Length() < 1e-16);
+                            }
+                            else
+                            if (Math.Abs((p0 - p1).Length - step) > step)
+                            {
+
+                                if (Math.Abs(p0.X) < 1e-16)
                                 {
                                     p0.X += Math.PI * 2;
-                                    p1.X += Math.PI * 2;
-                                    Contour aa = new Contour();
-                                    aa.Elements.Add(new Segment() { Start = p0, End = p1 });
-                                    l1.Add(aa);
-                                }
-                            }
-                        }
-                        else if (edge.Curve is BRepSpline spl)
-                        {
-                            var pnts = spl.GetPoints(edge);
-                            var projs = pnts.Select(z => cl.GetProj(z)).ToArray();
-                            for (int j = 1; j < projs.Length; j++)
-                            {
-                                var p0 = projs[j - 1];
-                                var p1 = projs[j];
-                                double step = 0.1;
-                                if (p0.X >= (Math.PI * 2 - 2 * step) && p1.X < 2 * step)
-                                {
-                                    var dy = p1.Y - p0.Y;
-                                    var dx = (p1.X + Math.PI * 2) - p0.X;
-                                    var tx = (Math.PI * 2 - p0.X) / dx;
-                                    var ty = dy * tx;
-
-                                    ll1.Add(new Segment() { Start = p0, End = new Vector2d(Math.PI * 2, ty + p0.Y) });
-                                    ll1.Add(new Segment() { Start = new Vector2d(0, ty + p0.Y), End = p1 });
-                                    ll1.RemoveAll(z => z.Length() < 1e-16);
-
-                                }
-                                else if (p1.X >= (Math.PI * 2 - 2 * step) && p0.X < 2 * step)
-                                {
-                                    var dy = p0.Y - p1.Y;
-                                    var dx = (p0.X + Math.PI * 2) - p1.X;
-                                    var tx = (Math.PI * 2 - p1.X) / dx;
-                                    var ty = dy * tx;
-
-                                    ll1.Add(new Segment() { Start = p1, End = new Vector2d(Math.PI * 2, ty + p1.Y) });
-                                    ll1.Add(new Segment() { Start = new Vector2d(0, ty + p1.Y), End = p0 });
-                                    ll1.RemoveAll(z => z.Length() < 1e-16);
-                                }
-                                else
-
-                                    ll1.Add(new Segment() { Start = p0, End = p1 });
-                            }
-                        }
-                        else
-                        {
-                            DebugHelpers.Warning($"unknown curve: {edge.Curve}");
-                        }
-                        if (ll1.Any())
-                        {
-                            var zz = new Contour() { Wire = wire };
-                            var arr3 = ll1.ToList();
-                            while (true)
-                            {
-                                var nl = zz.ConnectNext(arr3.ToArray());
-                                if (nl == null)
-                                {
-                                    if (arr3.Any())
+                                    if (Math.Abs((p0 - p1).Length - step) > step)
                                     {
-                                        l1.Add(zz);
-                                        zz = new Contour() { Wire = wire };
-                                        //throw new LiteCadException("wrong elems connect");
+                                        throw new LiteCadException("wrong angles");
+
                                     }
                                     else
-                                        break;
+                                    {
+                                        ll1.Add(new Segment() { Start = p0, End = p1 });
+                                    }
                                 }
-                                arr3.Remove(nl);
-                            }
+                                else if (Math.Abs(p1.X) < 1e-16)
+                                {
+                                    p1.X += Math.PI * 2;
+                                    if (Math.Abs((p0 - p1).Length - step) > step)
+                                    {
+                                        throw new LiteCadException("wrong angles");
 
-                            l1.Add(zz);
+                                    }
+                                    else
+                                    {
+                                        ll1.Add(new Segment() { Start = p0, End = p1 });
+                                    }
+                                }
+                                else
+                                {
+                                    throw new LiteCadException("wrong angles");
+
+                                }
+                            }
+                            else
+                            {
+                                ll1.Add(new Segment() { Start = p0, End = p1 });
+                            }
                         }
                     }
-                    if (l1.Any())
+                    else if (edge.Curve is BRepLineCurve lnc)
                     {
-                        ll.Add(l1.ToArray());
+                        var p0 = cl.GetProj(edge.Start);
+                        var p1 = cl.GetProj(edge.End);
+                        ll1.Add(new Segment() { Start = p0, End = p1 });
+                    }
+                    else if (edge.Curve is BRepBSplineWithKnotsCurve bspline)
+                    {
+                        var p0 = cl.GetProj(edge.Start);
+                        var p1 = cl.GetProj(edge.End);
+                        ll1.Add(new Segment() { Start = p0, End = p1 });
+                    }
+                    else if (edge.Curve is BRepSeamCurve seam)
+                    {
+                        if (seamp == null)
+                        {
+                            var p0 = cl.GetProj(edge.Start);
+                            var p1 = cl.GetProj(edge.End);
+
+                            seamp = new[] { p0, p1 };
+                            ll1.Add(new Segment() { Start = p0, End = p1 });
+                            if (Math.Abs(p0.X) < 1e-16 && Math.Abs(p1.X) < 1e-16)
+                            {
+                                p0.X += Math.PI * 2;
+                                p1.X += Math.PI * 2;
+                                Contour aa = new Contour();
+                                aa.Elements.Add(new Segment() { Start = p0, End = p1 });
+                                l1.Add(aa);
+                            }
+                        }
+                    }
+                    else if (edge.Curve is BRepSpline spl)
+                    {
+                        var pnts = spl.GetPoints(edge);
+                        var projs = pnts.Select(z => cl.GetProj(z)).ToArray();
+                        for (int j = 1; j < projs.Length; j++)
+                        {
+                            var p0 = projs[j - 1];
+                            var p1 = projs[j];
+                            double step = 0.1;
+                            if (p0.X >= (Math.PI * 2 - 2 * step) && p1.X < 2 * step)
+                            {
+                                var dy = p1.Y - p0.Y;
+                                var dx = (p1.X + Math.PI * 2) - p0.X;
+                                var tx = (Math.PI * 2 - p0.X) / dx;
+                                var ty = dy * tx;
+
+                                ll1.Add(new Segment() { Start = p0, End = new Vector2d(Math.PI * 2, ty + p0.Y) });
+                                ll1.Add(new Segment() { Start = new Vector2d(0, ty + p0.Y), End = p1 });
+                                ll1.RemoveAll(z => z.Length() < 1e-16);
+
+                            }
+                            else if (p1.X >= (Math.PI * 2 - 2 * step) && p0.X < 2 * step)
+                            {
+                                var dy = p0.Y - p1.Y;
+                                var dx = (p0.X + Math.PI * 2) - p1.X;
+                                var tx = (Math.PI * 2 - p1.X) / dx;
+                                var ty = dy * tx;
+
+                                ll1.Add(new Segment() { Start = p1, End = new Vector2d(Math.PI * 2, ty + p1.Y) });
+                                ll1.Add(new Segment() { Start = new Vector2d(0, ty + p1.Y), End = p0 });
+                                ll1.RemoveAll(z => z.Length() < 1e-16);
+                            }
+                            else
+
+                                ll1.Add(new Segment() { Start = p0, End = p1 });
+                        }
+                    }
+                    else
+                    {
+                        DebugHelpers.Warning($"unknown curve: {edge.Curve}");
+                    }
+                    if (ll1.Any())
+                    {
+                        var zz = new Contour() { Wire = wire };
+                        var arr3 = ll1.ToList();
+                        while (true)
+                        {
+                            var nl = zz.ConnectNext(arr3.ToArray());
+                            if (nl == null)
+                            {
+                                if (arr3.Any())
+                                {
+                                    l1.Add(zz);
+                                    zz = new Contour() { Wire = wire };
+                                    //throw new LiteCadException("wrong elems connect");
+                                }
+                                else
+                                    break;
+                            }
+                            arr3.Remove(nl);
+                        }
+
+                        l1.Add(zz);
                     }
                 }
+                if (l1.Any())
+                {
+                    ll.Add(l1.ToArray());
+                }
             }
+
             if (!special)
             {
                 cntrs = new List<Contour>();
@@ -537,7 +508,7 @@ namespace LiteCAD.BRep.Faces
             return ret;
 
         }
-        public static BRepEdge ExtractEllipseEdge(Vector3d start, Vector3d end1, Vector3d pos, Vector3d axis, Vector3d refDir
+        public BRepEdge ExtractEllipseEdge(Vector3d start, Vector3d end1, Vector3d pos, Vector3d axis, Vector3d refDir
             , double radius1, double radius2)
         {
             var edge = new BRepEdge();
@@ -562,7 +533,7 @@ namespace LiteCAD.BRep.Faces
                 sweep = Math.PI * 2;
             }
 
-            edge.Curve = new BRepEllipseCurve()
+            var cc = new BRepEllipseCurve()
             {
                 Location = loc1,
                 SemiAxis1 = radius1,
@@ -572,10 +543,38 @@ namespace LiteCAD.BRep.Faces
                 Dir = dir1,
                 SweepAngle = sweep
             };
+            edge.Curve = cc;
+            List<Vector3d> pnts = new List<Vector3d>();
+            var step = Math.PI * 5 / 180f;
+            var norm = cc.Dir.Normalized();
+            var angb = Vector3d.CalculateAngle(norm, cc.RefDir);
+            var maxr = Math.Max(cc.SemiAxis1, cc.SemiAxis2);
+            var minr = Math.Min(cc.SemiAxis1, cc.SemiAxis2);
+            cc.SemiAxis1 = maxr;
+            cc.SemiAxis2 = minr;
+            for (double i = 0; i < cc.SweepAngle; i += step)
+            {                
+                var mtr4 = Matrix4d.CreateFromAxisAngle(cc.Axis, i);                
+                var res = Vector4d.Transform(new Vector4d(norm ), mtr4);
+                var realAng = Vector3d.CalculateAngle(res.Xyz, cc.RefDir); 
+                var rad = cc.SemiAxis1 * cc.SemiAxis2 / (Math.Sqrt(Math.Pow(cc.SemiAxis1 * Math.Sin(realAng), 2) + Math.Pow(cc.SemiAxis2 * Math.Cos(realAng), 2)));
+                
+                res *= rad;
+                pnts.Add(cc.Location + res.Xyz);
+            }
+
+            pnts.Add(edge.End);
+
+            for (int j = 1; j < pnts.Count; j++)
+            {
+                var p0 = pnts[j - 1];
+                var p1 = pnts[j];
+                Items.Add(new LineItem() { Start = p0, End = p1 });
+            }
             return edge;
         }
 
-        public static BRepEdge ExtractCircleEdge(Vector3d start, Vector3d end1, Vector3d pos, Vector3d axis
+        public BRepEdge ExtractCircleEdge(Vector3d start, Vector3d end1, Vector3d pos, Vector3d axis
             , double radius)
         {
             var edge = new BRepEdge();
@@ -600,7 +599,9 @@ namespace LiteCAD.BRep.Faces
                 sweep = Math.PI * 2;
             }
 
-            edge.Curve = new BRepCircleCurve()
+
+
+            var cc = new BRepCircleCurve()
             {
                 Location = loc1,
                 Radius = radius,
@@ -608,6 +609,26 @@ namespace LiteCAD.BRep.Faces
                 Dir = dir1,
                 SweepAngle = sweep
             };
+            edge.Curve = cc;
+
+            List<Vector3d> pnts = new List<Vector3d>();
+            var step = Math.PI * 15 / 180f;
+            for (double i = 0; i < cc.SweepAngle; i += step)
+            {
+                var mtr4 = Matrix4d.CreateFromAxisAngle(cc.Axis, i);
+                var res = Vector4d.Transform(new Vector4d(cc.Dir), mtr4);
+                pnts.Add(cc.Location + res.Xyz);
+            }
+            if ((pnts.Last() - edge.End).Length > 1e-8 && (pnts.First() - edge.End).Length > 1e-8)
+            {
+                pnts.Add(edge.End);
+            }
+            for (int j = 1; j < pnts.Count; j++)
+            {
+                var p0 = pnts[j - 1];
+                var p1 = pnts[j];
+                Items.Add(new LineItem() { Start = p0, End = p1 });
+            }
             return edge;
         }
 
@@ -803,9 +824,9 @@ namespace LiteCAD.BRep.Faces
                             edge.Start = start;
                             edge.End = end;
                             BRepSpline spl = new BRepSpline();
-                            
+
                             edge.Curve = spl;
-                            
+
                             spl.Multiplicities = bcrv2.Multiplicities.ToList();
                             spl.Poles = bcrv2.ControlPoints.ToList();
                             spl.Knots = bcrv2.Knots.ToList();

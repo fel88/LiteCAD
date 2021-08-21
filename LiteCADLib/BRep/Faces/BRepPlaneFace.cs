@@ -99,14 +99,21 @@ namespace LiteCAD.BRep.Faces
                         List<Vector3d> pnts = new List<Vector3d>();
                         var step = Math.PI * 5 / 180f;
                         var norm = elc.Dir.Normalized();
-
-                        var angb = Vector3d.CalculateAngle(norm, elc.RefDir);
+                        var maxr = Math.Max(elc.SemiAxis1, elc.SemiAxis2);
+                        var minr = Math.Min(elc.SemiAxis1, elc.SemiAxis2);
+                        elc.SemiAxis1 = maxr;
+                        elc.SemiAxis2 = minr;
+                        //var angb = Vector3d.CalculateAngle(norm, elc.RefDir);
                         for (double i = 0; i < elc.SweepAngle; i += step)
-                        {
-                            var realAng = angb + i;
+                        {                            
                             var mtr4 = Matrix4d.CreateFromAxisAngle(elc.Axis, i);
+                            
+                            var res = Vector4d.Transform(new Vector4d(norm ), mtr4);
+                            var realAng = Vector3d.CalculateAngle(res.Xyz, elc.RefDir);
+
                             var rad = elc.SemiAxis1 * elc.SemiAxis2 / (Math.Sqrt(Math.Pow(elc.SemiAxis1 * Math.Sin(realAng), 2) + Math.Pow(elc.SemiAxis2 * Math.Cos(realAng), 2)));
-                            var res = Vector4d.Transform(new Vector4d(norm * rad), mtr4);
+                            res *= rad;
+
                             pnts.Add(elc.Location + res.Xyz);
                         }
                         pnts.Add(edge.End);
@@ -211,7 +218,7 @@ namespace LiteCAD.BRep.Faces
             Node = ret;
             return ret;
         }
-        public static BRepEdge ExtractCircleEdge(BRepFace face, Vector3d start, Vector3d end1, double radius,
+        public BRepEdge ExtractCircleEdge(Vector3d start, Vector3d end1, double radius,
             Vector3d axis, Vector3d location)
         {
             BRepEdge edge = new BRepEdge();
@@ -266,12 +273,12 @@ namespace LiteCAD.BRep.Faces
             {
                 var p0 = pnts[j - 1];
                 var p1 = pnts[j];
-                face.Items.Add(new LineItem() { Start = p0, End = p1 });
+                Items.Add(new LineItem() { Start = p0, End = p1 });
             }
             return edge;
         }
 
-        public static BRepEdge ExtractEllipseEdge(BRepFace face,
+        public virtual BRepEdge ExtractEllipseEdge(
             Vector3d start,
             Vector3d end1,
             double radius1,
@@ -321,18 +328,32 @@ namespace LiteCAD.BRep.Faces
             for (double i = 0; i < ang2; i += step)
             {
                 var mtr4 = Matrix4d.CreateFromAxisAngle(axis, i);
-                var realAng = i + ang3;
                 //var rad = (radius1 * radius2) / (Math.Sqrt(radius2 * radius2 * Math.Pow(Math.Sin(i), 2)) + Math.Sqrt(radius1 * radius1 * Math.Pow(Math.Cos(i), 2)));
+                var res = Vector4d.Transform(new Vector4d(norm ), mtr4);
+                var realAng = Vector3d.CalculateAngle(res.Xyz, cc.RefDir);
                 var rad = (radius1 * radius2) / (Math.Sqrt(Math.Pow(radius1 * Math.Sin(realAng), 2) + Math.Pow(radius2 * Math.Cos(realAng), 2)));
-                var res = Vector4d.Transform(new Vector4d(norm * rad), mtr4);
+
+                res *= rad;
+
                 pnts.Add(pos + res.Xyz);
+
+                /*var mtr4 = Matrix4d.CreateFromAxisAngle(elc.Axis, i);
+                            
+                            var res = Vector4d.Transform(new Vector4d(norm ), mtr4);
+                            var realAng = Vector3d.CalculateAngle(res.Xyz, elc.RefDir);
+
+                            var rad = elc.SemiAxis1 * elc.SemiAxis2 / (Math.Sqrt(Math.Pow(elc.SemiAxis1 * Math.Sin(realAng), 2) + Math.Pow(elc.SemiAxis2 * Math.Cos(realAng), 2)));
+                            res *= rad;
+
+                            pnts.Add(elc.Location + res.Xyz);
+                 */
             }
             pnts.Add(pos + dir2);
             for (int j = 1; j < pnts.Count; j++)
             {
                 var p0 = pnts[j - 1];
                 var p1 = pnts[j];
-                face.Items.Add(new LineItem() { Start = p0, End = p1 });
+                Items.Add(new LineItem() { Start = p0, End = p1 });
             }
             return edge;
         }
@@ -363,7 +384,7 @@ namespace LiteCAD.BRep.Faces
                     if (crv.EdgeGeometry is StepCircle circ)
                     {
                         var pp = circ.Position as StepAxis2Placement3D;
-                        var edge = ExtractCircleEdge(this, start, end1,
+                        var edge = ExtractCircleEdge(start, end1,
                             circ.Radius,
                             pp.Axis.ToVector3d(), circ.Position.Location.ToVector3d());
                         wire.Edges.Add(edge);
@@ -405,7 +426,7 @@ namespace LiteCAD.BRep.Faces
                         else if (csurf.EdgeGeometry is StepCircle circ2)
                         {
                             var pp = circ2.Position as StepAxis2Placement3D;
-                            var edge = ExtractCircleEdge(this, start, end1,
+                            var edge = ExtractCircleEdge(start, end1,
                                 circ2.Radius,
                                 pp.Axis.ToVector3d(), circ2.Position.Location.ToVector3d());
                             wire.Edges.Add(edge);
@@ -464,12 +485,12 @@ namespace LiteCAD.BRep.Faces
                         else
                         if (sc.Geometry is Circle circ2)
                         {
-                            wire.Edges.Add(ExtractCircleEdge(this, start, end, circ2.Radius, circ2.Axis.Dir1, circ2.Axis.Location));
+                            wire.Edges.Add(ExtractCircleEdge(start, end, circ2.Radius, circ2.Axis.Dir1, circ2.Axis.Location));
                         }
                         else
                         if (sc.Geometry is Ellipse elp2)
                         {
-                            wire.Edges.Add(ExtractEllipseEdge(this,
+                            wire.Edges.Add(ExtractEllipseEdge(
                                 start,
                                 end,
                                 elp2.MinorRadius,
@@ -496,7 +517,7 @@ namespace LiteCAD.BRep.Faces
                     else
                     if (crv is Circle circ)
                     {
-                        wire.Edges.Add(ExtractCircleEdge(this, start, end, circ.Radius, circ.Axis.Dir1, circ.Axis.Location));
+                        wire.Edges.Add(ExtractCircleEdge(start, end, circ.Radius, circ.Axis.Dir1, circ.Axis.Location));
                     }
                     else
                     if (crv is BSplineCurveWithKnots bcrv)

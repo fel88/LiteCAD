@@ -49,6 +49,7 @@
             this.listView2 = new System.Windows.Forms.ListView();
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.contextMenuStrip2 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.visibleSwitchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.meshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,10 +65,11 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.button1 = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.checkBox8 = new System.Windows.Forms.CheckBox();
+            this.button9 = new System.Windows.Forms.Button();
             this.checkBox7 = new System.Windows.Forms.CheckBox();
             this.checkBox6 = new System.Windows.Forms.CheckBox();
             this.checkBox5 = new System.Windows.Forms.CheckBox();
-            this.checkBox4 = new System.Windows.Forms.CheckBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.button8 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -86,7 +88,6 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
-            this.button9 = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.treeListView1)).BeginInit();
@@ -269,7 +270,8 @@
             // 
             this.listView2.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader2,
-            this.columnHeader3});
+            this.columnHeader3,
+            this.columnHeader4});
             this.listView2.ContextMenuStrip = this.contextMenuStrip2;
             this.listView2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView2.FullRowSelect = true;
@@ -282,6 +284,19 @@
             this.listView2.UseCompatibleStateImageBehavior = false;
             this.listView2.View = System.Windows.Forms.View.Details;
             this.listView2.SelectedIndexChanged += new System.EventHandler(this.listView2_SelectedIndexChanged);
+            // 
+            // columnHeader2
+            // 
+            this.columnHeader2.Text = "#";
+            this.columnHeader2.Width = 30;
+            // 
+            // columnHeader3
+            // 
+            this.columnHeader3.Text = "Surface";
+            // 
+            // columnHeader4
+            // 
+            this.columnHeader4.Text = "Visible";
             // 
             // contextMenuStrip2
             // 
@@ -418,11 +433,11 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.checkBox8);
             this.tabPage3.Controls.Add(this.button9);
             this.tabPage3.Controls.Add(this.checkBox7);
             this.tabPage3.Controls.Add(this.checkBox6);
             this.tabPage3.Controls.Add(this.checkBox5);
-            this.tabPage3.Controls.Add(this.checkBox4);
             this.tabPage3.Controls.Add(this.checkBox1);
             this.tabPage3.Controls.Add(this.button8);
             this.tabPage3.Controls.Add(this.label1);
@@ -437,6 +452,27 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Debug";
             this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // checkBox8
+            // 
+            this.checkBox8.AutoSize = true;
+            this.checkBox8.Location = new System.Drawing.Point(17, 202);
+            this.checkBox8.Name = "checkBox8";
+            this.checkBox8.Size = new System.Drawing.Size(131, 17);
+            this.checkBox8.TabIndex = 12;
+            this.checkBox8.Text = "skip wire on exception";
+            this.checkBox8.UseVisualStyleBackColor = true;
+            this.checkBox8.CheckedChanged += new System.EventHandler(this.checkBox8_CheckedChanged);
+            // 
+            // button9
+            // 
+            this.button9.Location = new System.Drawing.Point(12, 54);
+            this.button9.Name = "button9";
+            this.button9.Size = new System.Drawing.Size(72, 20);
+            this.button9.TabIndex = 11;
+            this.button9.Text = "save to ply";
+            this.button9.UseVisualStyleBackColor = true;
+            this.button9.Click += new System.EventHandler(this.button9_Click);
             // 
             // checkBox7
             // 
@@ -454,7 +490,7 @@
             // checkBox6
             // 
             this.checkBox6.AutoSize = true;
-            this.checkBox6.Location = new System.Drawing.Point(17, 294);
+            this.checkBox6.Location = new System.Drawing.Point(17, 271);
             this.checkBox6.Name = "checkBox6";
             this.checkBox6.Size = new System.Drawing.Size(104, 17);
             this.checkBox6.TabIndex = 9;
@@ -467,26 +503,13 @@
             this.checkBox5.AutoSize = true;
             this.checkBox5.Checked = true;
             this.checkBox5.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox5.Location = new System.Drawing.Point(43, 184);
+            this.checkBox5.Location = new System.Drawing.Point(12, 165);
             this.checkBox5.Name = "checkBox5";
             this.checkBox5.Size = new System.Drawing.Size(74, 17);
             this.checkBox5.TabIndex = 8;
             this.checkBox5.Text = "draw axes";
             this.checkBox5.UseVisualStyleBackColor = true;
             this.checkBox5.CheckedChanged += new System.EventHandler(this.checkBox5_CheckedChanged);
-            // 
-            // checkBox4
-            // 
-            this.checkBox4.AutoSize = true;
-            this.checkBox4.Checked = true;
-            this.checkBox4.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox4.Location = new System.Drawing.Point(17, 271);
-            this.checkBox4.Name = "checkBox4";
-            this.checkBox4.Size = new System.Drawing.Size(143, 17);
-            this.checkBox4.TabIndex = 7;
-            this.checkBox4.Text = "use internal STEP parser";
-            this.checkBox4.UseVisualStyleBackColor = true;
-            this.checkBox4.CheckedChanged += new System.EventHandler(this.checkBox4_CheckedChanged);
             // 
             // checkBox1
             // 
@@ -501,7 +524,7 @@
             // 
             // button8
             // 
-            this.button8.Location = new System.Drawing.Point(28, 14);
+            this.button8.Location = new System.Drawing.Point(9, 6);
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(75, 23);
             this.button8.TabIndex = 5;
@@ -512,7 +535,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(44, 204);
+            this.label1.Location = new System.Drawing.Point(13, 185);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(35, 13);
             this.label1.TabIndex = 4;
@@ -520,7 +543,7 @@
             // 
             // button7
             // 
-            this.button7.Location = new System.Drawing.Point(37, 150);
+            this.button7.Location = new System.Drawing.Point(6, 131);
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(106, 23);
             this.button7.TabIndex = 3;
@@ -530,7 +553,7 @@
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(36, 122);
+            this.button6.Location = new System.Drawing.Point(5, 103);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(106, 23);
             this.button6.TabIndex = 2;
@@ -541,7 +564,7 @@
             // checkBox3
             // 
             this.checkBox3.AutoSize = true;
-            this.checkBox3.Location = new System.Drawing.Point(31, 99);
+            this.checkBox3.Location = new System.Drawing.Point(9, 80);
             this.checkBox3.Name = "checkBox3";
             this.checkBox3.Size = new System.Drawing.Size(124, 17);
             this.checkBox3.TabIndex = 1;
@@ -551,7 +574,7 @@
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(28, 43);
+            this.button5.Location = new System.Drawing.Point(9, 30);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(75, 23);
             this.button5.TabIndex = 0;
@@ -651,16 +674,6 @@
             this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
             this.toolStripProgressBar1.Visible = false;
             // 
-            // button9
-            // 
-            this.button9.Location = new System.Drawing.Point(31, 72);
-            this.button9.Name = "button9";
-            this.button9.Size = new System.Drawing.Size(72, 20);
-            this.button9.TabIndex = 11;
-            this.button9.Text = "save to ply";
-            this.button9.UseVisualStyleBackColor = true;
-            this.button9.Click += new System.EventHandler(this.button9_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -744,7 +757,6 @@
         private System.Windows.Forms.ToolStripMenuItem visibleSwitchToolStripMenuItem;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
-        private System.Windows.Forms.CheckBox checkBox4;
         private System.Windows.Forms.CheckBox checkBox5;
         private System.Windows.Forms.ToolStripMenuItem switchNormalsToolStripMenuItem;
         private System.Windows.Forms.CheckBox checkBox6;
@@ -753,6 +765,8 @@
         private System.Windows.Forms.ToolStripMenuItem updateToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem1;
         private System.Windows.Forms.Button button9;
+        private System.Windows.Forms.ColumnHeader columnHeader4;
+        private System.Windows.Forms.CheckBox checkBox8;
     }
 }
 

@@ -4,7 +4,6 @@ using LiteCAD.Common;
 using OpenTK;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace LiteCAD.Parsers.Step
@@ -53,6 +52,7 @@ namespace LiteCAD.Parsers.Step
                 throw new StepParserException("duplicate parser items");
         }
         public static bool SkipFaceOnException = true;
+        public static bool SkipWireOnException = true;
         public Part ToPart()
         {
             Part ret = new Part();
@@ -87,7 +87,7 @@ namespace LiteCAD.Parsers.Step
                 if (face.Surface.GetType() == item[0])
                 {
                     var ret = Activator.CreateInstance(item[1], p) as BRepFace;
-                    ret.Load(face);
+                    ret.Load(face);                    
                     return ret;
                 }
             }
@@ -216,29 +216,5 @@ namespace LiteCAD.Parsers.Step
     public class BoundedSurface : Surface
     {
         public List<Surface> Surfaces = new List<Surface>();
-    }
-
-    public class BSplineSurface : Surface
-    {
-        public int Degree;
-    }
-
-    public class RationalBSplineSurface : SurfaceCurve
-    {
-        public double[] Weights;
-        public void Parse(TokenList list)
-        {
-            var l1 = (list.Tokens.First(z => z is ListTokenItem) as ListTokenItem).List.Tokens.ToArray();
-            var z1 = l1.Where(z => z is StringTokenItem).ToArray();
-
-            Weights = z1.Select(z => z as StringTokenItem).Where(z => z.Token.Any(char.IsDigit)).Select(u => double.Parse(u.Token.Replace(",", "."), CultureInfo.InvariantCulture)).ToArray();
-        }
-    }
-
-    public class BSplineSurfaceWithKnots : BSplineSurface
-    {
-        public int uDegree;
-        public int vDegree;
-        public Vector3d[][] ControPoints;
     }
 }

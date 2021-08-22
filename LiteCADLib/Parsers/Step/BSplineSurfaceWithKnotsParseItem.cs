@@ -51,7 +51,7 @@ namespace LiteCAD.Parsers.Step
                 var refs1 = ar1.Select(z => ctx.GetRefObj(int.Parse(z.Trim().TrimStart('#'))));
                 list.Add(refs1.Select(z=>(Vector3d)z).ToArray());
             }
-            ret.ControPoints = list.ToArray();
+            ret.ControlPoints = list.ToArray();
             spl = spl.Where(z => !z.Contains('\'')).ToArray();
             //var zz = spl.Skip(2).Select(z => double.Parse(z, CultureInfo.InvariantCulture)).ToArray();
             //var refs = spl.Skip(1).Take(1).Select(z => int.Parse(z.TrimStart('#'))).ToArray();            

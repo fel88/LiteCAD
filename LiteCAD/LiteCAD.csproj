@@ -114,10 +114,6 @@
       <Project>{05537b4a-4a48-403c-a61b-9eca33ef559b}</Project>
       <Name>LiteCAD.Lib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\step\IxMilia.Step\IxMilia.Step.csproj">
-      <Project>{4b663273-b272-4b6a-b979-57835e67c2e4}</Project>
-      <Name>IxMilia.Step</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Triangle\Triangle.csproj">
       <Project>{5a12c4a1-bc07-4f18-82b5-b08e150025df}</Project>
       <Name>Triangle</Name>

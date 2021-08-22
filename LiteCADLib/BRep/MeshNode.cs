@@ -14,7 +14,7 @@ namespace LiteCAD.BRep
 
         public virtual void SwitchNormal()
         {
-            if (!(Parent.Surface is BRepPlane pl)) return;
+            //if (!(Parent.Surface is BRepPlane pl)) return;
 
             foreach (var item in Triangles)
             {
@@ -23,8 +23,6 @@ namespace LiteCAD.BRep
                     vv.Normal *= -1;
                 }
             }
-        }
-
-        
+        }        
     }
 }

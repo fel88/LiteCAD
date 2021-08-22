@@ -53,7 +53,7 @@ namespace LiteCAD.Parsers.Step
                     {
                         var z1 = topt[j + 1];
                         var list1 = (z1 as ListTokenItem);
-                        var k = new RationalBSplineSurface();
+                        var k = new RationalBSplineCurve();
                         k.Parse(list1.List);
                         ret.Curves.Add(k);
                     }

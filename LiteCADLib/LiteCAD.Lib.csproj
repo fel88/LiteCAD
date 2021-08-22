@@ -86,6 +86,8 @@
     <Compile Include="Parsers\Step\BSplineCurve.cs" />
     <Compile Include="Parsers\Step\BSplineCurveWithKnots.cs" />
     <Compile Include="Parsers\Step\BSplineCurveWithKnotsParseItem.cs" />
+    <Compile Include="Parsers\Step\BSplineSurface.cs" />
+    <Compile Include="Parsers\Step\BSplineSurfaceWithKnots.cs" />
     <Compile Include="Parsers\Step\BSplineSurfaceWithKnotsParseItem.cs" />
     <Compile Include="Parsers\Step\CartesianPointParseItem.cs" />
     <Compile Include="Parsers\Step\CircleParseItem.cs" />
@@ -112,6 +114,7 @@
     <Compile Include="Parsers\Step\PCurveParseItem.cs" />
     <Compile Include="Parsers\Step\PlaneSurfaceParseItem.cs" />
     <Compile Include="NURBS\RationalBSplinePoint.cs" />
+    <Compile Include="Parsers\Step\RationalBSplineSurface.cs" />
     <Compile Include="Parsers\Step\SeamCurveParseItem.cs" />
     <Compile Include="Parsers\Step\ShellParseItem.cs" />
     <Compile Include="BRep\Curves\BRepSpline.cs" />
@@ -154,10 +157,6 @@
     <ProjectReference Include="..\clipper\clipperLib.csproj">
       <Project>{9b062971-a88e-4a3d-b3c9-12b78d15fa66}</Project>
       <Name>clipperLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\step\IxMilia.Step\IxMilia.Step.csproj">
-      <Project>{4b663273-b272-4b6a-b979-57835e67c2e4}</Project>
-      <Name>IxMilia.Step</Name>
     </ProjectReference>
     <ProjectReference Include="..\Triangle\Triangle.csproj">
       <Project>{5a12c4a1-bc07-4f18-82b5-b08e150025df}</Project>

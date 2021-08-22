@@ -1,5 +1,4 @@
-﻿using IxMilia.Step.Items;
-using LiteCAD.BRep.Curves;
+﻿using LiteCAD.BRep.Curves;
 using LiteCAD.BRep.Surfaces;
 using LiteCAD.Common;
 using LiteCAD.Parsers.Step;
@@ -25,12 +24,7 @@ namespace LiteCAD.BRep.Faces
             }
             return ret;
         }
-
-        public override void Load(StepAdvancedFace face, StepSurface _cyl)
-        {
-            throw new NotImplementedException();
-
-        }
+                
         public static BRepEdge ExtractCircleEdge(BRepFace face, Vector3d start, Vector3d end1, double radius,
           Vector3d axis, Vector3d location)
         {

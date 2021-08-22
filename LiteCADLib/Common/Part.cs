@@ -1,6 +1,4 @@
-﻿using IxMilia.Step;
-using IxMilia.Step.Items;
-using LiteCAD.BRep;
+﻿using LiteCAD.BRep;
 using LiteCAD.BRep.Faces;
 using LiteCAD.BRep.Surfaces;
 using OpenTK;
@@ -32,7 +30,7 @@ namespace LiteCAD.Common
             {
                 BRepFace item = Faces[i];
                 float prog = (i / (float)Faces.Count) * 100;
-                DebugHelpers.Progress(true, prog);                
+                DebugHelpers.Progress(true, prog);
                 try
                 {
                     var nd = item.ExtractMesh();
@@ -44,64 +42,7 @@ namespace LiteCAD.Common
             }
             DebugHelpers.Progress(true, 100);
         }
-
-        public static Part FromStep(string fileName)
-        {
-            Part ret = new Part() { Name = new FileInfo(fileName).Name };
-
-            //------------------------------------------------------------ read from a file
-            StepFile stepFile;
-            using (FileStream fs = new FileStream(fileName, FileMode.Open))
-            {
-                stepFile = StepFile.Load(fs);
-            }
-
-            foreach (StepRepresentationItem item in stepFile.Items)
-            {
-                switch (item.ItemType)
-                {
-                    case StepItemType.AdvancedFace:
-                        {
-                            StepAdvancedFace face = (StepAdvancedFace)item;
-                            var geom = face.FaceGeometry;
-                            if (geom is StepCylindricalSurface cyl)
-                            {
-                                var pface = new BRepCylinderSurfaceFace(ret);
-                                pface.Load(face, geom);
-                                ret.Faces.Add(pface);                                
-                            }
-                            else if (geom is StepPlane pl)
-                            {
-                                var pface = new BRepPlaneFace(ret) { };
-                                pface.Load(face, pl);
-                                ret.Faces.Add(pface);
-                            }
-                            else if (geom is StepToroidalSurface tor)
-                            {
-                                var pface = new BRepToroidalSurfaceFace(ret) { };
-                                pface.Load(face, tor);
-                                ret.Faces.Add(pface);                                
-                            }
-                            else if (geom is StepSurfaceOfLinearExtrusion ext)
-                            {
-                                var pface = new BRepLinearExtrusionFace(ret) { };
-                                pface.Load(face, ext);
-                                ret.Faces.Add(pface);                             
-                            }
-                            else
-                            {
-                                DebugHelpers.Warning($"unsupported surface: {geom.ToString()}");
-                            }
-                        }
-                        break;
-                }
-            }
-            if (AutoExtractMeshOnLoad)
-                ret.ExtractMesh();
-            ret.FixNormals();
-            DebugHelpers.Progress(false, 0);
-            return ret;
-        }
+                
 
         public static bool AutoExtractMeshOnLoad = true;
 
@@ -123,6 +64,7 @@ namespace LiteCAD.Common
         {
             List<BRepFace> calculated = new List<BRepFace>();
             //1 phase
+            double eps1 = 1e-3;
             foreach (var item in Faces)
             {
                 if (item.Surface is BRepPlane pl)
@@ -132,7 +74,7 @@ namespace LiteCAD.Common
                     foreach (var pp in getPoints())
                     {
                         var dot = Vector3d.Dot(pl.Normal, pp - pl.Location);
-                        if (Math.Abs(dot) < 1e-8) continue;
+                        if (Math.Abs(dot) < eps1) continue;
                         if (sign == null) { sign = Math.Sign(dot); }
                         else
                         {
@@ -198,7 +140,7 @@ namespace LiteCAD.Common
                 int before = calculated.Count;
                 foreach (var rr in remain)
                 {
-
+                    if (rr is BRepLinearExtrusionFace) { calculated.Add(rr); break; }
                     var edges = rr.Wires.SelectMany(z => z.Edges);
                     bool exit = false;
                     foreach (var item in calculated)
@@ -265,7 +207,7 @@ namespace LiteCAD.Common
         {
             if (!Visible) return;
             GL.Disable(EnableCap.Lighting);
-            foreach (var item in Faces)
+            foreach (var item in Faces.OrderByDescending(z => z.Selected))
             {
                 if (!item.Visible) continue;
                 foreach (var pitem in item.Items)
@@ -277,7 +219,6 @@ namespace LiteCAD.Common
 
             foreach (var item in Nodes)
             {
-
                 if (!item.Parent.Visible) continue;
                 GL.Enable(EnableCap.Lighting);
 

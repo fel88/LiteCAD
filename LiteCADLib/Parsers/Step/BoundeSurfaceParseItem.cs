@@ -30,7 +30,9 @@ namespace LiteCAD.Parsers.Step
             var spl = item.Value.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
             List<TokenList> lists = new List<TokenList>();
             Stack<TokenList> stack = new Stack<TokenList>();
-            stack.Push(new TokenList());
+            
+            TokenList top = new TokenList();
+            stack.Push(top);
             for (int i = 0; i < tkns.Length; i++)
             {
                 if (tkns[i] == "(")
@@ -44,6 +46,38 @@ namespace LiteCAD.Parsers.Step
                     stack.Peek().Tokens.Add(new StringTokenItem() { Token = tkns[i] });
                 }
             }
+
+            var topt = (top.Tokens[0] as ListTokenItem).List.Tokens;
+            for (int j = 0; j < topt.Count; j++)
+            {
+                ITokenItem xx = topt[j];
+                if (xx is StringTokenItem sti)
+                    if (sti.Token == "B_SPLINE_SURFACE_WITH_KNOTS")
+                    {
+                        var z1 = topt[j + 1];
+                        var list1 = (z1 as ListTokenItem);
+                        var k = new BSplineSurfaceWithKnots();
+                        k.Parse(list1.List);
+                        ret.Surfaces.Add(k);
+                    }
+                    else if (sti.Token == "RATIONAL_B_SPLINE_SURFACE")
+                    {
+                        var z1 = topt[j + 1];
+                        var list1 = (z1 as ListTokenItem);
+                        var k = new RationalBSplineSurface();
+                        k.Parse(list1.List);
+                        ret.Surfaces.Add(k);
+                    }
+                    else if (sti.Token == "B_SPLINE_SURFACE")
+                    {
+                        var z1 = topt[j + 1];
+                        var list1 = (z1 as ListTokenItem);
+                        var k = new BSplineSurface();
+                        k.Parse(ctx, list1.List);
+                        ret.Surfaces.Add(k);
+                    }
+            }
+
 
             spl = spl.Where(z => !z.Contains('\'')).ToArray();
             //var zz = spl.Skip(2).Select(z => double.Parse(z, CultureInfo.InvariantCulture)).ToArray();

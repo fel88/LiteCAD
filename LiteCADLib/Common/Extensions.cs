@@ -9,14 +9,7 @@ namespace LiteCAD.Common
         {
             return new Vector3((float)v.X, (float)v.Y, (float)v.Z);
         }
-        public static Vector3d ToVector3d(this IxMilia.Step.Items.StepCartesianPoint v)
-        {
-            return new Vector3d(v.X, v.Y, v.Z);
-        }
-        public static Vector3d ToVector3d(this IxMilia.Step.Items.StepDirection v)
-        {
-            return new Vector3d(v.X, v.Y, v.Z);
-        }
+        
         public static Vector2d ToVector2d(this Vector2 v)
         {
             return new Vector2d(v.X, v.Y);

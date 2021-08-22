@@ -220,7 +220,7 @@ namespace LiteCAD
         public bool AllowPartLoadTimeout = true;
         public int PartLoadTimeout = 15000;
         bool loaded = false;
-        bool useInternalStepParser = true;
+        
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
@@ -232,16 +232,7 @@ namespace LiteCAD
                 {
                     try
                     {
-                        Part prt = null;
-
-                        if (useInternalStepParser)
-                        {
-                            prt = StepParser.Parse(ofd.FileName);
-                        }
-                        else
-                        {
-                            prt = Part.FromStep(ofd.FileName);
-                        }
+                        Part prt = StepParser.Parse(ofd.FileName);                       
                         var fi = new FileInfo(ofd.FileName);
                         loaded = true;
                         lock (Parts)
@@ -250,7 +241,9 @@ namespace LiteCAD
                         }
                         infoPanel.AddInfo($"model loaded succesfully: {fi.Name}");
                         treeListView1.SetObjects(Parts);
-                        fitAll();
+                        var vv = getAllPoints();
+                        fitAll(vv);
+                        camToSelected(vv);
                     }
                     catch (Exception ex)
                     {
@@ -290,7 +283,7 @@ namespace LiteCAD
             ph.Name = "plane01";
             treeListView1.SetObjects(Parts);
         }
-
+        Part selectedPart;
         private void treeListView1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (treeListView1.SelectedObject == null) return;
@@ -299,6 +292,7 @@ namespace LiteCAD
             if (tag is Part part)
             {
                 updateFacesList(part);
+                selectedPart = part;
             }
             if (tag is IEditFieldsContainer c)
             {
@@ -378,24 +372,25 @@ namespace LiteCAD
             }
             return vv.ToArray();
         }
-        void fitAll(bool changeCamera = true)
+
+        void fitAll(Vector3d[] vv = null)
         {
-            var vv = getAllPoints();
+            if (vv == null)
+                vv = getAllPoints();
             if (vv.Length == 0) return;
             FitToPoints(vv, camera1);
-            if (changeCamera)
-                camToSelected(vv);
         }
+
         BRepFace selectedFace = null;
         void updateFacesList(Part part)
         {
             listView2.Items.Clear();
             foreach (var item in part.Faces)
             {
-                listView2.Items.Add(new ListViewItem(new string[] { item.Id.ToString(), item.Surface.GetType().Name }) { Tag = item });
+                listView2.Items.Add(new ListViewItem(new string[] { item.Id.ToString(), item.Surface.GetType().Name, item.Visible.ToString() }) { Tag = item });
             }
-
         }
+
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
             fitAll();
@@ -446,12 +441,13 @@ namespace LiteCAD
             var len = camera1.DirLen;
             var dir = camera1.Dir;
             camera1.CamTo = Vector3.Zero;
-            camera1.CamFrom = camera1.CamTo - dir * len;
+            camera1.CamFrom = camera1.CamTo + dir * len;
         }
 
 
         void camToSelected(Vector3d[] vv)
         {
+            if (vv == null || vv.Length == 0) return;
             Vector3d cnt = Vector3d.Zero;
             foreach (var item in vv)
             {
@@ -461,7 +457,7 @@ namespace LiteCAD
             var len = camera1.DirLen;
             var dir = camera1.Dir;
             camera1.CamTo = cnt.ToVector3();
-            camera1.CamFrom = camera1.CamTo - dir * len;
+            camera1.CamFrom = camera1.CamTo + dir * len;
         }
         private void button6_Click(object sender, EventArgs e)
         {
@@ -477,11 +473,12 @@ namespace LiteCAD
 
         private void listView2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (listView2.SelectedItems.Count == 0) return;
             if (selectedFace != null)
             {
                 selectedFace.Selected = false;
             }
+            if (listView2.SelectedItems.Count == 0) { return; }
+
             selectedFace = listView2.SelectedItems[0].Tag as BRepFace;
             selectedFace.Selected = true;
         }
@@ -491,6 +488,7 @@ namespace LiteCAD
             if (listView2.SelectedItems.Count == 0) return;
             var face = listView2.SelectedItems[0].Tag as BRepFace;
             face.Visible = !face.Visible;
+            updateFacesList(selectedPart);
         }
 
         private void checkBox1_CheckedChanged_1(object sender, EventArgs e)
@@ -504,12 +502,7 @@ namespace LiteCAD
             var face = listView2.SelectedItems[0].Tag as BRepFace;
             face.ExtractMesh();
         }
-
-        private void checkBox4_CheckedChanged(object sender, EventArgs e)
-        {
-            useInternalStepParser = checkBox4.Checked;
-        }
-
+                
         private void checkBox5_CheckedChanged(object sender, EventArgs e)
         {
             drawAxes = checkBox5.Checked;
@@ -551,7 +544,7 @@ namespace LiteCAD
         {
             if (listView2.SelectedItems.Count == 0) return;
             var face = listView2.SelectedItems[0].Tag as BRepFace;
-            face.Node=null;
+            face.Node = null;
         }
 
         private void button9_Click(object sender, EventArgs e)
@@ -561,18 +554,23 @@ namespace LiteCAD
             sfd.Filter = "PLY files (*.ply)|*.ply";
             if (sfd.ShowDialog() != DialogResult.OK) return;
             List<Vector3d> ret = new List<Vector3d>();
-            foreach (var item in pp. Nodes)
+            foreach (var item in pp.Nodes)
             {
                 foreach (var t in item.Triangles)
                 {
                     foreach (var v in t.Vertices)
                     {
-                        ret.Add( v.Position);
+                        ret.Add(v.Position);
                     }
                 }
             }
 
-            PlyStuff.Save(sfd.FileName, ret.ToArray());            
+            PlyStuff.Save(sfd.FileName, ret.ToArray());
+        }
+
+        private void checkBox8_CheckedChanged(object sender, EventArgs e)
+        {
+            BRepFace.SkipWireOnParseException = checkBox8.Checked;
         }
     }
 }

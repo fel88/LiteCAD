@@ -1,5 +1,4 @@
-﻿using IxMilia.Step.Items;
-using LiteCAD.BRep.Curves;
+﻿using LiteCAD.BRep.Curves;
 using LiteCAD.BRep.Surfaces;
 using LiteCAD.Common;
 using LiteCAD.Parsers.Step;
@@ -27,12 +26,7 @@ namespace LiteCAD.BRep.Faces
             throw new NotImplementedException();
         }
 
-        public override void Load(StepAdvancedFace face, StepSurface _cyl)
-        {
-            throw new NotImplementedException();
-
-        }
-
+        
         public override void Load(AdvancedFace face)
         {
             var ss = face.Surface as BSplineSurfaceWithKnots;

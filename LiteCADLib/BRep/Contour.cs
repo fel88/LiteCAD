@@ -206,6 +206,11 @@ namespace LiteCAD.BRep
             return null;
         }
 
+        public double Area()
+        {
+            var ar = GeometryUtils.CalculateArea(Elements.Select(z => z.End).ToArray());
+            return Math.Abs(ar);
+        }
         internal void Reduce(double eps = 1e-8)
         {
             Elements.RemoveAll(x => x.Length() < eps);

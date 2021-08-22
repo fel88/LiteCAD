@@ -1,5 +1,4 @@
-﻿using IxMilia.Step.Items;
-using LiteCAD.BRep.Curves;
+﻿using LiteCAD.BRep.Curves;
 using LiteCAD.BRep.Surfaces;
 using LiteCAD.Common;
 using LiteCAD.Parsers.Step;
@@ -357,108 +356,7 @@ namespace LiteCAD.BRep.Faces
             }
             return edge;
         }
-        public override void Load(StepAdvancedFace face, StepSurface _pl)
-        {
-            var pl = _pl as IxMilia.Step.Items.StepPlane;
-            var loc = pl.Position.Location;
-            var loc2 = new Vector3d(loc.X, loc.Y, loc.Z);
-            var nrm = pl.Position.Axis;
-            var nrm2 = new Vector3d(nrm.X, nrm.Y, nrm.Z);
-            Surface = new BRepPlane()
-            {
-                Location = loc2,
-                Normal = nrm2
-            };
-            foreach (var bitem in face.Bounds)
-            {
-                var loop = bitem.Bound as StepEdgeLoop;
-                BRepWire wire = new BRepWire() { IsOutter = bitem is StepFaceOuterBound };
-                Wires.Add(wire);
-                foreach (var litem in loop.EdgeList)
-                {
-                    StepEdgeCurve crv = litem.EdgeElement as StepEdgeCurve;
-                    var strt = (crv.EdgeStart as StepVertexPoint).Location;
-                    var end = (crv.EdgeEnd as StepVertexPoint).Location;
-                    var start = new Vector3d(strt.X, strt.Y, strt.Z);
-                    var end1 = new Vector3d(end.X, end.Y, end.Z);
-                    if (crv.EdgeGeometry is StepCircle circ)
-                    {
-                        var pp = circ.Position as StepAxis2Placement3D;
-                        var edge = ExtractCircleEdge(start, end1,
-                            circ.Radius,
-                            pp.Axis.ToVector3d(), circ.Position.Location.ToVector3d());
-                        wire.Edges.Add(edge);
-                    }
-                    else if (crv.EdgeGeometry is StepLine lin)
-                    {
-                        BRepEdge edge = new BRepEdge();
-                        edge.Curve = new BRepLineCurve() { };
-                        wire.Edges.Add(edge);
-
-                        var vec = new Vector3d(lin.Vector.Direction.X,
-                            lin.Vector.Direction.Y,
-                            lin.Vector.Direction.Z);
-                        edge.Start = start;
-                        edge.End = end1;
-                        Items.Add(new LineItem()
-                        {
-                            Start = start,
-                            End = end1
-                        });
-                    }
-                    else if (crv.EdgeGeometry is StepCurveSurface csurf)
-                    {
-                        if (csurf.EdgeGeometry is StepLine ln)
-                        {
-                            BRepEdge edge = new BRepEdge();
-                            edge.Curve = new BRepLineCurve() { };
-                            wire.Edges.Add(edge);
-
-                            edge.Start = start;
-                            edge.End = end1;
-
-                            Items.Add(new LineItem()
-                            {
-                                Start = start,
-                                End = end1
-                            });
-                        }
-                        else if (csurf.EdgeGeometry is StepCircle circ2)
-                        {
-                            var pp = circ2.Position as StepAxis2Placement3D;
-                            var edge = ExtractCircleEdge(start, end1,
-                                circ2.Radius,
-                                pp.Axis.ToVector3d(), circ2.Position.Location.ToVector3d());
-                            wire.Edges.Add(edge);
-                        }
-                        else if (csurf.EdgeGeometry is StepBSplineCurveWithKnots bspline)
-                        {
-                            BRepEdge edge = new BRepEdge();
-                            var cc = new BRepBSplineWithKnotsCurve();
-                            edge.Start = start;
-                            edge.End = end1;
-                            cc.Degree = bspline.Degree;
-                            cc.Closed = bspline.ClosedCurve;
-                            cc.ControlPoints = bspline.ControlPointsList.Select(z => new Vector3d(z.X, z.Y, z.Z)).ToArray();
-                            cc.KnotMultiplicities = bspline.KnotMultiplicities.ToArray();
-                            cc.Knots = bspline.Knots.ToArray();
-                            edge.Curve = cc;
-                            wire.Edges.Add(edge);
-                            Items.Add(new LineItem() { Start = start, End = end1 });
-                        }
-                        else
-                        {
-                            DebugHelpers.Warning($"unsupported geometry: {csurf.EdgeGeometry}");
-                        }
-                    }
-                    else
-                    {
-                        DebugHelpers.Warning($"plane surface. unsupported: {crv}");
-                    }
-                }
-            }
-        }
-
+        
         public override void Load(AdvancedFace face)
         {
             Surface = new BRepPlane() { Location = face.Surface.Axis.Location, Normal = face.Surface.Axis.Dir1 };
@@ -579,9 +477,9 @@ namespace LiteCAD.BRep.Faces
                             spl.Poles = t1.Poles.ToList();
                             spl.Degree = t1.Degree;
                         }
-                        if (bcrv2.Curves.Any(z => z is RationalBSplineSurface))
+                        if (bcrv2.Curves.Any(z => z is RationalBSplineCurve))
                         {
-                            var t1 = bcrv2.Curves.First(z => z is RationalBSplineSurface) as RationalBSplineSurface;
+                            var t1 = bcrv2.Curves.First(z => z is RationalBSplineCurve) as RationalBSplineCurve;
                             spl.Weights = t1.Weights.ToList();
                         }
 
@@ -611,6 +509,7 @@ namespace LiteCAD.BRep.Faces
                     }
                 }
             }
+            base.Load(face);
         }
     }
 }

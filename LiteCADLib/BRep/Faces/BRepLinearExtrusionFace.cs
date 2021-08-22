@@ -1,5 +1,4 @@
-﻿using IxMilia.Step.Items;
-using LiteCAD.BRep.Curves;
+﻿using LiteCAD.BRep.Curves;
 using LiteCAD.BRep.Surfaces;
 using LiteCAD.Common;
 using LiteCAD.Parsers.Step;
@@ -19,7 +18,7 @@ namespace LiteCAD.BRep.Faces
 
             //get all on the main plane
 
-            
+
             Vector3d? extrusionDir = null;
             BRepPlane plane = new BRepPlane() { Location = ss.Location, Normal = ss.Normal };
 
@@ -42,10 +41,10 @@ namespace LiteCAD.BRep.Faces
                         var ang = Vector3d.CalculateAngle(dir, ss.Normal);
                         if (edge.Curve is BRepLineCurve lc)
                         {
-                           
+
                             if (ang < eps || Math.Abs(ang - Math.PI) < eps)
                             {
-                                
+
                                 if (plane.IsOnSurface(edge.End))
                                 {
                                     extrusionDir = edge.Start - edge.End;
@@ -56,11 +55,11 @@ namespace LiteCAD.BRep.Faces
                                 }
                             }
                         }
-                        else if(edge.Curve is BRepSeamCurve seam)
+                        else if (edge.Curve is BRepSeamCurve seam)
                         {
                             if (ang < eps || Math.Abs(ang - Math.PI) < eps)
                             {
-                                
+
                                 if (plane.IsOnSurface(edge.End))
                                 {
                                     extrusionDir = edge.Start - edge.End;
@@ -106,10 +105,11 @@ namespace LiteCAD.BRep.Faces
                     var angb = Vector3d.CalculateAngle(norm, elc.RefDir);
                     for (double i = 0; i < elc.SweepAngle; i += step)
                     {
-                        var realAng = angb + i;
                         var mtr4 = Matrix4d.CreateFromAxisAngle(elc.Axis, i);
+                        var res = Vector4d.Transform(new Vector4d(norm), mtr4);
+                        var realAng = Vector3d.CalculateAngle(res.Xyz, elc.RefDir);
                         var rad = elc.SemiAxis1 * elc.SemiAxis2 / (Math.Sqrt(Math.Pow(elc.SemiAxis1 * Math.Sin(realAng), 2) + Math.Pow(elc.SemiAxis2 * Math.Cos(realAng), 2)));
-                        var res = Vector4d.Transform(new Vector4d(norm * rad), mtr4);
+                        res *= rad;
                         pnts.Add(elc.Location + res.Xyz);
                     }
                     pnts.Add(item.End);
@@ -179,13 +179,13 @@ namespace LiteCAD.BRep.Faces
             {
                 var _p0 = cntrs[0].Elements[i].Start;
                 var _p1 = cntrs[0].Elements[i].End;
-                var p0 = _p0.X * v1 + _p0.Y * axis2 + plane.Location;                
+                var p0 = _p0.X * v1 + _p0.Y * axis2 + plane.Location;
                 var p1 = _p1.X * v1 + _p1.Y * axis2 + plane.Location;
                 var p2 = p0 + shift;
                 var p3 = p1 + shift;
                 var tr1 = new TriangleInfo() { };
                 var tr2 = new TriangleInfo() { };
-                
+
                 tr1.Vertices = new VertexInfo[] {
                     new VertexInfo() { Position = p0 } ,new VertexInfo() { Position = p1 },new VertexInfo() { Position = p2 }
                 };
@@ -208,78 +208,7 @@ namespace LiteCAD.BRep.Faces
             Node = ret;
             return ret;
         }
-
-        public override void Load(StepAdvancedFace face, StepSurface _cyl)
-        {
-            var ext = _cyl as StepSurfaceOfLinearExtrusion;
-            Surface = new BRepLinearExtrusionSurface()
-            {
-                Length = ext.Vector.Length,
-                Vector = new Vector3d(ext.Vector.Direction.X, ext.Vector.Direction.Y, ext.Vector.Direction.Z)
-            };
-
-            foreach (var bitem in face.Bounds)
-            {
-                var loop = bitem.Bound as StepEdgeLoop;
-                BRepWire wire = new BRepWire();
-                Wires.Add(wire);
-                foreach (var litem in loop.EdgeList)
-                {
-                    StepEdgeCurve crv = litem.EdgeElement as StepEdgeCurve;
-                    var strt = (crv.EdgeStart as StepVertexPoint).Location;
-                    var end = (crv.EdgeEnd as StepVertexPoint).Location;
-                    var start = new Vector3d(strt.X, strt.Y, strt.Z);
-                    var end1 = new Vector3d(end.X, end.Y, end.Z);
-                    Items.Add(new LineItem()
-                    {
-                        Start = start,
-                        End = end1
-                    });
-                    if (crv.EdgeGeometry is StepCircle circ)
-                    {
-
-                    }
-                    else if (crv.EdgeGeometry is StepCurveSurface curve)
-                    {
-                        if (curve.EdgeGeometry is StepCircle circ2)
-                        {
-
-                        }
-                        else if (curve.EdgeGeometry is StepBSplineCurveWithKnots bspline)
-                        {
-                            BRepEdge edge = new BRepEdge();
-                            var cc = new BRepBSplineWithKnotsCurve();
-                            edge.Start = start;
-                            edge.End = end1;
-                            cc.Degree = bspline.Degree;
-                            cc.Closed = bspline.ClosedCurve;
-                            cc.ControlPoints = bspline.ControlPointsList.Select(z => new Vector3d(z.X, z.Y, z.Z)).ToArray();
-                            cc.KnotMultiplicities = bspline.KnotMultiplicities.ToArray();
-                            cc.Knots = bspline.Knots.ToArray();
-                            edge.Curve = cc;
-                            wire.Edges.Add(edge);
-                        }
-                        else if (curve.EdgeGeometry is StepLine _line)
-                        {
-                            BRepEdge edge = new BRepEdge();
-                            var cc = new BRepLineCurve();
-                            edge.Start = start;
-                            edge.End = end1;
-                            edge.Curve = cc;
-                            wire.Edges.Add(edge);
-                        }
-                        else
-                        {
-                            DebugHelpers.Warning($"unsupported curve geometry: {curve.EdgeGeometry}");
-                        }
-                    }
-                    else
-                    {
-                        DebugHelpers.Warning($"linear extrusion surface. unsupported curve: {crv}");
-                    }
-                }
-            }
-        }
+                
 
         public override void Load(AdvancedFace face)
         {

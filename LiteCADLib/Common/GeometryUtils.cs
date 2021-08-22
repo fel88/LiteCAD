@@ -142,6 +142,11 @@ namespace LiteCAD.Common
 
             return area / 2.0;
         }
+
+        public static bool AlmostEqual(double a, double b, double eps = 1e-8)
+        {
+            return Math.Abs(a - b) <= eps;
+        }
         public static double CalculateArea(Vector2d[] Points)
         {
             // Add the first point to the end.

@@ -1,6 +1,6 @@
-﻿using IxMilia.Step.Items;
-using LiteCAD.Common;
+﻿using LiteCAD.Common;
 using LiteCAD.Parsers.Step;
+using System;
 using System.Collections.Generic;
 
 namespace LiteCAD.BRep
@@ -17,6 +17,8 @@ namespace LiteCAD.BRep
         public Part Parent;
         public MeshNode Node;
         bool _selected;
+
+        public static bool SkipWireOnParseException = false;
         public bool Selected
         {
             get => _selected; set
@@ -32,11 +34,25 @@ namespace LiteCAD.BRep
         public List<DrawItem> Items = new List<DrawItem>();
         public BRepSurface Surface;
         public List<BRepWire> Wires = new List<BRepWire>();
+
         public BRepWire OutterWire;
-        public bool Visible { get; set; } = true;
-        public abstract void Load(StepAdvancedFace face, StepSurface surf);
-        public abstract void Load(AdvancedFace face);
+        public bool Visible { get; set; } = true;        
+        public virtual void Load(AdvancedFace face)
+        {
+            checkWires();
+        }
         public abstract MeshNode ExtractMesh();
 
+        
+        protected void checkWires()
+        {
+            foreach (var item in Wires)
+            {
+                if (!item.IsClosed())
+                {
+                    throw new LiteCadException("not closed wire detected");                    
+                }
+            }
+        }
     }
 }

@@ -232,7 +232,7 @@ namespace LiteCAD.Common
                 foreach (var zitem in item.Triangles)
                 {
                     foreach (var vv in zitem.Vertices)
-                    {
+                    {                                    
                         GL.Normal3(vv.Normal);
                         GL.Vertex3(vv.Position);
                     }

@@ -57,7 +57,7 @@ namespace LiteCAD.Common
         public override void Draw()
         {
             if (!Visible) return;
-
+            GL.Disable(EnableCap.Lighting);
             var basis = GetBasis();
             if (Fill)
             {

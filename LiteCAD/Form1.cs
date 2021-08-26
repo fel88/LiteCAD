@@ -1,4 +1,5 @@
 ﻿using LiteCAD.BRep;
+using LiteCAD.BRep.Editor;
 using LiteCAD.Common;
 using LiteCAD.Parsers.Step;
 using OpenTK;
@@ -16,6 +17,13 @@ namespace LiteCAD
 {
     public partial class Form1 : Form
     {
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            mf = new MessageFilter();
+            Application.AddMessageFilter(mf);
+        }
+
+        MessageFilter mf = null;
         GLControl glControl;
         private EventWrapperGlControl evwrapper;
         Camera camera1 = new Camera() { IsOrtho = true };
@@ -144,6 +152,7 @@ namespace LiteCAD
             InitializeComponent();
             checkBox3.Checked = Part.AutoExtractMeshOnLoad;
             checkBox1.Checked = AllowPartLoadTimeout;
+            Load += Form1_Load;
 
             glControl = new OpenTK.GLControl(new OpenTK.Graphics.GraphicsMode(32, 24, 0, 8));
 
@@ -220,7 +229,7 @@ namespace LiteCAD
         public bool AllowPartLoadTimeout = true;
         public int PartLoadTimeout = 15000;
         bool loaded = false;
-        
+
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
@@ -232,7 +241,7 @@ namespace LiteCAD
                 {
                     try
                     {
-                        Part prt = StepParser.Parse(ofd.FileName);                       
+                        Part prt = StepParser.Parse(ofd.FileName);
                         var fi = new FileInfo(ofd.FileName);
                         loaded = true;
                         lock (Parts)
@@ -502,7 +511,7 @@ namespace LiteCAD
             var face = listView2.SelectedItems[0].Tag as BRepFace;
             face.ExtractMesh();
         }
-                
+
         private void checkBox5_CheckedChanged(object sender, EventArgs e)
         {
             drawAxes = checkBox5.Checked;
@@ -572,5 +581,44 @@ namespace LiteCAD
         {
             BRepFace.SkipWireOnParseException = checkBox8.Checked;
         }
+
+        private void projectionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listView2.SelectedItems.Count == 0) return;
+            var face = listView2.SelectedItems[0].Tag as BRepFace;
+            ProjectMapEditor pme = new ProjectMapEditor();
+            pme.Init(face);
+            pme.ShowDialog();
+
+            if (pme.Exception != null)
+            {
+                infoPanel.AddError(pme.Exception.Message);
+            }
+        }
+
+        private void fitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listView2.SelectedItems.Count == 0) return;
+            var face = listView2.SelectedItems[0].Tag as BRepFace;
+            List<Vector3d> vv = new List<Vector3d>();
+
+
+            foreach (var ditem in face.Items)
+            {
+                if (ditem is LineItem li)
+                {
+                    vv.Add(li.Start);
+                    vv.Add(li.End);
+                }
+
+            }
+
+            if (vv.Count == 0) return;
+            camToSelected(vv.ToArray());
+            FitToPoints(vv.ToArray(), camera1);
+            camToSelected(vv.ToArray());
+
+        }
+
     }
 }

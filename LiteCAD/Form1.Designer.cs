@@ -88,6 +88,8 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
+            this.projectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.treeListView1)).BeginInit();
@@ -167,6 +169,7 @@
             this.olvColumn1.AspectName = "Name";
             this.olvColumn1.IsEditable = false;
             this.olvColumn1.Text = "Name";
+            this.olvColumn1.Width = 120;
             // 
             // olvColumn2
             // 
@@ -293,6 +296,7 @@
             // columnHeader3
             // 
             this.columnHeader3.Text = "Surface";
+            this.columnHeader3.Width = 120;
             // 
             // columnHeader4
             // 
@@ -310,7 +314,7 @@
             // visibleSwitchToolStripMenuItem
             // 
             this.visibleSwitchToolStripMenuItem.Name = "visibleSwitchToolStripMenuItem";
-            this.visibleSwitchToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.visibleSwitchToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.visibleSwitchToolStripMenuItem.Text = "visible switch";
             this.visibleSwitchToolStripMenuItem.Click += new System.EventHandler(this.visibleSwitchToolStripMenuItem_Click);
             // 
@@ -318,29 +322,31 @@
             // 
             this.meshToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.updateToolStripMenuItem,
-            this.deleteToolStripMenuItem1});
+            this.projectionToolStripMenuItem,
+            this.deleteToolStripMenuItem1,
+            this.fitToolStripMenuItem});
             this.meshToolStripMenuItem.Name = "meshToolStripMenuItem";
-            this.meshToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.meshToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.meshToolStripMenuItem.Text = "mesh";
             // 
             // updateToolStripMenuItem
             // 
             this.updateToolStripMenuItem.Name = "updateToolStripMenuItem";
-            this.updateToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
+            this.updateToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.updateToolStripMenuItem.Text = "update";
             this.updateToolStripMenuItem.Click += new System.EventHandler(this.updateToolStripMenuItem_Click);
             // 
             // deleteToolStripMenuItem1
             // 
             this.deleteToolStripMenuItem1.Name = "deleteToolStripMenuItem1";
-            this.deleteToolStripMenuItem1.Size = new System.Drawing.Size(111, 22);
+            this.deleteToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
             this.deleteToolStripMenuItem1.Text = "delete";
             this.deleteToolStripMenuItem1.Click += new System.EventHandler(this.deleteToolStripMenuItem1_Click);
             // 
             // switchNormalsToolStripMenuItem
             // 
             this.switchNormalsToolStripMenuItem.Name = "switchNormalsToolStripMenuItem";
-            this.switchNormalsToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.switchNormalsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.switchNormalsToolStripMenuItem.Text = "switch normals";
             this.switchNormalsToolStripMenuItem.Click += new System.EventHandler(this.switchNormalsToolStripMenuItem_Click);
             // 
@@ -674,6 +680,20 @@
             this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
             this.toolStripProgressBar1.Visible = false;
             // 
+            // projectionToolStripMenuItem
+            // 
+            this.projectionToolStripMenuItem.Name = "projectionToolStripMenuItem";
+            this.projectionToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.projectionToolStripMenuItem.Text = "projection";
+            this.projectionToolStripMenuItem.Click += new System.EventHandler(this.projectionToolStripMenuItem_Click);
+            // 
+            // fitToolStripMenuItem
+            // 
+            this.fitToolStripMenuItem.Name = "fitToolStripMenuItem";
+            this.fitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.fitToolStripMenuItem.Text = "fit";
+            this.fitToolStripMenuItem.Click += new System.EventHandler(this.fitToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -767,6 +787,8 @@
         private System.Windows.Forms.Button button9;
         private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.CheckBox checkBox8;
+        private System.Windows.Forms.ToolStripMenuItem projectionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fitToolStripMenuItem;
     }
 }
 

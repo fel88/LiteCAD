@@ -34,7 +34,7 @@ namespace LiteCAD.BRep.Curves
 
             int deg = Degree;
 
-            if (n.WeightedPointSeries.Count <= 3) return null;
+            //if (n.WeightedPointSeries.Count <= 3) return null;
 
             List<double> knots = new List<double>();
             for (int i = 0; i < Multiplicities.Count; i++)

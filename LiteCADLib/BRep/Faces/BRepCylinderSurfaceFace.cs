@@ -338,16 +338,30 @@ namespace LiteCAD.BRep.Faces
             bool special = false;
             Vector3d vec0 = Vector3d.Zero;
 
+            List<ProjectPolygon> pp = new List<ProjectPolygon>();
+
             foreach (var wire in Wires)
             {
                 //find edges order
                 //if (!wire.IsClosed()) continue;
                 var l1 = getContours(wire);
+                foreach (var item in l1)
+                {
+                    ProjectPolygon pl = new ProjectPolygon();
+                    pp.Add(pl);
+                    foreach (var elem in item.Elements)
+                    {
+                        var a1 = elem.End;                        
+                        pl.Points.Add(a1);
+                    }
+                }
+                
                 if (l1.Any())
                 {
                     ll.Add(l1.ToArray());
                 }
             }
+            ProjectPolygons = pp.ToArray();
 
             if (!special)
             {

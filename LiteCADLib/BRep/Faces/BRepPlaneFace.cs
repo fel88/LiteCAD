@@ -402,8 +402,7 @@ namespace LiteCAD.BRep.Faces
                             throw new StepParserException($"unknown geometry: {sc.Geometry}");
                         }
                     }
-                    else
-                    if (crv is Line ln)
+                    else if (crv is Line ln)
                     {
                         BRepEdge edge = new BRepEdge();
                         edge.Curve = new BRepLineCurve() { Point = ln.Point, Vector = ln.Vector.Location };
@@ -412,13 +411,22 @@ namespace LiteCAD.BRep.Faces
                         edge.End = litem.Curve.End.Point;
                         Items.Add(new LineItem() { Start = edge.Start, End = edge.End });
                     }
-                    else
-                    if (crv is Circle circ)
+                    else if (crv is Circle circ)
                     {
                         wire.Edges.Add(ExtractCircleEdge(start, end, circ.Radius, circ.Axis.Dir1, circ.Axis.Location));
                     }
-                    else
-                    if (crv is BSplineCurveWithKnots bcrv)
+                    else if (crv is Ellipse elp)
+                    {
+                        wire.Edges.Add(ExtractEllipseEdge(
+                               start,
+                               end,
+                               elp.MinorRadius,
+                               elp.MajorRadius,
+                               elp.Axis.Dir1,
+                               elp.Axis.Dir2,
+                               elp.Axis.Location));
+                    }
+                    else if (crv is BSplineCurveWithKnots bcrv)
                     {
                         BRepEdge edge = new BRepEdge();
                         edge.Start = start;

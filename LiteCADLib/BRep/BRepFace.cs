@@ -18,6 +18,8 @@ namespace LiteCAD.BRep
         public MeshNode Node;
         bool _selected;
 
+        public ProjectPolygon[] ProjectPolygons;
+
         public static bool SkipWireOnParseException = false;
         public bool Selected
         {
@@ -36,21 +38,25 @@ namespace LiteCAD.BRep
         public List<BRepWire> Wires = new List<BRepWire>();
 
         public BRepWire OutterWire;
-        public bool Visible { get; set; } = true;        
+        public bool Visible { get; set; } = true;
         public virtual void Load(AdvancedFace face)
         {
             checkWires();
         }
         public abstract MeshNode ExtractMesh();
+        public virtual MeshNode UpdateMesh(ProjectPolygon[] polygons)
+        {
+            return ExtractMesh();
+        }
 
-        
+
         protected void checkWires()
         {
             foreach (var item in Wires)
             {
                 if (!item.IsClosed())
                 {
-                    throw new LiteCadException("not closed wire detected");                    
+                    throw new LiteCadException("not closed wire detected");
                 }
             }
         }

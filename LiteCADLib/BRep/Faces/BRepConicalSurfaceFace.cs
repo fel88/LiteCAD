@@ -13,18 +13,18 @@ namespace LiteCAD.BRep.Faces
         public BRepConicalSurfaceFace(Part parent) : base(parent) { }
 
         public override MeshNode ExtractMesh()
-        {            
+        {
             MeshNode ret = new MeshNode();
             foreach (var item in Wires)
             {
                 foreach (var edge in item.Edges)
                 {
-                    
+
                 }
             }
             return ret;
         }
-                
+
         public static BRepEdge ExtractCircleEdge(BRepFace face, Vector3d start, Vector3d end1, double radius,
           Vector3d axis, Vector3d location)
         {
@@ -89,10 +89,14 @@ namespace LiteCAD.BRep.Faces
                     var crv = litem.Curve.EdgeGeometry;
                     if (crv is SurfaceCurve sc)
                     {
-                        if(sc.Geometry is Circle crc2)
+                        if (sc.Geometry is Circle crc2)
                         {
                             wire.Edges.Add(ExtractCircleEdge(this, start, end, crc2.Radius, crc2.Axis.Dir1, crc2.Axis.Location));
 
+                        }
+                        else if (sc.Geometry is Line line)
+                        {
+                            Items.Add(new LineItem() { Start = start, End = end });
                         }
                         else
                         {

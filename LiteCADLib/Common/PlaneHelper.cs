@@ -6,8 +6,7 @@ using System.Drawing;
 namespace LiteCAD.Common
 {
     public class PlaneHelper : AbstractDrawable, IEditFieldsContainer
-    {
-        public string Name { get; set; }
+    {        
 
         [EditField]
         public Vector3d Position { get; set; }

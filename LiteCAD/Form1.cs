@@ -2,6 +2,7 @@
 using LiteCAD.BRep.Editor;
 using LiteCAD.Common;
 using LiteCAD.Parsers.Step;
+using LiteCAD.Tools;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
@@ -17,16 +18,17 @@ namespace LiteCAD
 {
     public partial class Form1 : Form
     {
+        public static Form1 Form;
         private void Form1_Load(object sender, EventArgs e)
-        {
+        {            
             mf = new MessageFilter();
             Application.AddMessageFilter(mf);
         }
 
         MessageFilter mf = null;
         GLControl glControl;
-        private EventWrapperGlControl evwrapper;
-        Camera camera1 = new Camera() { IsOrtho = true };
+        public EventWrapperGlControl evwrapper;
+        public Camera camera1 = new Camera() { IsOrtho = true };
         public CameraViewManager ViewManager;
         private void Gl_Paint(object sender, PaintEventArgs e)
         {
@@ -45,6 +47,7 @@ namespace LiteCAD
         bool drawAxes = true;
         void Redraw()
         {
+            CurrentTool.Update();
             ViewManager.Update();
 
             GL.ClearColor(Color.LightGray);
@@ -142,6 +145,7 @@ namespace LiteCAD
                 if (!item.Visible) continue;
                 item.Draw();
             }
+            CurrentTool.Draw();
             GL.Disable(EnableCap.Lighting);
 
             glControl.SwapBuffers();
@@ -153,6 +157,7 @@ namespace LiteCAD
             checkBox3.Checked = Part.AutoExtractMeshOnLoad;
             checkBox1.Checked = AllowPartLoadTimeout;
             Load += Form1_Load;
+            Form = this;
 
             glControl = new OpenTK.GLControl(new OpenTK.Graphics.GraphicsMode(32, 24, 0, 8));
 
@@ -161,6 +166,9 @@ namespace LiteCAD
                 glControl = new OpenTK.GLControl(new OpenTK.Graphics.GraphicsMode(32, 24, 0, 8));
             }
             evwrapper = new EventWrapperGlControl(glControl);
+
+            glControl.MouseDown += GlControl_MouseDown;
+            glControl.MouseUp += GlControl_MouseUp;
 
             glControl.Paint += Gl_Paint;
             ViewManager = new DefaultCameraViewManager();
@@ -194,6 +202,16 @@ namespace LiteCAD
             };
 
             infoPanel.Switch();
+        }
+
+        private void GlControl_MouseUp(object sender, MouseEventArgs e)
+        {
+            CurrentTool.MouseUp();
+        }
+
+        private void GlControl_MouseDown(object sender, MouseEventArgs e)
+        {
+            CurrentTool.MouseDown();
         }
 
         InfoPanel infoPanel = new InfoPanel();
@@ -320,7 +338,7 @@ namespace LiteCAD
             propertyGrid1.SelectedObject = listView1.SelectedItems[0].Tag;
         }
 
-        public void FitToPoints(Vector3d[] pnts, Camera cam)
+        public void FitToPoints(Vector3d[] pnts, Camera cam, float gap=10)
         {
             List<Vector2d> vv = new List<Vector2d>();
             foreach (var vertex in pnts)
@@ -330,10 +348,10 @@ namespace LiteCAD
             }
 
             //prjs->xy coords
-            var minx = vv.Min(z => z.X);
-            var maxx = vv.Max(z => z.X);
-            var miny = vv.Min(z => z.Y);
-            var maxy = vv.Max(z => z.Y);
+            var minx = vv.Min(z => z.X) - gap;
+            var maxx = vv.Max(z => z.X) + gap;
+            var miny = vv.Min(z => z.Y) - gap;
+            var maxy = vv.Max(z => z.Y) + gap;
 
             var dx = (maxx - minx);
             var dy = (maxy - miny);
@@ -358,13 +376,15 @@ namespace LiteCAD
 
             cam.OrthoWidth = (float)Math.Max(dx, dy);
         }
-
         Vector3d[] getAllPoints()
         {
+            return getAllPoints(Parts.OfType<Part>().ToArray());
+        }
+        Vector3d[] getAllPoints(Part[] parts)
+        {
             List<Vector3d> vv = new List<Vector3d>();
-            foreach (var item in Parts)
-            {
-                if (!(item is Part p)) continue;
+            foreach (var p in parts)
+            {                
                 var nn = p.Nodes.SelectMany(z => z.Triangles.SelectMany(u => u.Vertices.Select(zz => zz.Position))).ToArray();
                 vv.AddRange(nn);
                 foreach (var face in p.Faces)
@@ -620,5 +640,88 @@ namespace LiteCAD
 
         }
 
+        private void draftToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Draft draft = new Draft() { Name = "new draft" };
+            draft.Plane = new PlaneHelper() { Normal = Vector3d.UnitZ, Position = Vector3d.Zero };
+            Parts.Add(draft);
+            treeListView1.SetObjects(Parts);
+        }
+        Vector3[] camState = new Vector3[3];
+        private void editToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeListView1.SelectedObjects.Count <= 0) return;
+            if (treeListView1.SelectedObject is Draft d)
+            {
+                EditMode = EditModeEnum.Draft;
+                camState[0] = camera1.CamTo;
+                camState[1] = camera1.CamFrom;
+                camState[2] = camera1.CamUp;
+
+                camera1.CamTo = d.Plane.Position.ToVector3();
+                camera1.CamFrom = (d.Plane.Position + d.Plane.Normal * 10).ToVector3();
+                camera1.CamUp = Vector3.UnitY;
+
+                editedDraft = d;
+                toolStrip2.Visible = true;
+            }
+
+        }
+
+        public EditModeEnum EditMode;
+         ITool _currentTool = SelectionTool.Instance;
+        public void SetTool(ITool tool)
+        {
+            _currentTool.Deselect();
+            _currentTool = tool;
+            _currentTool.Select();
+        }
+        public ITool CurrentTool { get => _currentTool; }
+
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+        }
+        Draft editedDraft;
+        private void toolStripButton3_Click(object sender, EventArgs e)
+        {
+            SetTool(RectDraftTool.Instance);
+        }
+
+        private void toolStripButton8_Click(object sender, EventArgs e)
+        {
+            EditMode = EditModeEnum.Part;
+            editedDraft = null;
+            toolStrip2.Visible = false;
+            //restore cam state
+            camera1.CamTo = camState[0];
+            camera1.CamFrom = camState[1];
+            camera1.CamUp = camState[2];
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            camera1.CamTo = Vector3.Zero;
+            camera1.CamFrom = new Vector3(250, 250, 250);
+            camera1.CamUp = Vector3.UnitZ;
+        }
+
+        private void fitToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            if (treeListView1.SelectedObjects.Count <= 0) return;
+            var vv = getAllPoints(treeListView1.SelectedObjects.OfType<Part>().ToArray());
+            fitAll(vv);
+            camToSelected(vv);            
+        }
+    }
+
+    public enum EditModeEnum
+    {
+        Part, Draft
     }
 }

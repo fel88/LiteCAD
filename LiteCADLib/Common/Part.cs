@@ -12,8 +12,7 @@ using System.Linq;
 namespace LiteCAD.Common
 {
     public class Part : AbstractDrawable
-    {
-        public string Name { get; set; }
+    {        
 
         public List<BRepFace> Faces = new List<BRepFace>();
         public MeshNode[] Nodes

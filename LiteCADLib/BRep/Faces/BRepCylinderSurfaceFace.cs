@@ -230,8 +230,8 @@ namespace LiteCAD.BRep.Faces
                     ll1.Add(new Segment() { Start = p0, End = p1 });
                     if (Math.Abs(p0.X) < 1e-16 && Math.Abs(p1.X) < 1e-16)
                     {
-                        p0.X += Math.PI * 2;
-                        p1.X += Math.PI * 2;
+                        //  p0.X += Math.PI * 2;
+                        //  p1.X += Math.PI * 2;
                         // Contour aa = new Contour();
                         //   aa.Elements.Add(new Segment() { Start = p0, End = p1 });
                         //   l1.Add(aa);
@@ -329,7 +329,7 @@ namespace LiteCAD.BRep.Faces
             Vector3d proj1;
             Vector3d v1;
 
-            List<Contour[]> ll = new List<Contour[]>();
+            //List<Contour[]> ll = new List<Contour[]>();
 
             var cl = Cylinder;
 
@@ -351,46 +351,60 @@ namespace LiteCAD.BRep.Faces
                     pp.Add(pl);
                     foreach (var elem in item.Elements)
                     {
-                        var a1 = elem.End;                        
+                        var a1 = elem.End;
                         pl.Points.Add(a1);
                     }
                 }
-                
-                if (l1.Any())
-                {
-                    ll.Add(l1.ToArray());
-                }
-            }
-            ProjectPolygons = pp.ToArray();
+                Contour ccn = new Contour();
+                ccn.ConnectNext(new[] { l1.First() });
 
-            if (!special)
-            {
-                cntrs = new List<Contour>();
-                foreach (var item in ll)
+                for (int i = 1; i < l1.Length; i++)
                 {
-                    Contour ccn = new Contour();
-                    var ar = item.ToList();
-                    while (true)
+                    //connect only to last segments    
+                    var item = l1[i];
+                    var prev = l1[i - 1];
+
+                    bool useStart = true;
+                    bool useEnd = true;
+                    if (i > 1)
                     {
-                        var res = ccn.ConnectNext(ar.ToArray());
+                        Vector2d connectPoint = Vector2d.One;
 
-                        if (res == null)
+                        if (Contour.DistByXRing(prev.Start, item.Start, Math.PI * 2) < float.Epsilon)
                         {
-                            if (ar.Any())
-                            {
-                                //throw new LiteCadException("bad contour");
-                                ccn.Reduce();
-                                cntrs.Add(ccn);
-                                ccn = new Contour();
-                            }
-                            else
-                                break;
+                            connectPoint = item.Start;
                         }
-                        ar.Remove(res);
+                        if (Contour.DistByXRing(prev.Start, item.End, Math.PI * 2) < float.Epsilon)
+                        {
+                            connectPoint = item.End;
+                        }
+                        if (Contour.DistByXRing(prev.End, item.End, Math.PI * 2) < float.Epsilon)
+                        {
+                            connectPoint = item.End;
+                        }
+                        if (Contour.DistByXRing(prev.End, item.Start, Math.PI * 2) < float.Epsilon)
+                        {
+                            connectPoint = item.Start;
+                        }
+
+                        if (Contour.DistByXRing(ccn.Start, connectPoint, Math.PI * 2) < float.Epsilon)
+                        {
+                            useEnd = false;
+                        }
+                        if (Contour.DistByXRing(ccn.End, connectPoint, Math.PI * 2) < float.Epsilon)
+                        {
+                            useStart = false;
+                        }
                     }
-                    ccn.Reduce();
-                    cntrs.Add(ccn);
+
+                    var res = ccn.ConnectNext(new[] { item }, useStart, useEnd);
+
+                    if (res == null)
+                        throw new LiteCadException("wrong wire contour connection");
                 }
+
+                ccn.Reduce();
+                cntrs.Add(ccn);
 
                 //search connect components and split
                 foreach (var item in cntrs)
@@ -401,6 +415,52 @@ namespace LiteCAD.BRep.Faces
                         item.Elements.Add(new Segment() { Start = item.End, End = item.Start });
                     }
                 }
+
+                /*if (l1.Any())
+                {
+                    ll.Add(l1.ToArray());
+                }*/
+            }
+            ProjectPolygons = pp.ToArray();
+
+            if (!special)
+            {
+                //cntrs = new List<Contour>();
+                //foreach (var item in ll)
+                //{
+                //    Contour ccn = new Contour();
+                //    var ar = item.ToList();
+                //    while (true)
+                //    {
+                //        var res = ccn.ConnectNext(ar.ToArray());
+
+                //        if (res == null)
+                //        {
+                //            if (ar.Any())
+                //            {
+                //                //throw new LiteCadException("bad contour");
+                //                ccn.Reduce();
+                //                cntrs.Add(ccn);
+                //                ccn = new Contour();
+                //            }
+                //            else
+                //                break;
+                //        }
+                //        ar.Remove(res);
+                //    }
+                //    ccn.Reduce();
+                //    cntrs.Add(ccn);
+                //}
+
+                ////search connect components and split
+                //foreach (var item in cntrs)
+                //{
+                //    if ((item.Start - item.End).Length > 1e-8)
+                //    {
+                //        if (Math.Abs(item.Start.X - item.End.X) > 1e-8) throw new LiteCadException("wrong cylinder face contour");
+                //        item.Elements.Add(new Segment() { Start = item.End, End = item.Start });
+                //    }
+                //}
 
                 cntrs = cntrs.OrderByDescending(z => GeometryUtils.CalculateArea(z.Elements.Select(u => u.Start).ToArray())).ToList();
 
@@ -667,7 +727,7 @@ namespace LiteCAD.BRep.Faces
             }
             return edge;
         }
-                
+
 
         BRepWire extractWire(FaceBound bound)
         {

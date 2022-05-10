@@ -8,9 +8,11 @@ namespace LiteCAD.Common
     {
         public List<Vector3d> Points = new List<Vector3d>();
 
+        public PlaneHelper Plane;
+        
         public override void Draw()
         {
-            throw new NotImplementedException();
+            
         }
     }
 }

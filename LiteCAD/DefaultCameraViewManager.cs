@@ -73,7 +73,7 @@ namespace LiteCAD
             control.KeyDownAction = Control_KeyDown;
             control.MouseWheelAction = Control_MouseWheel;
         }
-
+        
         private void Control_MouseWheel(object sender, MouseEventArgs e)
         {
             float zoomK = 20;

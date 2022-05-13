@@ -20,6 +20,13 @@ namespace LiteCAD.BRep.Editor
         public float sx, sy;
         public float zoom = 1;
 
+        public void InitGraphics()
+        {
+            Bmp = new Bitmap(PictureBox.Control.Width, PictureBox.Control.Height);
+            gr = Graphics.FromImage(Bmp);
+            gr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        }
+
         public Bitmap Bmp;
 
         public void UpdateDrag()
@@ -84,6 +91,13 @@ namespace LiteCAD.BRep.Editor
             sy = (pos.Y / zold + sy - pos.Y / zoom);
         }
 
+        public void DrawLine(Pen black, PointF point, PointF point2)
+        {
+            var pp = Transform(point);
+            var pp2 = Transform(point2);
+            gr.DrawLine(black, pp, pp2);
+        }
+
         public virtual void PictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
             var pos = PictureBox.Control.PointToClient(Cursor.Position);
@@ -120,8 +134,7 @@ namespace LiteCAD.BRep.Editor
 
         public virtual void Pb_SizeChanged(object sender, EventArgs e)
         {
-            Bmp = new Bitmap(PictureBox.Control.Width, PictureBox.Control.Height);
-            gr = Graphics.FromImage(Bmp);
+            InitGraphics();
         }
         public virtual void PictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
@@ -169,14 +182,7 @@ namespace LiteCAD.BRep.Editor
         {
             var pp = Transform(new PointF(v1, v2));
             gr.FillEllipse(black, pp.X, pp.Y, v3 * scale, v4 * scale);
-        }
-
-        internal void DrawLine(Pen black, PointF point, PointF point2)
-        {
-            var pp = Transform(point);
-            var pp2 = Transform(point2);
-            gr.DrawLine(black, pp, pp2);
-        }
+        }        
 
         public void FitToPoints(PointF[] points, int gap = 0)
         {

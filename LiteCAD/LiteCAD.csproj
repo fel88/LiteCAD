@@ -64,6 +64,15 @@
     <Compile Include="Camera.cs" />
     <Compile Include="CameraViewManager.cs" />
     <Compile Include="DefaultCameraViewManager.cs" />
+    <Compile Include="DraftEditor\DraftEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DraftEditor\DraftEditor.Designer.cs">
+      <DependentUpon>DraftEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DraftEditor\EventWrapperPictureBox.cs" />
+    <Compile Include="DraftEditor\LinearConstraintHelper.cs" />
+    <Compile Include="IEditor.cs" />
     <Compile Include="ITool.cs" />
     <Compile Include="Tools\DraftLineTool.cs" />
     <Compile Include="EventWrapperGlControl.cs" />
@@ -83,8 +92,12 @@
     <Compile Include="MouseRay.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tools\LinearConstraintTool.cs" />
     <Compile Include="Tools\RectDraftTool.cs" />
     <Compile Include="Tools\SelectionTool.cs" />
+    <EmbeddedResource Include="DraftEditor\DraftEditor.resx">
+      <DependentUpon>DraftEditor.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -131,6 +144,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\cursor.ico" />
     <Content Include="ruler-triangle.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

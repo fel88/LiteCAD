@@ -77,6 +77,11 @@
     <Compile Include="BRep\Contour.cs" />
     <Compile Include="BRep\CylinderMeshNode.cs" />
     <Compile Include="BRep\UnsupportedCurveException.cs" />
+    <Compile Include="Common\DraftConstraint.cs" />
+    <Compile Include="Common\DraftElement.cs" />
+    <Compile Include="Common\DraftLine.cs" />
+    <Compile Include="Common\DraftPoint.cs" />
+    <Compile Include="Common\LinearConstaint.cs" />
     <Compile Include="MessageFilter.cs" />
     <Compile Include="Common\DebugHelpers.cs" />
     <Compile Include="BRep\DrawItem.cs" />

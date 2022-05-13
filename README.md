@@ -12,3 +12,5 @@
 * polyBoolCS (https://github.com/StagPoint/PolyBoolCS)
 * clipper (http://www.angusj.com/delphi/clipper.php)
 * NURBS (https://www.codeproject.com/Articles/1095142/Generate-and-understand-NURBS-curves)
+
+<sub>Some icons by [Yusuke Kamiyamane](http://p.yusukekamiyamane.com/). Licensed under a [Creative Commons Attribution 3.0 License](http://creativecommons.org/licenses/by/3.0/)</sub>

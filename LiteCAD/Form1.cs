@@ -157,7 +157,65 @@ namespace LiteCAD
         {
             InitializeComponent();
 
+            (treeListView1.Columns[0] as BrightIdeasSoftware.OLVColumn).AspectGetter = (x) =>
+            {
+                if (x is IDraftHelper dh)
+                {
+                    return $"<{x.GetType().Name}>";
+                }
+                if (x is IDrawable d)
+                {
+                    return d.Name;
+                }
+
+                return $"<{x.GetType().Name}>";
+            };
+
+            treeListView1.ChildrenGetter = (x) =>
+        {
+            if (EditMode == EditModeEnum.Draft)
+                if (x is Draft dd)
+                {
+                    var d1 = dd.Helpers.OfType<object>().ToArray();
+                    var d2 = dd.Elements.OfType<object>().ToArray();
+                    return d1.Union(d2).ToArray();
+                }
+            if (x is IDrawable d)
+            {
+                return d.Childs.ToArray();
+            }
+            if (x is PartAssembly p)
+            {
+                return p.Parts.ToArray();
+            }
+
+            return null;
+        };
+            treeListView1.CanExpandGetter = (x) =>
+            {
+                if (EditMode == EditModeEnum.Draft)
+                    if (x is Draft dd)
+                    {
+                        var d1 = dd.Helpers.OfType<object>().ToArray();
+                        var d2 = dd.Elements.OfType<object>().ToArray();
+                        return d1.Union(d2).Any();
+                    }
+                if (x is Draft)
+                    return false;
+
+                if (x is IDrawable d)
+                {
+                    return d.Childs.Any();
+                }
+                if (x is PartAssembly p)
+                {
+                    return p.Parts.Any();
+                }
+
+                return false;
+            };
             toolStrip2.Visible = false;
+            toolStrip3.Visible = false;
             toolStrip1.Top = 0;
             toolStrip1.Left = 0;
             for (int i = 0; i < toolStripContainer1.TopToolStripPanel.Controls.Count; i++)
@@ -260,7 +318,7 @@ namespace LiteCAD
             camera1.CamUp = Vector3.UnitY;
         }
 
-        public List<IDrawable> Parts = new List<IDrawable>();
+
         public bool AllowPartLoadTimeout = true;
         public int PartLoadTimeout = 15000;
         bool loaded = false;
@@ -268,56 +326,10 @@ namespace LiteCAD
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "STEP files (*.stp;*.step)|*.stp;*.step|All files (*.*)|*.*";
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                loaded = false;
-                Thread th = new Thread(() =>
-                {
-                    try
-                    {
-                        Part prt = StepParser.Parse(ofd.FileName);
-                        var fi = new FileInfo(ofd.FileName);
-                        loaded = true;
-                        lock (Parts)
-                        {
-                            Parts.Add(prt);
-                        }
-                        infoPanel.AddInfo($"model loaded succesfully: {fi.Name}");
-                        treeListView1.SetObjects(Parts);
-                        var vv = getAllPoints();
-                        fitAll(vv);
-                        camToSelected(vv);
-                    }
-                    catch (Exception ex)
-                    {
-                        loaded = true;
-                        DebugHelpers.Exception(ex);
-                    }
-                });
-                Thread th2 = new Thread(() =>
-                {
-                    Stopwatch sw = Stopwatch.StartNew();
-                    while (true)
-                    {
-                        if (!Debugger.IsAttached && sw.Elapsed.TotalSeconds > PartLoadTimeout)
-                        {
-                            th.Abort();
-                            DebugHelpers.Error("load timeout");
-                            break;
-                        }
-                        Thread.Sleep(1000);
-                        if (loaded) break;
-                    }
-                });
-                if (!Debugger.IsAttached && AllowPartLoadTimeout)
-                {
-                    th2.IsBackground = true;
-                    th2.Start();
-                }
-                th.IsBackground = true;
-                th.Start();
-            }
+            ofd.Filter = "LiteCAD scene (*.lcs)|*.lcs";
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+            Scene = new LiteCADScene();
+            Scene.FromXml(ofd.FileName);
         }
 
         private void planeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -444,11 +456,32 @@ namespace LiteCAD
 
         void deleteItem()
         {
+
             if (treeListView1.SelectedObjects.Count <= 0) return;
             if (Helpers.ShowQuestion($"Are you sure to delete {treeListView1.SelectedObjects.Count} items?", Text) != DialogResult.Yes) return;
             foreach (var item in treeListView1.SelectedObjects)
             {
-                Parts.Remove(item as IDrawable);
+                if (editedDraft == item)
+                {
+                    Helpers.Warning("you can't delete edited draft", Text);
+                    continue;
+                }
+
+                if (item is DraftElement de)
+                {
+                    de.Parent.RemoveElement(de);
+                }
+                if (item is IDrawable dd)
+                {
+                    if (dd.Parent == null)
+                    {
+                        Parts.Remove(item as IDrawable);
+                    }
+                    else
+                    {
+                        dd.Parent.RemoveChild(dd);
+                    }
+                }
             }
             treeListView1.SetObjects(Parts);
         }
@@ -678,6 +711,7 @@ namespace LiteCAD
                 //   panel2.Controls.Add(glControl);
 
                 EditMode = EditModeEnum.Draft;
+                updateList();
                 camState[0] = camera1.CamTo;
                 camState[1] = camera1.CamFrom;
                 camState[2] = camera1.CamUp;
@@ -688,6 +722,7 @@ namespace LiteCAD
 
                 editedDraft = d;
                 toolStrip2.Visible = true;
+                toolStrip3.Visible = true;
             }
 
         }
@@ -706,6 +741,7 @@ namespace LiteCAD
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
             SetTool(DraftLineTool.Instance);
+            uncheckedAllToolButtons();
             toolStripButton2.Checked = true;
         }
 
@@ -717,17 +753,22 @@ namespace LiteCAD
         private void toolStripButton3_Click(object sender, EventArgs e)
         {
             SetTool(RectDraftTool.Instance);
+            uncheckedAllToolButtons();
+            toolStripButton3.Checked = true;
         }
 
         private void toolStripButton8_Click(object sender, EventArgs e)
         {
             EditMode = EditModeEnum.Part;
+            updateList();
+
             de.Visible = false;
             de.Finish();
             glControl.Visible = true;
-
+            SetTool(SelectionTool.Instance);
             editedDraft = null;
             toolStrip2.Visible = false;
+            toolStrip3.Visible = false;
             //restore cam state
             camera1.CamTo = camState[0];
             camera1.CamFrom = camState[1];
@@ -752,7 +793,16 @@ namespace LiteCAD
         private void toolStripButton9_Click(object sender, EventArgs e)
         {
             SetTool(SelectionTool.Instance);
+            uncheckedAllToolButtons();
             toolStripButton9.Checked = true;
+        }
+
+        void uncheckedAllToolButtons()
+        {
+            toolStripButton9.Checked = false;
+            toolStripButton2.Checked = false;
+            toolStripButton3.Checked = false;
+
         }
 
         private void toolStripButton10_Click(object sender, EventArgs e)
@@ -784,10 +834,103 @@ namespace LiteCAD
         {
             //export to dxf
         }
-    }
 
+        private void partToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "STEP files (*.stp;*.step)|*.stp;*.step|All files (*.*)|*.*";
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                loaded = false;
+                Thread th = new Thread(() =>
+                {
+                    try
+                    {
+                        Part prt = StepParser.Parse(ofd.FileName);
+                        var fi = new FileInfo(ofd.FileName);
+                        loaded = true;
+                        lock (Parts)
+                        {
+                            Parts.Add(prt);
+                        }
+                        infoPanel.AddInfo($"model loaded succesfully: {fi.Name}");
+                        treeListView1.SetObjects(Parts);
+                        var vv = getAllPoints();
+                        fitAll(vv);
+                        camToSelected(vv);
+                    }
+                    catch (Exception ex)
+                    {
+                        loaded = true;
+                        DebugHelpers.Exception(ex);
+                    }
+                });
+                Thread th2 = new Thread(() =>
+                {
+                    Stopwatch sw = Stopwatch.StartNew();
+                    while (true)
+                    {
+                        if (!Debugger.IsAttached && sw.Elapsed.TotalSeconds > PartLoadTimeout)
+                        {
+                            th.Abort();
+                            DebugHelpers.Error("load timeout");
+                            break;
+                        }
+                        Thread.Sleep(1000);
+                        if (loaded) break;
+                    }
+                });
+                if (!Debugger.IsAttached && AllowPartLoadTimeout)
+                {
+                    th2.IsBackground = true;
+                    th2.Start();
+                }
+                th.IsBackground = true;
+                th.Start();
+            }
+        }
+
+        void updateList()
+        {
+            treeListView1.SetObjects(Parts);
+        }
+        private void toolStripButton6_Click(object sender, EventArgs e)
+        {
+            if (treeListView1.SelectedObject is Draft dd)
+            {
+                Parts.Remove(dd);
+                Parts.Add(new ExtrudeModifier(dd) { });
+                updateList();
+            }
+        }
+
+        private void partToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+        public LiteCADScene Scene = new LiteCADScene();
+        public List<IDrawable> Parts => Scene.Parts;
+        private void assemblyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Parts.Add(new PartAssembly());
+            updateList();
+        }
+
+        private void updateToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            updateList();
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog ofd = new SaveFileDialog();
+            ofd.Filter = "LiteCAD scene (*.lcs)|*.lcs";
+            if (ofd.ShowDialog() != DialogResult.OK) return;            
+            Scene.SaveToXml(ofd.FileName);
+        }
+    }
     public enum EditModeEnum
     {
-        Part, Draft
+        Part, Draft, Assembly
     }
 }

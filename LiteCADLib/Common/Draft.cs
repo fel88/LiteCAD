@@ -10,7 +10,7 @@ namespace LiteCAD.Common
     public class Draft : AbstractDrawable
     {
         public List<Vector3d> Points3D = new List<Vector3d>();
-        
+
         public void RecalcConstraints()
         {
             var lc = Constraints.OfType<LinearConstraint>();
@@ -22,7 +22,11 @@ namespace LiteCAD.Common
         public List<DraftElement> Elements = new List<DraftElement>();
         public List<IDraftHelper> Helpers = new List<IDraftHelper>();
         public List<DraftConstraint> Constraints = new List<DraftConstraint>();
-        public List<Vector2d> Childs = new List<Vector2d>();
+        public void AddHelper(IDraftHelper h)
+        {
+            Helpers.Add(h);
+            h.Parent = this;
+        }
         public PlaneHelper Plane;
         public Vector2d[] Points => DraftPoints.Select(z => z.Location).ToArray();
         public DraftPoint[] DraftPoints => Elements.OfType<DraftPoint>().ToArray();
@@ -47,8 +51,38 @@ namespace LiteCAD.Common
             }
             GL.End();
         }
+        public override void RemoveChild(IDrawable dd)
+        {
+            if (dd is IDraftHelper dh)
+                Helpers.Remove(dh);
+
+            
+            Childs.Remove(dd);
+        }
+
+        public void AddElement(DraftElement h)
+        {
+            if (Elements.Contains(h)) 
+                return;
+
+            Elements.Add(h);
+            h.Parent = this;
+        }
+
+        public void RemoveElement(DraftElement de)
+        {
+            if(de is DraftPoint dp)
+            {
+                var ww = Elements.OfType<DraftLine>().Where(z => z.V0 == dp || z.V1 == dp).ToArray();
+                foreach (var item in ww)
+                {
+                    Elements.Remove(item);
+                }
+            }
+            Elements.Remove(de);
+        }
     }
-    public interface IDraftHelper
+    public interface IDraftHelper : IDrawable
     {
         Vector2d SnapPoint { get; set; }
 

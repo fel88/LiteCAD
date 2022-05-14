@@ -15,7 +15,7 @@ namespace LiteCAD.BRep.Editor
         public float startx, starty;
         public float origsx, origsy;
         public bool isDrag = false;
-        private bool isMiddleDrag = false;
+        public  bool isMiddleDrag = false;
         public bool MiddleDrag { get { return isMiddleDrag; } }
         public float sx, sy;
         public float zoom = 1;
@@ -97,12 +97,12 @@ namespace LiteCAD.BRep.Editor
             var pp2 = Transform(point2);
             gr.DrawLine(black, pp, pp2);
         }
-
+        public MouseButtons DragButton = MouseButtons.Right;
         public virtual void PictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
             var pos = PictureBox.Control.PointToClient(Cursor.Position);
 
-            if (e.Button == MouseButtons.Right)
+            if (e.Button == DragButton)
             {
                 isDrag = true;
 

@@ -72,8 +72,12 @@
     </Compile>
     <Compile Include="DraftEditor\EventWrapperPictureBox.cs" />
     <Compile Include="DraftEditor\LinearConstraintHelper.cs" />
+    <Compile Include="ExtrudeModifier.cs" />
     <Compile Include="IEditor.cs" />
     <Compile Include="ITool.cs" />
+    <Compile Include="LiteCADScene.cs" />
+    <Compile Include="PartAssembly.cs" />
+    <Compile Include="PartInstance.cs" />
     <Compile Include="Tools\DraftLineTool.cs" />
     <Compile Include="EventWrapperGlControl.cs" />
     <Compile Include="Form1.cs">

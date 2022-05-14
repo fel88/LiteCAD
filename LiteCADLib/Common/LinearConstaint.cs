@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace LiteCAD.Common
 {
@@ -31,6 +32,11 @@ namespace LiteCAD.Common
             var dp1 = Element2 as DraftPoint;
             var diff = (dp1.Location - dp0.Location).Normalized();
             dp1.Location = dp0.Location + diff * (double)Length;
+        }
+
+        public bool IsSame(LinearConstraint cc)
+        {
+            return new[] { Element2, Element1 }.Except(new[] { cc.Element1, cc.Element2 }).Count() == 0;
         }
     }
 }

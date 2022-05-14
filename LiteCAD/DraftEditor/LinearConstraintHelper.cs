@@ -3,10 +3,11 @@ using OpenTK;
 using LiteCAD.Common;
 using LiteCAD.BRep.Editor;
 using System.Drawing.Drawing2D;
+using System.Collections.Generic;
 
 namespace LiteCAD.DraftEditor
 {
-    public class LinearConstraintHelper : IDraftHelper
+    public class LinearConstraintHelper : AbstractDrawable, IDraftHelper
     {
         public readonly LinearConstraint constraint;
         public LinearConstraintHelper(LinearConstraint c)
@@ -15,6 +16,8 @@ namespace LiteCAD.DraftEditor
         }
 
         public Vector2d SnapPoint { get; set; }
+
+     
 
         public void Draw(DrawingContext ctx)
         {
@@ -42,6 +45,13 @@ namespace LiteCAD.DraftEditor
 
             ctx.gr.DrawLine(Pens.Red, tr0, tr2);
             ctx.gr.DrawLine(Pens.Red, tr1, tr3);
+        }
+
+        
+
+        public override void Draw()
+        {
+            
         }
     }
 

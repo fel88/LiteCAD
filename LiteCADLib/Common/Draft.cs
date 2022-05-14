@@ -27,10 +27,32 @@ namespace LiteCAD.Common
             Helpers.Add(h);
             h.Parent = this;
         }
+
+        public decimal CalcTotalCutLength()
+        {
+            decimal ret = 0;
+            ret += DraftEllipses.Sum(z => z.CutLength());
+            foreach (var item in DraftLines)
+            {
+                ret += (decimal)((item.V0.Location - item.V1.Location).Length);
+            }
+            return ret;
+        }
+
         public PlaneHelper Plane;
+
+        public decimal CalcArea()
+        {
+            //get nest
+            //calc area
+
+            return 0;
+        }
+
         public Vector2d[] Points => DraftPoints.Select(z => z.Location).ToArray();
         public DraftPoint[] DraftPoints => Elements.OfType<DraftPoint>().ToArray();
         public DraftLine[] DraftLines => Elements.OfType<DraftLine>().ToArray();
+        public DraftEllipse[] DraftEllipses => Elements.OfType<DraftEllipse>().ToArray();
         public void EndEdit()
         {
             //2d->3d

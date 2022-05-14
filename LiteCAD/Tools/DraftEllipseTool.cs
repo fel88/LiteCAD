@@ -1,8 +1,8 @@
 ﻿namespace LiteCAD.Tools
 {
-    public class RectDraftTool : AbstractTool
+    public class DraftEllipseTool : AbstractTool
     {
-        public static RectDraftTool Instance = new RectDraftTool();
+        public static DraftEllipseTool Instance = new DraftEllipseTool();
 
         public override void Deselect()
         {

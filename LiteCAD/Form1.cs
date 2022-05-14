@@ -1,4 +1,6 @@
-﻿using LiteCAD.BRep;
+﻿using IxMilia.Dxf;
+using IxMilia.Dxf.Entities;
+using LiteCAD.BRep;
 using LiteCAD.BRep.Editor;
 using LiteCAD.Common;
 using LiteCAD.DraftEditor;
@@ -830,9 +832,44 @@ namespace LiteCAD
             propertyGrid1.SelectedObject = nearest;
         }
 
-        private void toolStripButton7_Click(object sender, EventArgs e)
+        void exportObj(Part part)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "OBJ model (*.obj)|*.obj";
+            if (sfd.ShowDialog() != DialogResult.OK) return;
+
+            using (var fs = new FileStream(sfd.FileName, FileMode.CreateNew))
+            {
+                foreach (var item in part.Nodes)
+                {
+                    //item.Triangles
+                }
+            }            
+        }
+
+        void exportDxf(Draft draft)
         {
             //export to dxf
+            IxMilia.Dxf.DxfFile file = new IxMilia.Dxf.DxfFile();
+            foreach (var item in draft.DraftLines)
+            {
+                file.Entities.Add(new DxfLine(new DxfPoint(item.V0.X, item.V0.Y, 0), new DxfPoint(item.V1.X, item.V1.Y, 0)));
+            }
+            foreach (var item in draft.DraftEllipses)
+            {
+                //file.Entities.Add(new DxfEllipse(new DxfPoint(item.Center.X, item.Center.Y, 0), new DxfVector((double)item.Radius, 0, 0), 360));
+                file.Entities.Add(new DxfCircle(new DxfPoint(item.Center.X, item.Center.Y, 0), (double)item.Radius));
+                //file.Entities.Add(new DxfArc(new DxfPoint(item.Center.X, item.Center.Y, 0), (double)item.Radius, 0, 360));
+            }
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "DXF files (*.dxf)|*.dxf";
+
+            if (sfd.ShowDialog() != DialogResult.OK) return;
+            file.Save(sfd.FileName);
+        }
+        private void toolStripButton7_Click(object sender, EventArgs e)
+        {
+            exportDxf(editedDraft);
         }
 
         private void partToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -925,10 +962,41 @@ namespace LiteCAD
         {
             SaveFileDialog ofd = new SaveFileDialog();
             ofd.Filter = "LiteCAD scene (*.lcs)|*.lcs";
-            if (ofd.ShowDialog() != DialogResult.OK) return;            
+            if (ofd.ShowDialog() != DialogResult.OK) return;
             Scene.SaveToXml(ofd.FileName);
         }
+
+        private void toolStripButton4_Click(object sender, EventArgs e)
+        {
+            SetTool(DraftEllipseTool.Instance);
+            uncheckedAllToolButtons();
+            toolStripButton4.Checked = true;
+        }
+
+        private void dxfToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeListView1.SelectedObjects.Count <= 0) return;
+            var vv = treeListView1.SelectedObjects.OfType<Draft>().ToArray();
+            exportDxf(vv[0]);
+        }
+
+        private void objToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeListView1.SelectedObjects.Count <= 0) return;
+            var vv = treeListView1.SelectedObjects.OfType<Part>().ToArray();
+            exportObj(vv[0]);
+        }
+
+        private void infoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeListView1.SelectedObjects.Count <= 0) return;
+            var vv = treeListView1.SelectedObjects.OfType<IEconomicsDetail>().ToArray();
+            Info inf = new Info();
+            inf.Init(vv[0]);
+            inf.Show(this);
+        }
     }
+
     public enum EditModeEnum
     {
         Part, Draft, Assembly

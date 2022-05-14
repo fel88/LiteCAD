@@ -13,5 +13,4 @@ namespace LiteCAD.Common
 
         void RemoveChild(IDrawable dd);
     }
-
 }

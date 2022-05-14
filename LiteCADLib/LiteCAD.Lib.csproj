@@ -79,6 +79,7 @@
     <Compile Include="BRep\UnsupportedCurveException.cs" />
     <Compile Include="Common\DraftConstraint.cs" />
     <Compile Include="Common\DraftElement.cs" />
+    <Compile Include="Common\DraftEllipse.cs" />
     <Compile Include="Common\DraftLine.cs" />
     <Compile Include="Common\DraftPoint.cs" />
     <Compile Include="Common\LinearConstaint.cs" />

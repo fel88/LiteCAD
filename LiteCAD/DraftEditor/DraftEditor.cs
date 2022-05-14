@@ -30,8 +30,16 @@ namespace LiteCAD.DraftEditor
         {
             //var pos = ctx.PictureBox.Control.PointToClient(Cursor.Position);
 
+            if (selected is IDrawable dd)
+            {
+                dd.Selected = false;
+            }
 
             selected = nearest;
+            if (selected is IDrawable dd2)
+            {
+                dd2.Selected = true;
+            }
 
             if (e == MouseButtons.Middle)
             {
@@ -49,7 +57,7 @@ namespace LiteCAD.DraftEditor
         {
             return base.ProcessCmdKey(ref msg, keyData);
         }
-
+        DraftPoint lastDraftPoint = null;
         List<DraftPoint> queue = new List<DraftPoint>();
         private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
@@ -90,13 +98,22 @@ namespace LiteCAD.DraftEditor
             if (editor.CurrentTool is DraftLineTool && e.Button == MouseButtons.Left)
             {
                 var p = (ctx.GetCursor());
-                var last = _draft.Elements.OfType<DraftPoint>().LastOrDefault();
-                _draft.Elements.Add(new DraftPoint(_draft, p.X, p.Y));
-                if (last != null)
+                DraftPoint target = null;
+                if (nearest is DraftPoint dp)
                 {
-                    _draft.Elements.Add(new DraftLine(last, _draft.Elements.Last() as DraftPoint, _draft));
-
+                    target = dp;
                 }
+                else
+                {
+                    target = new DraftPoint(_draft, p.X, p.Y);
+                    _draft.Elements.Add(target);
+                }
+
+                if (lastDraftPoint != null)
+                {
+                    _draft.Elements.Add(new DraftLine(lastDraftPoint, target, _draft));
+                }
+                lastDraftPoint = target;
             }
             if (editor.CurrentTool is RectDraftTool && e.Button == MouseButtons.Left)
             {
@@ -124,6 +141,29 @@ namespace LiteCAD.DraftEditor
                     _draft.AddElement(new DraftLine(p1, p2, _draft));
                     _draft.AddElement(new DraftLine(p2, p3, _draft));
                     _draft.AddElement(new DraftLine(p3, p0, _draft));
+                }
+            }
+            if (editor.CurrentTool is DraftEllipseTool && e.Button == MouseButtons.Left)
+            {
+                var p = (ctx.GetCursor());
+                if (firstClick == null)
+                {
+
+                    firstClick = p;
+                }
+                else
+                {
+
+                    var p0 = new DraftPoint(_draft, p.X, p.Y);
+
+                    var p2 = new DraftPoint(_draft, firstClick.Value.X, firstClick.Value.Y);
+                    var c = new DraftPoint(_draft, (firstClick.Value.X + p.X) / 2, (firstClick.Value.Y + p.Y) / 2);
+
+                    editor.ResetTool();
+
+
+                    _draft.AddElement(new DraftEllipse(c, (decimal)Math.Abs(firstClick.Value.X - p.X) / 2, _draft));
+                    firstClick = null;
                 }
             }
         }
@@ -154,6 +194,23 @@ namespace LiteCAD.DraftEditor
                     minl = d;
                     minp = item;
                 }
+            }
+            foreach (var item in _draft.DraftEllipses)
+            {
+                var d = (item.Center.Location - _pos).Length;
+                if (d < minl)
+                {
+                    minl = d;
+                    minp = item.Center;
+                }
+
+                d = Math.Abs((item.Center.Location - _pos).Length - (double)item.Radius);
+                if (d < minl)
+                {
+                    minl = d;
+                    minp = item;
+                }
+
             }
             foreach (var item in _draft.DraftLines)
             {
@@ -216,6 +273,25 @@ namespace LiteCAD.DraftEditor
                     ctx.gr.DrawLine(Pens.Black, tr, tr11);
                 }
 
+                for (int i = 0; i < _draft.DraftEllipses.Length; i++)
+                {
+                    var el = _draft.DraftEllipses[i];
+                    Vector2d item0 = _draft.DraftEllipses[i].Center.Location;
+                    var rad = (float)el.Radius * ctx.zoom;
+                    var tr = ctx.Transform(item0.X, item0.Y);
+
+                    ctx.gr.DrawEllipse(el == selected ? Pens.Blue : Pens.Black, tr.X - rad, tr.Y - rad, rad * 2, rad * 2);
+
+                    float gp = 5;
+                    tr = ctx.Transform(el.Center.X, el.Center.Y);
+
+                    if (nearest == el.Center)
+                    {
+                        ctx.gr.FillRectangle(Brushes.Blue, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
+                    }
+                    ctx.gr.DrawRectangle(Pens.Black, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
+                }
+
                 foreach (var item in _draft.Helpers)
                 {
                     item.Draw(ctx);
@@ -234,6 +310,14 @@ namespace LiteCAD.DraftEditor
                 {
                     curp = ctx.Transform(dp.Location);
                     gcur = dp.Location.ToPointF();
+                }
+                if (nearest is DraftEllipse de)
+                {
+                    var diff = (de.Center.Location - new Vector2d(gcur.X, gcur.Y)).Normalized();
+                    var onEl = de.Center.Location - diff * (double)de.Radius;
+                    //get point on ellipse
+                    curp = ctx.Transform(onEl);
+                    gcur = onEl.ToPointF();
                 }
                 var t = ctx.Transform(new PointF(ctx.startx, ctx.starty));
                 ctx.gr.DrawLine(pen, ctx.startx, ctx.starty, curp.X, curp.Y);
@@ -261,7 +345,7 @@ namespace LiteCAD.DraftEditor
 
         private void Editor_ToolChanged(ITool obj)
         {
-
+            lastDraftPoint = null;
         }
 
         internal void Finish()

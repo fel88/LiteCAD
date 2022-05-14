@@ -73,11 +73,19 @@
     <Compile Include="DraftEditor\EventWrapperPictureBox.cs" />
     <Compile Include="DraftEditor\LinearConstraintHelper.cs" />
     <Compile Include="ExtrudeModifier.cs" />
+    <Compile Include="IEconomicsDetail.cs" />
     <Compile Include="IEditor.cs" />
+    <Compile Include="Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Info.Designer.cs">
+      <DependentUpon>Info.cs</DependentUpon>
+    </Compile>
     <Compile Include="ITool.cs" />
     <Compile Include="LiteCADScene.cs" />
     <Compile Include="PartAssembly.cs" />
     <Compile Include="PartInstance.cs" />
+    <Compile Include="Tools\DraftEllipseTool.cs" />
     <Compile Include="Tools\DraftLineTool.cs" />
     <Compile Include="EventWrapperGlControl.cs" />
     <Compile Include="Form1.cs">
@@ -104,6 +112,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Info.resx">
+      <DependentUpon>Info.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="InfoPanel.resx">
       <DependentUpon>InfoPanel.cs</DependentUpon>

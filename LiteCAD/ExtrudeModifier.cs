@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace LiteCAD
 {
-    public class ExtrudeModifier : IDrawable
+    public class ExtrudeModifier : IDrawable, IEconomicsDetail
     {
 
         public ExtrudeModifier(Draft draft)
@@ -27,6 +27,10 @@ namespace LiteCAD
         public List<IDrawable> Childs { get; set; } = new List<IDrawable>();
 
         public IDrawable Parent { get; set; }
+
+        public decimal TotalCutLength => Source.CalcTotalCutLength();
+
+        public decimal Volume => Source.CalcArea() * Height;
 
         Draft Source;
         Part Part;

@@ -1,4 +1,7 @@
 ﻿using OpenTK;
+using System.Globalization;
+using System.IO;
+using System.Xml.Linq;
 
 namespace LiteCAD.Common
 {
@@ -6,14 +9,15 @@ namespace LiteCAD.Common
     {
 
         public Vector2d Location;
+        
 
         public double X
         {
-            get => Location.X; 
+            get => Location.X;
             set
             {
-                Parent.RecalcConstraints();
                 Location.X = value;
+                Parent.RecalcConstraints();                
             }
         }
         public double Y
@@ -30,6 +34,18 @@ namespace LiteCAD.Common
         {
 
             Location = new Vector2d(x, y);
+        }
+
+        public DraftPoint(XElement item2, Draft d):base(d)
+        {
+            Id = int.Parse(item2.Attribute("id").Value);
+            X = double.Parse(item2.Attribute("x").Value.Replace(",", "."), CultureInfo.InvariantCulture);
+            Y = double.Parse(item2.Attribute("y").Value.Replace(",", "."), CultureInfo.InvariantCulture);
+        }
+
+        public override void Store(TextWriter writer)
+        {
+            writer.WriteLine($"<point id=\"{Id}\" x=\"{X}\" y=\"{Y}\" />");
         }
     }
 }

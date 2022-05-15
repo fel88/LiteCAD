@@ -16,8 +16,9 @@ namespace LiteCAD.DraftEditor
         }
 
         public Vector2d SnapPoint { get; set; }
+        public DraftConstraint Constraint => constraint;
 
-     
+        public bool Enabled { get => constraint.Enabled; set => constraint.Enabled = value; }
 
         public void Draw(DrawingContext ctx)
         {
@@ -47,13 +48,12 @@ namespace LiteCAD.DraftEditor
             ctx.gr.DrawLine(Pens.Red, tr1, tr3);
         }
 
-        
+
 
         public override void Draw()
         {
-            
+
         }
     }
-
 
 }

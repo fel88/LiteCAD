@@ -1,8 +1,8 @@
 ﻿namespace LiteCAD.Tools
 {
-    public class LinearConstraintTool : AbstractTool
+    public class PerpendicularConstraintTool : AbstractTool
     {
-        public static LinearConstraintTool Instance = new LinearConstraintTool();
+        public static PerpendicularConstraintTool Instance = new PerpendicularConstraintTool();
 
         public override void Deselect()
         {

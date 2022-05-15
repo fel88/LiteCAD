@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace LiteCAD.Common
 {
@@ -11,6 +12,11 @@ namespace LiteCAD.Common
         public virtual void RemoveChild(IDrawable dd)
         {
             Childs.Remove(dd);
+        }
+
+        public virtual void Store(TextWriter writer)
+        {
+            
         }
 
         public bool Visible { get; set; } = true;

@@ -1,5 +1,8 @@
-﻿using LiteCAD.Common;
+﻿using LiteCAD.BRep.Faces;
+using LiteCAD.BRep.Surfaces;
+using LiteCAD.Common;
 using System.Collections.Generic;
+using System.IO;
 
 namespace LiteCAD
 {
@@ -17,10 +20,71 @@ namespace LiteCAD
         private void CreatePart()
         {
             //draft->brep
+            _part = new Part();
+            var bottomFace = new BRepPlaneFace(_part) { Surface = new BRepPlane() { Normal = Source.Plane.Normal, Location = Source.Plane.Position } };
+
+            //geta all wires
+            var wires = Source.GetWires();
+            foreach (var wire in wires)
+            {
+                List<BRep.BRepEdge> edges = new List<BRep.BRepEdge>();
+
+                foreach (var item in wire)
+                {
+                    var diff = item.V0.Location - item.V1.Location;
+                    var p = new OpenTK.Vector3d(item.V0.Location.X, item.V0.Location.Y, 0);
+                    var pe = new OpenTK.Vector3d(item.V1.Location.X, item.V1.Location.Y, 0);
+                    edges.Add(new BRep.BRepEdge()
+                    {
+                        Curve = new BRep.Curves.BRepLineCurve()
+                        {
+                            Point = p,
+                            Vector = new OpenTK.Vector3d(diff.X, diff.Y, 0)
+                        },
+                        Start = p,
+                        End = pe
+                    });
+                }
+                bottomFace.Wires.Add(new BRep.BRepWire() { Edges = edges });
+
+            }
+            var shift = Source.Plane.Normal * (double)Height;
+            var topFace = new BRepPlaneFace(_part) { Surface = new BRepPlane() { Normal = -Source.Plane.Normal, Location = Source.Plane.Position + Source.Plane.Normal * (double)Height } };
+
+            foreach (var item in bottomFace.Wires)
+            {
+                List<BRep.BRepEdge> edges = new List<BRep.BRepEdge>();
+                foreach (var edge in item.Edges)
+                {
+                    var ne = new BRep.BRepEdge();
+                    edges.Add(ne);
+                    ne.Start = edge.Start + shift;
+                    ne.End = edge.End + shift;
+                    var cc = edge.Curve as BRep.Curves.BRepLineCurve;
+                    ne.Curve = new BRep.Curves.BRepLineCurve() { Point = cc.Point + shift, Vector = cc.Vector };                    
+                }
+                topFace.Wires.Add(new BRep.BRepWire() { Edges = edges });
+            }
+            //side faces 
+
+
+            _part.Faces.Add(bottomFace);
+            _part.Faces.Add(topFace);
+            _part.ExtractMesh();
         }
 
-        public decimal Height { get; set; }
-        public bool Visible { get; set; }
+        decimal _height;
+        public decimal Height
+        {
+            get => _height;
+            set
+            {
+                _height = value;
+                CreatePart();
+            }
+        }
+
+        public bool Visible { get; set; } = true;
         public bool Selected { get; set; }
         public string Name { get; set; } = "extrude";
 
@@ -33,7 +97,9 @@ namespace LiteCAD
         public decimal Volume => Source.CalcArea() * Height;
 
         Draft Source;
-        Part Part;
+        Part _part;
+
+        public Part Part => _part;
 
         public void Draw()
         {
@@ -46,8 +112,16 @@ namespace LiteCAD
             if (Source != dd) return;
             Childs.Remove(dd);
             Source = null;
-            Part = null;
+            _part = null;
 
+        }
+
+        public void Store(TextWriter writer)
+        {
+            writer.WriteLine("<extrude><source>");
+
+            Source.Store(writer);
+            writer.WriteLine("</source></extrude>");
         }
     }
 }

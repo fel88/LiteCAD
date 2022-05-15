@@ -2,19 +2,42 @@
 using OpenTK.Graphics.OpenGL;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace LiteCAD.Common
 {
     public class PlaneHelper : AbstractDrawable, IEditFieldsContainer
-    {        
+    {
+        public PlaneHelper()
+        {
+
+        }
+
+        public PlaneHelper(XElement elem)
+        {
+            var pos = elem.Attribute("pos").Value.Split(';').Select(z => double.Parse(z.Replace(",", "."), CultureInfo.InvariantCulture)).ToArray();
+            Position = new Vector3d(pos[0], pos[1], pos[2]); 
+            var normal = elem.Attribute("normal").Value.Split(';').Select(z => double.Parse(z.Replace(",", "."), CultureInfo.InvariantCulture)).ToArray();
+            Normal = new Vector3d(normal[0], normal[1], normal[2]);
+        }
 
         [EditField]
         public Vector3d Position { get; set; }
+
         [EditField]
         public Vector3d Normal { get; set; }
 
         [EditField]
         public int DrawSize { get; set; } = 10;
+
+        public override void Store(TextWriter writer)
+        {
+            writer.WriteLine($"<plane pos=\"{Position.X};{Position.Y};{Position.Z}\" normal=\"{Normal.X};{Normal.Y};{Normal.Z}\"/>");
+        }
+
         public Vector3d[] GetBasis()
         {
             Vector3d[] shifts = new[] { Vector3d.UnitX, Vector3d.UnitY, Vector3d.UnitZ };
@@ -33,6 +56,7 @@ namespace LiteCAD.Common
 
             return new[] { axis1, axis2 };
         }
+
         public Vector3d ProjPoint(Vector3d point)
         {
             var nrm = Normal.Normalized();

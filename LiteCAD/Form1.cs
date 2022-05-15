@@ -332,6 +332,7 @@ namespace LiteCAD
             if (ofd.ShowDialog() != DialogResult.OK) return;
             Scene = new LiteCADScene();
             Scene.FromXml(ofd.FileName);
+            updateList();
         }
 
         private void planeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -409,8 +410,14 @@ namespace LiteCAD
         }
         Vector3d[] getAllPoints()
         {
-            return getAllPoints(Parts.OfType<Part>().ToArray());
+            var p1 = getAllPoints(Parts.OfType<Part>().ToArray());
+            return p1;
+            //var drafts = Parts.OfType<Draft>();
+            // var p2 = drafts.SelectMany(z => z.DraftPoints.Select(u => u.Location));
+
+            // return p2.Union(p1).ToArray();
         }
+
         Vector3d[] getAllPoints(Part[] parts)
         {
             List<Vector3d> vv = new List<Vector3d>();
@@ -435,6 +442,11 @@ namespace LiteCAD
 
         void fitAll(Vector3d[] vv = null)
         {
+            if (EditMode == EditModeEnum.Draft)
+            {
+                de.FitAll();
+                return;
+            }
             if (vv == null)
                 vv = getAllPoints();
             if (vv.Length == 0) return;
@@ -674,7 +686,6 @@ namespace LiteCAD
             var face = listView2.SelectedItems[0].Tag as BRepFace;
             List<Vector3d> vv = new List<Vector3d>();
 
-
             foreach (var ditem in face.Items)
             {
                 if (ditem is LineItem li)
@@ -682,24 +693,23 @@ namespace LiteCAD
                     vv.Add(li.Start);
                     vv.Add(li.End);
                 }
-
             }
 
             if (vv.Count == 0) return;
             camToSelected(vv.ToArray());
             FitToPoints(vv.ToArray(), camera1);
             camToSelected(vv.ToArray());
-
         }
 
         private void draftToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Draft draft = new Draft() { Name = "new draft" };
-            draft.Plane = new PlaneHelper() { Normal = Vector3d.UnitZ, Position = Vector3d.Zero };
             Parts.Add(draft);
             treeListView1.SetObjects(Parts);
         }
+
         Vector3[] camState = new Vector3[3];
+
         private void editToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;
@@ -708,7 +718,7 @@ namespace LiteCAD
                 glControl.Visible = false;
                 de.Visible = true;
                 de.SetDraft(d);
-
+                de.FitAll();
 
                 //   panel2.Controls.Add(glControl);
 
@@ -844,7 +854,7 @@ namespace LiteCAD
                 {
                     //item.Triangles
                 }
-            }            
+            }
         }
 
         void exportDxf(Draft draft)
@@ -853,6 +863,9 @@ namespace LiteCAD
             IxMilia.Dxf.DxfFile file = new IxMilia.Dxf.DxfFile();
             foreach (var item in draft.DraftLines)
             {
+                if (item.Dummy)
+                    continue;
+
                 file.Entities.Add(new DxfLine(new DxfPoint(item.V0.X, item.V0.Y, 0), new DxfPoint(item.V1.X, item.V1.Y, 0)));
             }
             foreach (var item in draft.DraftEllipses)
@@ -984,7 +997,18 @@ namespace LiteCAD
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;
             var vv = treeListView1.SelectedObjects.OfType<Part>().ToArray();
-            exportObj(vv[0]);
+            if (vv.Any())
+            {
+                exportObj(vv[0]);
+            }
+            else
+            {
+                var vv2 = treeListView1.SelectedObjects.OfType<ExtrudeModifier>().ToArray();
+                if (vv2.Any() && vv2[0].Part != null)
+                {
+                    exportObj(vv2[0].Part);
+                }
+            }
         }
 
         private void infoToolStripMenuItem_Click(object sender, EventArgs e)
@@ -994,6 +1018,17 @@ namespace LiteCAD
             Info inf = new Info();
             inf.Init(vv[0]);
             inf.Show(this);
+        }
+
+        private void toolStripButton14_Click(object sender, EventArgs e)
+        {
+            SetTool(PerpendicularConstraintTool.Instance);
+        }
+
+        private void toolStripButton12_Click(object sender, EventArgs e)
+        {
+            SetTool(ParallelConstraintTool.Instance);
+
         }
     }
 

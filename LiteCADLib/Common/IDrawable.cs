@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace LiteCAD.Common
 {
@@ -12,5 +13,6 @@ namespace LiteCAD.Common
         bool Selected { get; set; }
 
         void RemoveChild(IDrawable dd);
+        void Store(TextWriter writer);
     }
 }

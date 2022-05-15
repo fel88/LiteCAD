@@ -58,7 +58,7 @@ namespace LiteCAD.DraftEditor
             return base.ProcessCmdKey(ref msg, keyData);
         }
         DraftPoint lastDraftPoint = null;
-        List<DraftPoint> queue = new List<DraftPoint>();
+        List<DraftElement> queue = new List<DraftElement>();
         private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
             if (editor.CurrentTool is SelectionTool && e.Button == MouseButtons.Left)
@@ -72,18 +72,67 @@ namespace LiteCAD.DraftEditor
                     editor.ObjectSelect(nearest);
                 }
             }
+            if (editor.CurrentTool is PerpendicularConstraintTool && e.Button == MouseButtons.Left)
+            {
+                if (nearest is DraftLine)
+                {
+                    if (!queue.Contains(nearest))
+                        queue.Add(nearest as DraftLine);
+                }
+                if (queue.Count > 1)
+                {
+                    var cc = new PerpendicularConstraint(queue[0] as DraftLine, queue[1] as DraftLine);
+                    if (!_draft.Constraints.OfType<PerpendicularConstraint>().Any(z => z.IsSame(cc)))
+                    {
+                        _draft.AddConstraint(cc);
+                        _draft.AddHelper(new PerpendicularConstraintHelper(cc));
+                        _draft.Childs.Add(_draft.Helpers.Last());
+                    }
+                    else
+                    {
+                        Helpers.Warning("such constraint already exist", ParentForm.Text);
+                    }
+                    queue.Clear();
+                    editor.ResetTool();
+                }
+            }
+            if (editor.CurrentTool is ParallelConstraintTool && e.Button == MouseButtons.Left)
+            {
+                if (nearest is DraftLine)
+                {
+                    if (!queue.Contains(nearest))
+                        queue.Add(nearest as DraftLine);
+                }
+                if (queue.Count > 1)
+                {
+                    var cc = new ParallelConstraint(queue[0] as DraftLine, queue[1] as DraftLine);
+                    if (!_draft.Constraints.OfType<ParallelConstraint>().Any(z => z.IsSame(cc)))
+                    {
+                        _draft.AddConstraint(cc);
+                        _draft.AddHelper(new ParallelConstraintHelper(cc));
+                        _draft.Childs.Add(_draft.Helpers.Last());
+                    }
+                    else
+                    {
+                        Helpers.Warning("such constraint already exist", ParentForm.Text);
+                    }
+                    queue.Clear();
+                    editor.ResetTool();
+                }
+            }
             if (editor.CurrentTool is LinearConstraintTool && e.Button == MouseButtons.Left)
             {
                 if (nearest is DraftPoint)
                 {
-                    queue.Add(nearest as DraftPoint);
+                    if (!queue.Contains(nearest))
+                        queue.Add(nearest as DraftPoint);
                 }
                 if (queue.Count > 1)
                 {
-                    var cc = new LinearConstraint(queue[0], queue[1], (decimal)(queue[0].Location - queue[1].Location).Length);
+                    var cc = new LinearConstraint(queue[0], queue[1], (decimal)((queue[0] as DraftPoint).Location - (queue[1] as DraftPoint).Location).Length);
                     if (!_draft.Constraints.OfType<LinearConstraint>().Any(z => z.IsSame(cc)))
                     {
-                        _draft.Constraints.Add(cc);
+                        _draft.AddConstraint(cc);
                         _draft.AddHelper(new LinearConstraintHelper(cc));
                         _draft.Childs.Add(_draft.Helpers.Last());
                     }
@@ -176,6 +225,14 @@ namespace LiteCAD.DraftEditor
             isPressed = false;
         }
 
+        public void FitAll()
+        {
+            if (_draft == null || _draft.DraftPoints.Count() == 0) return;
+
+            var t = _draft.DraftPoints.Select(z => z.Location).ToArray();
+            ctx.FitToPoints(t.Select(z => z.ToPointF()).ToArray(), 5);
+        }
+
         DrawingContext ctx = new DrawingContext() { DragButton = MouseButtons.Left };
         object nearest;
         object selected;
@@ -266,11 +323,18 @@ namespace LiteCAD.DraftEditor
 
                 for (int i = 0; i < _draft.DraftLines.Length; i++)
                 {
+                    var el = _draft.DraftLines[i];
+
                     Vector2d item0 = _draft.DraftLines[i].V0.Location;
                     Vector2d item = _draft.DraftLines[i].V1.Location;
                     var tr = ctx.Transform(item0.X, item0.Y);
                     var tr11 = ctx.Transform(item.X, item.Y);
-                    ctx.gr.DrawLine(Pens.Black, tr, tr11);
+                    Pen p = new Pen(el == selected ? Color.Blue : Color.Black);
+
+                    if (el.Dummy)
+                        p.DashPattern = new float[] { 10, 10 };
+
+                    ctx.gr.DrawLine(p, tr, tr11);
                 }
 
                 for (int i = 0; i < _draft.DraftEllipses.Length; i++)
@@ -294,6 +358,8 @@ namespace LiteCAD.DraftEditor
 
                 foreach (var item in _draft.Helpers)
                 {
+                    if (!item.Visible) continue;
+
                     item.Draw(ctx);
                 }
             }

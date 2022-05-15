@@ -72,6 +72,8 @@
     </Compile>
     <Compile Include="DraftEditor\EventWrapperPictureBox.cs" />
     <Compile Include="DraftEditor\LinearConstraintHelper.cs" />
+    <Compile Include="DraftEditor\ParallelConstraintHelper.cs" />
+    <Compile Include="DraftEditor\PerpendicularConstraintHelper.cs" />
     <Compile Include="ExtrudeModifier.cs" />
     <Compile Include="IEconomicsDetail.cs" />
     <Compile Include="IEditor.cs" />
@@ -105,6 +107,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\LinearConstraintTool.cs" />
+    <Compile Include="Tools\ParallelConstraintTool.cs" />
+    <Compile Include="Tools\PerpendicularConstraintTool.cs" />
     <Compile Include="Tools\RectDraftTool.cs" />
     <Compile Include="Tools\SelectionTool.cs" />
     <EmbeddedResource Include="DraftEditor\DraftEditor.resx">

@@ -26,7 +26,7 @@ namespace LiteCAD
                 Text += ": " + dd.Name;
             }
             this.detail = detail;
-            label1.Text = "Total cut length: " + Math.Round(detail.TotalCutLength, 4)+$" mm ({detail.TotalCutLength/100m:N2} m)";
+            label1.Text = "Total cut length: " + Math.Round(detail.TotalCutLength, 4) + $" mm ({detail.TotalCutLength / 100m:N2} m)";
             label2.Text = "Total volume: " + detail.Volume;
 
             recalc();
@@ -34,7 +34,7 @@ namespace LiteCAD
         }
         void recalc()
         {
-            var price = (detail.TotalCutLength / 100m) *qty* runningMeterCutPrice;
+            var price = (detail.TotalCutLength / 100m) * qty * runningMeterCutPrice;
             textBox3.Text = Math.Round(price, 4).ToString();
         }
         decimal runningMeterCutPrice = 10;

@@ -1,8 +1,10 @@
 ﻿using LiteCAD.BRep.Faces;
 using LiteCAD.BRep.Surfaces;
 using LiteCAD.Common;
+using OpenTK;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace LiteCAD
 {
@@ -61,19 +63,99 @@ namespace LiteCAD
                     ne.Start = edge.Start + shift;
                     ne.End = edge.End + shift;
                     var cc = edge.Curve as BRep.Curves.BRepLineCurve;
-                    ne.Curve = new BRep.Curves.BRepLineCurve() { Point = cc.Point + shift, Vector = cc.Vector };                    
+                    ne.Curve = new BRep.Curves.BRepLineCurve() { Point = cc.Point + shift, Vector = cc.Vector };
                 }
                 topFace.Wires.Add(new BRep.BRepWire() { Edges = edges });
             }
             //side faces 
 
+            List<BRep.BRepWire> outter = new List<BRep.BRepWire>();
+            foreach (var item in bottomFace.Wires)
+            {
+                var pp = item.Edges.SelectMany(z => new[] { z.End }).ToArray();
+                bool good = true;
+                foreach (var w in bottomFace.Wires)
+                {
+                    if (item == w) continue;
+                    var pp2 = w.Edges.SelectMany(z => new[] { z.End }).ToArray();
+                    if (pp.Any(u => GeometryUtils.pnpoly(pp2.Select(z => new Vector2d(z.X, z.Y)).ToArray(), u.X, u.Y)))
+                    {
+                        good = false;
+                        break;
+                    }
+                }
+                if (good)
+                {
+                    outter.Add(item);
+                }
+            }
+
+            foreach (var wire in bottomFace.Wires)
+                foreach (var item in wire.Edges)
+                {
+                    List<BRep.BRepEdge> edges2 = new List<BRep.BRepEdge>();
+
+                    var dir = (item.End - item.Start).Normalized();
+                    dir = new Vector3d(-dir.Y, dir.X, 0);
+                    var sideFace = new BRepPlaneFace(_part)
+                    {
+                        Surface = new BRepPlane()
+                        {
+                            Normal = -dir,
+                            Location = item.Start
+                        }
+                    };
+                    edges2.Add(new BRep.BRepEdge()
+                    {
+                        Curve = new BRep.Curves.BRepLineCurve()
+                        {
+                            Point = item.Start,
+                            Vector = (item.End - item.Start).Normalized()
+                        },
+                        Start = item.Start,
+                        End = item.End
+                    });
+
+                    edges2.Add(new BRep.BRepEdge()
+                    {
+                        Curve = new BRep.Curves.BRepLineCurve()
+                        {
+                            Point = item.Start,
+                            Vector = (item.End - item.Start).Normalized()
+                        },
+                        Start = item.End,
+                        End = item.End + shift
+                    });
+                    edges2.Add(new BRep.BRepEdge()
+                    {
+                        Curve = new BRep.Curves.BRepLineCurve()
+                        {
+                            Point = item.Start,
+                            Vector = (item.End - item.Start).Normalized()
+                        },
+                        Start = item.End + shift,
+                        End = item.Start + shift
+                    });
+                    edges2.Add(new BRep.BRepEdge()
+                    {
+                        Curve = new BRep.Curves.BRepLineCurve()
+                        {
+                            Point = item.Start,
+                            Vector = (item.End - item.Start).Normalized()
+                        },
+                        Start = item.Start + shift,
+                        End = item.Start
+                    });
+                    sideFace.Wires.Add(new BRep.BRepWire() { Edges = edges2 });
+                    _part.Faces.Add(sideFace);
+                }
 
             _part.Faces.Add(bottomFace);
             _part.Faces.Add(topFace);
             _part.ExtractMesh();
         }
 
-        decimal _height;
+        decimal _height = 10;
         public decimal Height
         {
             get => _height;

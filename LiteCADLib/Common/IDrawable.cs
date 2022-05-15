@@ -5,6 +5,7 @@ namespace LiteCAD.Common
 {
     public interface IDrawable
     {
+        int Id { get; set; }
         IDrawable Parent { get; set; }
         List<IDrawable> Childs { get; }
         string Name { get; set; }
@@ -14,5 +15,10 @@ namespace LiteCAD.Common
 
         void RemoveChild(IDrawable dd);
         void Store(TextWriter writer);
+    }
+
+    public interface IPartContainer
+    {
+        Part Part { get; }
     }
 }

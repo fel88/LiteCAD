@@ -5,18 +5,32 @@ using OpenTK;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class ExtrudeModifier : IDrawable, IEconomicsDetail
+    public class ExtrudeModifier : IDrawable, IEconomicsDetail, IPartContainer
     {
-
         public ExtrudeModifier(Draft draft)
         {
             Source = draft;
             Source.Parent = this;
             CreatePart();
             Childs.Add(draft);
+            Id = FactoryHelper.NewId++;
+
+        }
+
+        Part IPartContainer.Part => _part;
+
+        public ExtrudeModifier(XElement item)
+        {
+            Source = new Draft(item.Element("source").Element("draft"));
+            Height = Helpers.ParseDecimal(item.Attribute("height").Value);
+            Source.Parent = this;
+            CreatePart();
+            Childs.Add(Source);
+            Id = FactoryHelper.NewId++;
         }
 
         private void CreatePart()
@@ -181,7 +195,10 @@ namespace LiteCAD
         Draft Source;
         Part _part;
 
+
         public Part Part => _part;
+
+        public int Id { get; set; }
 
         public void Draw()
         {
@@ -200,7 +217,7 @@ namespace LiteCAD
 
         public void Store(TextWriter writer)
         {
-            writer.WriteLine("<extrude><source>");
+            writer.WriteLine($"<extrude id=\"{Id}\" height=\"{Height}\"><source>");
 
             Source.Store(writer);
             writer.WriteLine("</source></extrude>");

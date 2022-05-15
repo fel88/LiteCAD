@@ -182,14 +182,15 @@ namespace LiteCAD
                     var d2 = dd.Elements.OfType<object>().ToArray();
                     return d1.Union(d2).ToArray();
                 }
-            if (x is IDrawable d)
-            {
-                return d.Childs.ToArray();
-            }
             if (x is PartAssembly p)
             {
                 return p.Parts.ToArray();
             }
+            if (x is IDrawable d)
+            {
+                return d.Childs.ToArray();
+            }
+
 
             return null;
         };
@@ -205,17 +206,24 @@ namespace LiteCAD
                 if (x is Draft)
                     return false;
 
-                if (x is IDrawable d)
-                {
-                    return d.Childs.Any();
-                }
                 if (x is PartAssembly p)
                 {
                     return p.Parts.Any();
                 }
+                if (x is IDrawable d)
+                {
+                    return d.Childs.Any();
+                }
+
 
                 return false;
             };
+
+            treeListView1.AllowDrop = true;
+            treeListView1.DragOver += TreeListView1_DragOver;
+            treeListView1.DragEnter += TreeListView1_DragEnter;
+            treeListView1.DragDrop += TreeListView1_DragDrop;
+            treeListView1.ItemDrag += TreeListView1_ItemDrag;
             toolStrip2.Visible = false;
             toolStrip3.Visible = false;
             toolStrip1.Top = 0;
@@ -279,6 +287,57 @@ namespace LiteCAD
             };
 
             infoPanel.Switch();
+        }
+
+        private void TreeListView1_DragOver(object sender, DragEventArgs e)
+        {
+            // Retrieve the client coordinates of the mouse position.  
+            // Point targetPoint = treeListView1.PointToClient(new Point(e.X, e.Y));
+
+            // Select the node at the mouse position.  
+            //treeListView1.SelectedNode = treeView1.GetNodeAt(targetPoint);
+        }
+
+        private void TreeListView1_DragEnter(object sender, DragEventArgs e)
+        {
+            e.Effect = e.AllowedEffect;
+        }
+
+        public class MyDraggedData
+        {
+            public object Data;
+            public MyDraggedData(object d)
+            {
+                Data = d;
+            }
+        }
+        private void TreeListView1_DragDrop(object sender, DragEventArgs e)
+        {
+            Point targetPoint = treeListView1.PointToClient(new Point(e.X, e.Y));
+
+            // Retrieve the node at the drop location.  
+            var targetNode = (treeListView1.GetItemAt(targetPoint.X, targetPoint.Y) as BrightIdeasSoftware.OLVListItem).RowObject;
+
+            // Retrieve the node that was dragged.              
+            var draggedNode = (MyDraggedData)e.Data.GetData(typeof(MyDraggedData));
+            if (draggedNode != null)
+            {
+                var dr = draggedNode.Data as IDrawable;
+                if (targetNode is PartAssembly pas)
+                {
+                    if (dr is IPartContainer pc)
+                        pas.Parts.Add(new PartInstance(pc));
+                    if (dr is Part p)
+                        pas.Parts.Add(new PartInstance(p));
+                }
+            }
+        }
+
+        private void TreeListView1_ItemDrag(object sender, ItemDragEventArgs e)
+        {
+            var item = e.Item as BrightIdeasSoftware.OLVListItem;
+            DoDragDrop(new MyDraggedData(item.RowObject), DragDropEffects.Copy);
+            //throw new NotImplementedException();
         }
 
         private void GlControl_MouseUp(object sender, MouseEventArgs e)

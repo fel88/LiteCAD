@@ -1,11 +1,21 @@
 ﻿using OpenTK;
 using System.Drawing;
+using System.Globalization;
 using System.Windows.Forms;
 
 namespace LiteCAD
 {
     public static class Helpers
-    {
+    {        
+
+        public static double ParseDouble(string v)
+        {
+            return double.Parse(v.Replace(",", "."), CultureInfo.InvariantCulture);
+        }
+        public static decimal ParseDecimal(string v)
+        {
+            return decimal.Parse(v.Replace(",", "."), CultureInfo.InvariantCulture);
+        }
         public static DialogResult ShowQuestion(string text, string caption, MessageBoxButtons btns = MessageBoxButtons.YesNo)
         {
             return MessageBox.Show(text, caption, btns, MessageBoxIcon.Question);

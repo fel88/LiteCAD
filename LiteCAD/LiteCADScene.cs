@@ -18,7 +18,18 @@ namespace LiteCAD
                 if (item.Name == "draft")
                 {
                     Draft d = new Draft(item);
-                    
+
+                    Parts.Add(d);
+                }
+                if (item.Name == "extrude")
+                {
+                    ExtrudeModifier d = new ExtrudeModifier(item);
+
+                    Parts.Add(d);
+                }
+                if (item.Name == "assembly")
+                {
+                    PartAssembly d = new PartAssembly(this, item);
                     Parts.Add(d);
                 }
             }

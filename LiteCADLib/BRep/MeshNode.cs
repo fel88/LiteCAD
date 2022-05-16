@@ -2,6 +2,7 @@
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace LiteCAD.BRep
 {
@@ -23,6 +24,16 @@ namespace LiteCAD.BRep
                     vv.Normal *= -1;
                 }
             }
-        }        
+        }
+
+        public void StoreXml(TextWriter writer)
+        {
+            writer.WriteLine("<mesh>");
+            foreach (var item in Triangles)
+            {
+                item.StoreXml(writer);
+            }
+            writer.WriteLine("</mesh>");
+        }
     }
 }

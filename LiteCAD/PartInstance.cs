@@ -43,7 +43,8 @@ namespace LiteCAD
         }
 
         public readonly Part Part;
-        public Matrix4d Matrix = Matrix4d.Identity;
+        Matrix4d _matrix  = Matrix4d.Identity;
+        public Matrix4d Matrix { get => _matrix; set => _matrix = value; }
 
         public double X { get => Position.X; set => _position.X = value; }
         public double Y { get => Position.Y; set => _position.Y = value; }
@@ -57,7 +58,7 @@ namespace LiteCAD
         public override void Draw()
         {
             GL.PushMatrix();
-            GL.MultMatrix(ref Matrix);
+            GL.MultMatrix(ref _matrix);
             GL.Rotate(RotateZ, Vector3d.UnitZ);
 
             GL.Translate(Position);

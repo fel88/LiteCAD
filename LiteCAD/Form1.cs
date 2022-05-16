@@ -5,6 +5,7 @@ using LiteCAD.BRep.Editor;
 using LiteCAD.Common;
 using LiteCAD.DraftEditor;
 using LiteCAD.Parsers.Step;
+using LiteCAD.PropEditors;
 using LiteCAD.Tools;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
@@ -159,6 +160,11 @@ namespace LiteCAD
         {
             InitializeComponent();
 
+            foreach (Control c in propertyGrid1.Controls)
+            {
+                c.MouseDoubleClick += C_MouseClick;
+            }
+
             (treeListView1.Columns[0] as BrightIdeasSoftware.OLVColumn).AspectGetter = (x) =>
             {
                 if (x is IDraftHelper dh)
@@ -287,6 +293,40 @@ namespace LiteCAD
             };
 
             infoPanel.Switch();
+        }
+
+        private void C_MouseClick(object sender, MouseEventArgs e)
+        {
+            var gi = propertyGrid1.SelectedGridItem;
+            var obj = propertyGrid1.SelectedObject;
+            if (gi.PropertyDescriptor.PropertyType == typeof(TransformationChain))
+            {                
+                var ret = editorStart(gi.Value, gi.PropertyDescriptor.Name, typeof(Matrix4dPropEditor));
+                gi.PropertyDescriptor.SetValue(obj, (TransformationChain)ret);
+                //gi.PropertyDescriptor.Name
+            }
+            if (gi.PropertyDescriptor.PropertyType == typeof(Vector3d))
+            {
+                //editor call here
+                //sert bacvk
+                var ret = editorStart(gi.Value, gi.PropertyDescriptor.Name, typeof(Vector3dPropEditor));
+                gi.PropertyDescriptor.SetValue(obj, (Vector3d)ret);
+                //gi.PropertyDescriptor.Name
+            }
+        }
+
+        object editorStart(object init, string nm, Type control)
+        {
+            Form f = new Form() { Text = nm };
+            f.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            f.StartPosition = FormStartPosition.CenterScreen;
+            var cc = Activator.CreateInstance(control) as UserControl;
+            (cc as IPropEditor).Init(init);
+            f.Controls.Add(cc);
+            f.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            f.AutoSize = true;
+            f.ShowDialog();
+            return (cc as IPropEditor).ReturnValue;
         }
 
         private void TreeListView1_DragOver(object sender, DragEventArgs e)
@@ -1089,10 +1129,85 @@ namespace LiteCAD
             SetTool(ParallelConstraintTool.Instance);
 
         }
+
+        private void meshToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            //obj or stl
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "STL file (*.stl)|*.stl";
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+            var bts = File.ReadAllBytes(ofd.FileName);
+            var cnt = BitConverter.ToInt32(bts, 80);
+            MeshModel mm = new MeshModel() { Name = Path.GetFileNameWithoutExtension(ofd.FileName) };
+            MeshNode node = new MeshNode();
+            mm.Nodes.Add(node);
+            Parts.Add(mm);
+
+
+            for (int i = 0; i < cnt; i++)
+            {
+                TriangleInfo tr = new TriangleInfo();
+                node.Triangles.Add(tr);
+
+                tr.Vertices = new VertexInfo[3];
+                Vector3d normal = new Vector3d();
+                Vector3d v1 = new Vector3d();
+                Vector3d v2 = new Vector3d();
+                Vector3d v3 = new Vector3d();
+
+                for (int j = 0; j < 3; j++)
+                {
+                    var fl = BitConverter.ToSingle(bts, 84 + j * 4 + i * 50);
+                    normal[j] = fl;
+                }
+                for (int j = 0; j < 3; j++)
+                {
+                    var fl = BitConverter.ToSingle(bts, 84 + 12 + j * 4 + i * 50);
+                    v1[j] = fl;
+                }
+
+                for (int j = 0; j < 3; j++)
+                {
+                    var fl = BitConverter.ToSingle(bts, 84 + 24 + j * 4 + i * 50);
+                    v2[j] = fl;
+                }
+                for (int j = 0; j < 3; j++)
+                {
+                    var fl = BitConverter.ToSingle(bts, 84 + 36 + j * 4 + i * 50);
+                    v3[j] = fl;
+                }
+                tr.Vertices[0] = new VertexInfo() { Position = v1, Normal = normal };
+                tr.Vertices[1] = new VertexInfo() { Position = v2, Normal = normal };
+                tr.Vertices[2] = new VertexInfo() { Position = v3, Normal = normal };
+
+
+            }
+            updateList();
+        }
+
+        private void matrixEditToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void propertyGrid1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            var gi = propertyGrid1.SelectedGridItem;
+        }
+
+        private void propertyGrid1_DoubleClick(object sender, EventArgs e)
+        {
+
+        }
     }
 
     public enum EditModeEnum
     {
         Part, Draft, Assembly
+    }
+    public interface IPropEditor
+    {
+        void Init(object o);
+        object ReturnValue { get; }
     }
 }

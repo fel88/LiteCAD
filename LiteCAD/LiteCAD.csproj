@@ -85,8 +85,21 @@
     </Compile>
     <Compile Include="ITool.cs" />
     <Compile Include="LiteCADScene.cs" />
+    <Compile Include="MeshModel.cs" />
     <Compile Include="PartAssembly.cs" />
     <Compile Include="PartInstance.cs" />
+    <Compile Include="PropEditors\Matrix4dPropEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PropEditors\Matrix4dPropEditor.Designer.cs">
+      <DependentUpon>Matrix4dPropEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PropEditors\Vector3dPropEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PropEditors\Vector3dPropEditor.Designer.cs">
+      <DependentUpon>Vector3dPropEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Tools\DraftEllipseTool.cs" />
     <Compile Include="Tools\DraftLineTool.cs" />
     <Compile Include="EventWrapperGlControl.cs" />
@@ -122,6 +135,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="InfoPanel.resx">
       <DependentUpon>InfoPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PropEditors\Matrix4dPropEditor.resx">
+      <DependentUpon>Matrix4dPropEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PropEditors\Vector3dPropEditor.resx">
+      <DependentUpon>Vector3dPropEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

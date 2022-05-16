@@ -1,4 +1,6 @@
 ﻿using OpenTK;
+using System;
+using System.IO;
 
 namespace LiteCAD.BRep
 {
@@ -31,6 +33,17 @@ namespace LiteCAD.BRep
             z1 /= 3;
             return z1;
         }
+
+        internal void StoreXml(TextWriter writer)
+        {
+            writer.WriteLine("<triangle>");
+            foreach (var item in Vertices)
+            {
+                writer.WriteLine($"<vertex pos=\"{item.Position.X};{item.Position.Y};{item.Position.Z}\" normal=\"{item.Normal.X};{item.Normal.Y};{item.Normal.Z}\"/>");
+            }
+            writer.WriteLine("</triangle>");
+        }
+
         public bool Contains(Vector3d v, double eps = 1e-8)
         {
             foreach (var item in Vertices)

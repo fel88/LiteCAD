@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenTK;
+using LiteCAD.Common;
 
 namespace LiteCAD.PropEditors
 {

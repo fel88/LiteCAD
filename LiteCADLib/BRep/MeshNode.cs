@@ -1,14 +1,17 @@
 ﻿using LiteCAD.BRep.Surfaces;
+using LiteCAD.Common;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace LiteCAD.BRep
 {
     public class MeshNode
     {
-
         public bool Visible { get; set; } = true;
         public BRepFace Parent;
         public List<TriangleInfo> Triangles = new List<TriangleInfo>();
@@ -24,6 +27,28 @@ namespace LiteCAD.BRep
                     vv.Normal *= -1;
                 }
             }
+        }
+        public Line3D[] SplitByPlane(PlaneHelper pl)
+        {
+            List<Line3D> vv = new List<Line3D>();
+            foreach (var item in Triangles)
+            {
+                vv.AddRange(item.SplitByPlane(pl));
+            }
+            return vv.ToArray();
+
+
+        }
+        public MeshNode RestoreXml(XElement mesh)
+        {
+            MeshNode ret = new MeshNode();
+            foreach (var tr in mesh.Elements())
+            {
+                TriangleInfo tt = new TriangleInfo();
+                tt.RestoreXml(tr);
+                ret.Triangles.Add(tt);
+            }
+            return ret;
         }
 
         public void StoreXml(TextWriter writer)

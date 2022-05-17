@@ -6,16 +6,27 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace LiteCAD
 {
     public class MeshModel : AbstractDrawable
     {
         public List<MeshNode> Nodes = new List<MeshNode>();
+        public void RestoreXml(XElement elem)
+        {
+            _matrix.RestoreXml(elem.Element("transform"));
+            foreach (var item in elem.Element("nodes").Elements())
+            {
+                MeshNode mn = new MeshNode();
+                Nodes.Add(mn.RestoreXml(item));
+            }
+        }
 
         public override void Store(TextWriter writer)
         {
-            writer.WriteLine("<mesh>");
+            writer.WriteLine($"<mesh name=\"{Name}\">");
             writer.WriteLine("<transform>");
             _matrix.StoreXml(writer);
             writer.WriteLine("</transform>");
@@ -25,17 +36,27 @@ namespace LiteCAD
                 item.StoreXml(writer);
             }
             writer.WriteLine("</nodes>");
-
             writer.WriteLine("</mesh>");
         }
 
-       
         TransformationChain _matrix = new TransformationChain();
+
+        public MeshModel()
+        {
+
+        }
+        public MeshModel(LiteCADScene liteCADScene, XElement item)
+        {
+            if (item.Attribute("name") != null)
+                Name = item.Attribute("name").Value;
+            RestoreXml(item);
+        }
+
         public TransformationChain Matrix { get => _matrix; set => _matrix = value; }
 
         public bool Wireframe { get; set; }
         public bool Fill { get; set; } = true;
-        
+
         public override void Draw()
         {
             if (!Visible) return;
@@ -106,64 +127,18 @@ namespace LiteCAD
 
         }
 
-
-    }
-
-    public class TransformationChain
-    {
-        public void StoreXml(TextWriter writer)
+        internal Line3D[] SplitPyPlane(PlaneHelper ph)
         {
-            writer.WriteLine("<transformationChain>");
-            foreach (var item in Items)
+            var mm = Matrix.Calc();
+            var ret = Nodes.SelectMany(z => z.SplitByPlane(ph)).ToArray();
+            for (int i = 0; i < ret.Length; i++)
             {
-                item.StoreXml(writer);
+                var res1 = Vector3d.Transform(ret[i].Start, mm);
+                var res2 = Vector3d.Transform(ret[i].End, mm);
+                ret[i].Start = res1;
+                ret[i].End = res2;
             }
-            writer.WriteLine("</transformationChain>");
-        }
-        public List<TransformationChainItem> Items = new List<TransformationChainItem>();
-        public Matrix4d Calc()
-        {
-            var r = Matrix4d.Identity;
-            foreach (var item in Items)
-            {
-                r *= item.Matrix();
-            }
-            return r;
-        }
-    }
-
-    public abstract class TransformationChainItem
-    {
-        public abstract Matrix4d Matrix();
-
-        internal abstract void StoreXml(TextWriter writer);
-    }
-
-    public class TranslateTransformChainItem : TransformationChainItem
-    {
-        public Vector3d Vector;
-        public override Matrix4d Matrix()
-        {
-            return Matrix4d.CreateTranslation(Vector);
-        }
-
-        internal override void StoreXml(TextWriter writer)
-        {
-            writer.WriteLine($"<translate vec=\"{Vector.X};{Vector.Y};{Vector.Z}\"/>");
-        }
-    }
-    public class ScaleTransformChainItem : TransformationChainItem
-    {
-        public Vector3d Vector;
-        public override Matrix4d Matrix()
-        {
-            return Matrix4d.Scale(Vector);
-        }
-
-        internal override void StoreXml(TextWriter writer)
-        {
-            writer.WriteLine($"<scale vec=\"{Vector.X};{Vector.Y};{Vector.Z}\"/>");
-
+            return ret;
         }
     }
 }

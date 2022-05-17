@@ -45,6 +45,7 @@
             this.cubeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.partToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.meshToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -56,6 +57,9 @@
             this.objToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.economicReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.infoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.commandsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.matrixEditToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.listView1 = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -124,10 +128,7 @@
             this.toolStripButton8 = new System.Windows.Forms.ToolStripButton();
             this.toolStrip4 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton6 = new System.Windows.Forms.ToolStripButton();
-            this.meshToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
-            this.commandsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.matrixEditToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cutAllByPlaneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.treeListView1)).BeginInit();
@@ -238,7 +239,7 @@
             this.toolStripSeparator6,
             this.commandsToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(135, 220);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 242);
             // 
             // addToolStripMenuItem
             // 
@@ -304,9 +305,16 @@
             // partToolStripMenuItem1
             // 
             this.partToolStripMenuItem1.Name = "partToolStripMenuItem1";
-            this.partToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.partToolStripMenuItem1.Size = new System.Drawing.Size(103, 22);
             this.partToolStripMenuItem1.Text = "part";
             this.partToolStripMenuItem1.Click += new System.EventHandler(this.partToolStripMenuItem1_Click);
+            // 
+            // meshToolStripMenuItem1
+            // 
+            this.meshToolStripMenuItem1.Name = "meshToolStripMenuItem1";
+            this.meshToolStripMenuItem1.Size = new System.Drawing.Size(103, 22);
+            this.meshToolStripMenuItem1.Text = "mesh";
+            this.meshToolStripMenuItem1.Click += new System.EventHandler(this.meshToolStripMenuItem1_Click);
             // 
             // deleteToolStripMenuItem
             // 
@@ -382,6 +390,27 @@
             this.infoToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.infoToolStripMenuItem.Text = "info";
             this.infoToolStripMenuItem.Click += new System.EventHandler(this.infoToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(177, 6);
+            // 
+            // commandsToolStripMenuItem
+            // 
+            this.commandsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.matrixEditToolStripMenuItem,
+            this.cutAllByPlaneToolStripMenuItem});
+            this.commandsToolStripMenuItem.Name = "commandsToolStripMenuItem";
+            this.commandsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.commandsToolStripMenuItem.Text = "commands";
+            // 
+            // matrixEditToolStripMenuItem
+            // 
+            this.matrixEditToolStripMenuItem.Name = "matrixEditToolStripMenuItem";
+            this.matrixEditToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.matrixEditToolStripMenuItem.Text = "matrix edit";
+            this.matrixEditToolStripMenuItem.Click += new System.EventHandler(this.matrixEditToolStripMenuItem_Click);
             // 
             // propertyGrid1
             // 
@@ -1070,32 +1099,12 @@
             this.toolStripButton6.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.toolStripButton6.Click += new System.EventHandler(this.toolStripButton6_Click);
             // 
-            // meshToolStripMenuItem1
+            // cutAllByPlaneToolStripMenuItem
             // 
-            this.meshToolStripMenuItem1.Name = "meshToolStripMenuItem1";
-            this.meshToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
-            this.meshToolStripMenuItem1.Text = "mesh";
-            this.meshToolStripMenuItem1.Click += new System.EventHandler(this.meshToolStripMenuItem1_Click);
-            // 
-            // toolStripSeparator6
-            // 
-            this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(177, 6);
-            // 
-            // commandsToolStripMenuItem
-            // 
-            this.commandsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.matrixEditToolStripMenuItem});
-            this.commandsToolStripMenuItem.Name = "commandsToolStripMenuItem";
-            this.commandsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.commandsToolStripMenuItem.Text = "commands";
-            // 
-            // matrixEditToolStripMenuItem
-            // 
-            this.matrixEditToolStripMenuItem.Name = "matrixEditToolStripMenuItem";
-            this.matrixEditToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.matrixEditToolStripMenuItem.Text = "matrix edit";
-            this.matrixEditToolStripMenuItem.Click += new System.EventHandler(this.matrixEditToolStripMenuItem_Click);
+            this.cutAllByPlaneToolStripMenuItem.Name = "cutAllByPlaneToolStripMenuItem";
+            this.cutAllByPlaneToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.cutAllByPlaneToolStripMenuItem.Text = "cut all by plane";
+            this.cutAllByPlaneToolStripMenuItem.Click += new System.EventHandler(this.cutAllByPlaneToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -1240,6 +1249,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripMenuItem commandsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem matrixEditToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cutAllByPlaneToolStripMenuItem;
     }
 }
 

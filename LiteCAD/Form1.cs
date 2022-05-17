@@ -300,7 +300,7 @@ namespace LiteCAD
             var gi = propertyGrid1.SelectedGridItem;
             var obj = propertyGrid1.SelectedObject;
             if (gi.PropertyDescriptor.PropertyType == typeof(TransformationChain))
-            {                
+            {
                 var ret = editorStart(gi.Value, gi.PropertyDescriptor.Name, typeof(Matrix4dPropEditor));
                 gi.PropertyDescriptor.SetValue(obj, (TransformationChain)ret);
                 //gi.PropertyDescriptor.Name
@@ -571,12 +571,12 @@ namespace LiteCAD
         {
 
             if (treeListView1.SelectedObjects.Count <= 0) return;
-            if (Helpers.ShowQuestion($"Are you sure to delete {treeListView1.SelectedObjects.Count} items?", Text) != DialogResult.Yes) return;
+            if (GUIHelpers.ShowQuestion($"Are you sure to delete {treeListView1.SelectedObjects.Count} items?", Text) != DialogResult.Yes) return;
             foreach (var item in treeListView1.SelectedObjects)
             {
                 if (editedDraft == item)
                 {
-                    Helpers.Warning("you can't delete edited draft", Text);
+                    GUIHelpers.Warning("you can't delete edited draft", Text);
                     continue;
                 }
 
@@ -1114,6 +1114,7 @@ namespace LiteCAD
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;
             var vv = treeListView1.SelectedObjects.OfType<IEconomicsDetail>().ToArray();
+            if (vv.Length == 0) return;
             Info inf = new Info();
             inf.Init(vv[0]);
             inf.Show(this);
@@ -1198,6 +1199,42 @@ namespace LiteCAD
         private void propertyGrid1_DoubleClick(object sender, EventArgs e)
         {
 
+        }
+
+        private void cutAllByPlaneToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var models = treeListView1.SelectedObjects.OfType<MeshModel>().ToArray();
+            if (models.Length == 0) return;
+            var ph = treeListView1.SelectedObjects.OfType<PlaneHelper>().FirstOrDefault();
+            if (ph == null) return;
+
+            var pnts = models.SelectMany(z => z.SplitPyPlane(ph));
+
+            //project all to ph
+            //var proj = pnts.Select(ph.ProjPoint).ToList();
+            var lines = pnts.ToList();
+            Draft d = new Draft() { Name = "cut-by-plane" };
+            float closeEps = 1e-3f;
+            foreach (var line in lines)
+            {
+                var fd1 = d.DraftPoints.FirstOrDefault(z => (z.Location - line.Start.Xy).Length < closeEps);
+                var fd2 = d.DraftPoints.FirstOrDefault(z => (z.Location - line.End.Xy).Length < closeEps);
+                if (fd1 == null)
+                {
+                    fd1 = new DraftPoint(d, line.Start.X, line.Start.Y);
+                    d.AddElement(fd1);
+                }
+                if (fd2 == null)
+                {
+                    fd2 = new DraftPoint(d, line.End.X, line.End.Y);
+                    d.AddElement(fd2);
+                }
+
+                d.AddElement(new DraftLine(fd1, fd2, d));
+            }
+
+            Parts.Add(d);
+            updateList();
         }
     }
 

@@ -32,6 +32,16 @@ namespace LiteCAD
                     PartAssembly d = new PartAssembly(this, item);
                     Parts.Add(d);
                 }
+                if (item.Name == "mesh")
+                {
+                    MeshModel d = new MeshModel(this, item);
+                    Parts.Add(d);
+                }
+                if (item.Name == "plane")
+                {
+                    PlaneHelper d = new PlaneHelper(item);
+                    Parts.Add(d);
+                }
             }
         }
 

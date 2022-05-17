@@ -57,6 +57,7 @@
     <Compile Include="BRep\Editor\ProjectMapEditor.Designer.cs">
       <DependentUpon>ProjectMapEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Common\Helpers.cs" />
     <Compile Include="BRep\ProjectPolygon.cs" />
     <Compile Include="BRep\Faces\BRepBSplineWithKnotsSurfaceFace.cs" />
     <Compile Include="BRep\Curves\BRepCircleCurve.cs" />

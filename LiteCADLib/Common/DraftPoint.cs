@@ -35,6 +35,10 @@ namespace LiteCAD.Common
 
             Location = new Vector2d(x, y);
         }
+        public DraftPoint(Draft parent, double x, double y) : base(parent)
+        {
+            Location = new Vector2d(x, y);
+        }
 
         public DraftPoint(XElement item2, Draft d):base(d)
         {

@@ -90,7 +90,7 @@ namespace LiteCAD.DraftEditor
                     }
                     else
                     {
-                        Helpers.Warning("such constraint already exist", ParentForm.Text);
+                        GUIHelpers.Warning("such constraint already exist", ParentForm.Text);
                     }
                     queue.Clear();
                     editor.ResetTool();
@@ -114,7 +114,7 @@ namespace LiteCAD.DraftEditor
                     }
                     else
                     {
-                        Helpers.Warning("such constraint already exist", ParentForm.Text);
+                        GUIHelpers.Warning("such constraint already exist", ParentForm.Text);
                     }
                     queue.Clear();
                     editor.ResetTool();
@@ -138,7 +138,7 @@ namespace LiteCAD.DraftEditor
                     }
                     else
                     {
-                        Helpers.Warning("such constraint already exist", ParentForm.Text);
+                        GUIHelpers.Warning("such constraint already exist", ParentForm.Text);
                     }
                     queue.Clear();
                     editor.ResetTool();

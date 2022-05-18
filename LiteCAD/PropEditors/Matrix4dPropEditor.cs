@@ -51,7 +51,10 @@ namespace LiteCAD.PropEditors
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (listView1.SelectedItems.Count == 0) return;
+            
             var tci = listView1.SelectedItems[0].Tag as TransformationChainItem;
+            propertyGrid1.SelectedObject = tci;
+
             current = tci;
             if (tci is TranslateTransformChainItem tr)
             {
@@ -64,6 +67,12 @@ namespace LiteCAD.PropEditors
                 textBox1.Text = sc.Vector.X.ToString();
                 textBox2.Text = sc.Vector.Y.ToString();
                 textBox3.Text = sc.Vector.Z.ToString();
+            }
+            if (tci is RotationTransformChainItem rt)
+            {
+                textBox1.Text = rt.Axis.X.ToString();
+                textBox2.Text = rt.Axis.Y.ToString();
+                textBox3.Text = rt.Axis.Z.ToString();
             }
         }
 
@@ -79,6 +88,10 @@ namespace LiteCAD.PropEditors
                 if (current is ScaleTransformChainItem sc)
                 {
                     sc.Vector.X = Helpers.ParseDouble(textBox1.Text);
+                }
+                if (current is RotationTransformChainItem rt)
+                {
+                    rt.Axis.X = Helpers.ParseDouble(textBox1.Text);
                 }
             }
             catch (Exception ex)
@@ -114,6 +127,10 @@ namespace LiteCAD.PropEditors
                 {
                     sc.Vector.Y = Helpers.ParseDouble(textBox2.Text);
                 }
+                if (current is RotationTransformChainItem rt)
+                {
+                    rt.Axis.Y = Helpers.ParseDouble(textBox2.Text);
+                }
             }
             catch (Exception ex)
             {
@@ -134,11 +151,21 @@ namespace LiteCAD.PropEditors
                 {
                     sc.Vector.Z = Helpers.ParseDouble(textBox3.Text);
                 }
+                if (current is RotationTransformChainItem rt)
+                {
+                    rt.Axis.Z = Helpers.ParseDouble(textBox3.Text);
+                }
             }
             catch (Exception ex)
             {
 
             }
+        }
+
+        private void rotateAxisToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _matrix.Items.Add(new RotationTransformChainItem());
+            updateList();
         }
     }
 }

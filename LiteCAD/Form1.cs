@@ -179,6 +179,11 @@ namespace LiteCAD
                 return $"<{x.GetType().Name}>";
             };
 
+            (treeListView1.Columns[1] as BrightIdeasSoftware.OLVColumn).AspectGetter = (x) =>
+            {
+                return $"{x.GetType().Name}";
+            };
+
             treeListView1.ChildrenGetter = (x) =>
         {
             if (EditMode == EditModeEnum.Draft)
@@ -301,7 +306,7 @@ namespace LiteCAD
             var obj = propertyGrid1.SelectedObject;
             if (gi.PropertyDescriptor.PropertyType == typeof(TransformationChain))
             {
-                var ret = editorStart(gi.Value, gi.PropertyDescriptor.Name, typeof(Matrix4dPropEditor));
+                var ret = editorStart(gi.Value, gi.PropertyDescriptor.Name, typeof(Matrix4dPropEditor), false);
                 gi.PropertyDescriptor.SetValue(obj, (TransformationChain)ret);
                 //gi.PropertyDescriptor.Name
             }
@@ -315,7 +320,12 @@ namespace LiteCAD
             }
         }
 
-        object editorStart(object init, string nm, Type control)
+        internal void SetStatus(string v)
+        {
+            toolStripStatusLabel1.Text = v;
+        }
+
+        object editorStart(object init, string nm, Type control, bool dialog = true)
         {
             Form f = new Form() { Text = nm };
             f.FormBorderStyle = FormBorderStyle.FixedToolWindow;
@@ -325,7 +335,15 @@ namespace LiteCAD
             f.Controls.Add(cc);
             f.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             f.AutoSize = true;
-            f.ShowDialog();
+            if (dialog)
+            {
+                f.ShowDialog();
+            }
+            else
+            {
+                f.TopMost = true;
+                f.Show();
+            }
             return (cc as IPropEditor).ReturnValue;
         }
 
@@ -370,7 +388,21 @@ namespace LiteCAD
                     if (dr is Part p)
                         pas.Parts.Add(new PartInstance(p));
                 }
+                if (targetNode is Group gr)
+                {
+                    if (dr.Parent != null)
+                        dr.Parent.RemoveChild(dr);
+                    else
+                        Parts.Remove(dr);
+                    if (!gr.Childs.Contains(dr))
+                    {
+                        //check nesting
+                        gr.Childs.Add(dr);
+                    }
+
+                }
             }
+            updateList();
         }
 
         private void TreeListView1_ItemDrag(object sender, ItemDragEventArgs e)
@@ -439,7 +471,7 @@ namespace LiteCAD
             PlaneHelper ph = new PlaneHelper() { Normal = Vector3d.UnitZ };
             Parts.Add(ph);
             ph.Name = "plane01";
-            treeListView1.SetObjects(Parts);
+            updateList();
         }
         Part selectedPart;
         private void treeListView1_SelectedIndexChanged(object sender, EventArgs e)
@@ -567,9 +599,9 @@ namespace LiteCAD
             fitAll();
         }
 
+        
         void deleteItem()
         {
-
             if (treeListView1.SelectedObjects.Count <= 0) return;
             if (GUIHelpers.ShowQuestion($"Are you sure to delete {treeListView1.SelectedObjects.Count} items?", Text) != DialogResult.Yes) return;
             foreach (var item in treeListView1.SelectedObjects)
@@ -596,7 +628,7 @@ namespace LiteCAD
                     }
                 }
             }
-            treeListView1.SetObjects(Parts);
+            updateList();
         }
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -804,7 +836,7 @@ namespace LiteCAD
         {
             Draft draft = new Draft() { Name = "new draft" };
             Parts.Add(draft);
-            treeListView1.SetObjects(Parts);
+            updateList();
         }
 
         Vector3[] camState = new Vector3[3];
@@ -1003,7 +1035,7 @@ namespace LiteCAD
                             Parts.Add(prt);
                         }
                         infoPanel.AddInfo($"model loaded succesfully: {fi.Name}");
-                        treeListView1.SetObjects(Parts);
+                        updateList();
                         var vv = getAllPoints();
                         fitAll(vv);
                         camToSelected(vv);
@@ -1041,6 +1073,9 @@ namespace LiteCAD
 
         void updateList()
         {
+            /*var grp = new Group() { Name = "root" };
+            grp.Childs.AddRange(Parts);
+            treeListView1.SetObjects(new[] { grp});*/
             treeListView1.SetObjects(Parts);
         }
         private void toolStripButton6_Click(object sender, EventArgs e)
@@ -1215,18 +1250,26 @@ namespace LiteCAD
             var lines = pnts.ToList();
             Draft d = new Draft() { Name = "cut-by-plane" };
             float closeEps = 1e-3f;
+            /*Group gr = new Group() { Name = "cut-by-plane-lines" };
+            Parts.Add(gr);
+            foreach (var item in lines)
+            {
+                gr.Childs.Add(new LineHelper(item));
+            }*/
             foreach (var line in lines)
             {
-                var fd1 = d.DraftPoints.FirstOrDefault(z => (z.Location - line.Start.Xy).Length < closeEps);
-                var fd2 = d.DraftPoints.FirstOrDefault(z => (z.Location - line.End.Xy).Length < closeEps);
+                var uv1 = ph.ProjectPointUV(line.Start);
+                var uv2 = ph.ProjectPointUV(line.End);
+                var fd1 = d.DraftPoints.FirstOrDefault(z => (z.Location - uv1).Length < closeEps);
+                var fd2 = d.DraftPoints.FirstOrDefault(z => (z.Location - uv2).Length < closeEps);
                 if (fd1 == null)
                 {
-                    fd1 = new DraftPoint(d, line.Start.X, line.Start.Y);
+                    fd1 = new DraftPoint(d, uv1.X, uv1.Y);
                     d.AddElement(fd1);
                 }
                 if (fd2 == null)
                 {
-                    fd2 = new DraftPoint(d, line.End.X, line.End.Y);
+                    fd2 = new DraftPoint(d, uv2.X, uv2.Y);
                     d.AddElement(fd2);
                 }
 
@@ -1235,6 +1278,22 @@ namespace LiteCAD
 
             Parts.Add(d);
             updateList();
+        }
+
+        private void groupToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Parts.Add(new Group());
+            updateList();
+        }
+
+        private void toolStripButton15_Click(object sender, EventArgs e)
+        {
+            de.FlipHorizontal();            
+        }
+
+        private void toolStripButton16_Click(object sender, EventArgs e)
+        {
+            de.Undo();
         }
     }
 

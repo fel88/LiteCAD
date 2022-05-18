@@ -23,8 +23,12 @@ namespace LiteCAD.Common
             {
                 Name = elem.Attribute("name").Value;
             }
+            if (elem.Attribute("size") != null)
+            {
+                DrawSize = int.Parse(elem.Attribute("size").Value);
+            }
             var pos = elem.Attribute("pos").Value.Split(';').Select(z => double.Parse(z.Replace(",", "."), CultureInfo.InvariantCulture)).ToArray();
-            Position = new Vector3d(pos[0], pos[1], pos[2]); 
+            Position = new Vector3d(pos[0], pos[1], pos[2]);
             var normal = elem.Attribute("normal").Value.Split(';').Select(z => double.Parse(z.Replace(",", "."), CultureInfo.InvariantCulture)).ToArray();
             Normal = new Vector3d(normal[0], normal[1], normal[2]);
         }
@@ -40,7 +44,7 @@ namespace LiteCAD.Common
 
         public override void Store(TextWriter writer)
         {
-            writer.WriteLine($"<plane name=\"{Name}\" pos=\"{Position.X};{Position.Y};{Position.Z}\" normal=\"{Normal.X};{Normal.Y};{Normal.Z}\"/>");
+            writer.WriteLine($"<plane name=\"{Name}\" size=\"{DrawSize}\" pos=\"{Position.X};{Position.Y};{Position.Z}\" normal=\"{Normal.X};{Normal.Y};{Normal.Z}\"/>");
         }
 
         public Vector3d[] GetBasis()
@@ -61,7 +65,26 @@ namespace LiteCAD.Common
 
             return new[] { axis1, axis2 };
         }
-
+        public Vector2d ProjectPointUV(Vector3d v)
+        {
+            var basis = GetBasis();
+            return GetUVProjPoint(v, basis[0], basis[1]);
+        }
+        public Vector2d GetUVProjPoint(Vector3d point, Vector3d axis1, Vector3d axis2)
+        {
+            var p = GetProjPoint(point) - Position;
+            var p1 = Vector3d.Dot(p, axis1);
+            var p2 = Vector3d.Dot(p, axis2);
+            return new Vector2d(p1, p2);
+        }
+        public Vector3d GetProjPoint(Vector3d point)
+        {
+            var v = point - Position;
+            var nrm = Normal;
+            var dist = Vector3d.Dot(v, nrm);
+            var proj = point - dist * nrm;
+            return proj;
+        }
         public Vector3d ProjPoint(Vector3d point)
         {
             var nrm = Normal.Normalized();
@@ -213,45 +236,4 @@ namespace LiteCAD.Common
             return ret.ToArray();
         }
     }
-    public class Line3D
-    {
-        public Vector3d Start;
-        public Vector3d End;
-        public Vector3d Dir
-        {
-            get
-            {
-                return (End - Start).Normalized();
-            }
-        }
-
-        public bool IsPointOnLine(Vector3d pnt, float epsilon = 10e-6f)
-        {
-            float tolerance = 10e-6f;
-            var d1 = pnt - Start;
-            if (d1.Length < tolerance) return true;
-            if ((End - Start).Length < tolerance) throw new Exception("degenerated 3d line");
-            var crs = Vector3d.Cross(d1.Normalized(), (End - Start).Normalized());
-            return Math.Abs(crs.Length) < epsilon;
-        }
-        public bool IsPointInsideSegment(Vector3d pnt, float epsilon = 10e-6f)
-        {
-            if (!IsPointOnLine(pnt, epsilon)) return false;
-            var v0 = (End - Start).Normalized();
-            var v1 = pnt - Start;
-            var crs = Vector3d.Dot(v0, v1) / (End - Start).Length;
-            return !(crs < 0 || crs > 1);
-        }
-        public bool IsSameLine(Line3D l)
-        {
-            return IsPointOnLine(l.Start) && IsPointOnLine(l.End);
-        }
-
-        public void Shift(Vector3d vector3)
-        {
-            Start += vector3;
-            End += vector3;
-        }
-    }
-
 }

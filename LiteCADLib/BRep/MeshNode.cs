@@ -28,17 +28,21 @@ namespace LiteCAD.BRep
                 }
             }
         }
-        public Line3D[] SplitByPlane(PlaneHelper pl)
+        public Line3D[] SplitByPlane(Matrix4d matrix, PlaneHelper pl)
         {
             List<Line3D> vv = new List<Line3D>();
+            List<TriangleInfo> trianglesModifed = new List<TriangleInfo>();
             foreach (var item in Triangles)
+            {
+                trianglesModifed.Add(item.Multiply(matrix));
+            }
+            foreach (var item in trianglesModifed)
             {
                 vv.AddRange(item.SplitByPlane(pl));
             }
             return vv.ToArray();
-
-
         }
+
         public MeshNode RestoreXml(XElement mesh)
         {
             MeshNode ret = new MeshNode();

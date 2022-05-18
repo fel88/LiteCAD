@@ -101,6 +101,7 @@
     <Compile Include="PropEditors\Vector3dPropEditor.Designer.cs">
       <DependentUpon>Vector3dPropEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="RotationTransformChainItem.cs" />
     <Compile Include="ScaleTransformChainItem.cs" />
     <Compile Include="Tools\DraftEllipseTool.cs" />
     <Compile Include="Tools\DraftLineTool.cs" />

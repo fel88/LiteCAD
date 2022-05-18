@@ -11,8 +11,6 @@ using LiteCAD.Common;
 using LiteCAD.Tools;
 using System.Linq;
 using LiteCAD.BRep.Editor;
-using System.IO;
-using System.Xml.Linq;
 
 namespace LiteCAD.DraftEditor
 {
@@ -32,42 +30,20 @@ namespace LiteCAD.DraftEditor
         {
             //var pos = ctx.PictureBox.Control.PointToClient(Cursor.Position);
 
-
-
-
-            if (e == MouseButtons.Left)
+            if (selected is IDrawable dd)
             {
-                foreach (var item in selected)
-                {
-                    if (item is IDrawable dd)
-                    {
-                        dd.Selected = false;
-                    }
-                }
-                selected = new[] { nearest };
-                Form1.Form.SetStatus($"selected: {selected.Count()} objects");
-                foreach (var item in selected)
-                {
-                    if (item is IDrawable dd)
-                    {
-                        dd.Selected = true;
-                    }
-                }
+                dd.Selected = false;
+            }
+
+            selected = nearest;
+            if (selected is IDrawable dd2)
+            {
+                dd2.Selected = true;
             }
 
             if (e == MouseButtons.Middle)
             {
                 ctx.isMiddleDrag = true;
-                if (nearest is DraftPoint pp)
-                {
-                    var tr = ctx.Transform(pp.Location);
-                    ctx.startx = (float)tr.X;
-                    ctx.starty = (float)tr.Y;
-                }
-            }
-            if (e == MouseButtons.Left)
-            {
-                ctx.isLeftDrag = true;
                 if (nearest is DraftPoint pp)
                 {
                     var tr = ctx.Transform(pp.Location);
@@ -247,51 +223,6 @@ namespace LiteCAD.DraftEditor
         private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
             isPressed = false;
-            var cp = Cursor.Position;
-            var pos = ctx.PictureBox.Control.PointToClient(Cursor.Position);
-
-            if (e.Button == MouseButtons.Right)
-            {
-                var dx = Math.Abs(ctx.startx - pos.X);
-                var dy = Math.Abs(ctx.starty - pos.Y);
-                float eps = 1;
-                if ((dx + dy) < eps)
-                {
-                    contextMenuStrip1.Show(cp);
-                }
-            }
-            if (e.Button == MouseButtons.Left)
-            {
-                var gcur = ctx.GetCursor();
-                var t = ctx.BackTransform(new PointF(ctx.startx, ctx.starty));
-                var rxm = Math.Min(t.X, gcur.X);
-                var rym = Math.Min(t.Y, gcur.Y);
-                var rdx = Math.Abs(t.X - gcur.X);
-                var rdy = Math.Abs(t.Y - gcur.Y);
-                var rect = new RectangleF(rxm, rym, rdx, rdy);
-                if (rect.Width > 1 && rect.Height > 1)
-                {
-                    var tt = _draft.DraftPoints.Where(z => rect.Contains((float)z.Location.X, (float)z.Location.Y)).ToArray();
-                    selected = tt;
-                    Form1.Form.SetStatus($"selected: {tt.Count()} points");
-                }
-            }
-        }
-
-        public List<string> Undos = new List<string>();
-        public void Undo()
-        {
-            if (Undos.Count == 0) return;
-            var el = XElement.Parse(Undos.Last());
-            _draft.Restore(el);
-            Undos.RemoveAt(Undos.Count - 1);
-        }
-
-        public void Backup()
-        {
-            StringWriter sw = new StringWriter();
-            _draft.Store(sw);
-            Undos.Add(sw.ToString());
         }
 
         public void FitAll()
@@ -302,9 +233,9 @@ namespace LiteCAD.DraftEditor
             ctx.FitToPoints(t.Select(z => z.ToPointF()).ToArray(), 5);
         }
 
-        DrawingContext ctx = new DrawingContext() { DragButton = MouseButtons.Right };
+        DrawingContext ctx = new DrawingContext() { DragButton = MouseButtons.Left };
         object nearest;
-        object[] selected = new object[] { };
+        object selected;
         void updateNearest()
         {
             var pos = ctx.GetCursor();
@@ -382,7 +313,7 @@ namespace LiteCAD.DraftEditor
                     float gp = 5;
                     var tr = ctx.Transform(item.X, item.Y);
 
-                    if (nearest == item || selected.Contains(item))
+                    if (nearest == item)
                     {
                         ctx.gr.FillRectangle(Brushes.Blue, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
                     }
@@ -398,7 +329,7 @@ namespace LiteCAD.DraftEditor
                     Vector2d item = _draft.DraftLines[i].V1.Location;
                     var tr = ctx.Transform(item0.X, item0.Y);
                     var tr11 = ctx.Transform(item.X, item.Y);
-                    Pen p = new Pen(selected.Contains(el) ? Color.Blue : Color.Black);
+                    Pen p = new Pen(el == selected ? Color.Blue : Color.Black);
 
                     if (el.Dummy)
                         p.DashPattern = new float[] { 10, 10 };
@@ -413,7 +344,7 @@ namespace LiteCAD.DraftEditor
                     var rad = (float)el.Radius * ctx.zoom;
                     var tr = ctx.Transform(item0.X, item0.Y);
 
-                    ctx.gr.DrawEllipse(selected.Contains(el) ? Pens.Blue : Pens.Black, tr.X - rad, tr.Y - rad, rad * 2, rad * 2);
+                    ctx.gr.DrawEllipse(el == selected ? Pens.Blue : Pens.Black, tr.X - rad, tr.Y - rad, rad * 2, rad * 2);
 
                     float gp = 5;
                     tr = ctx.Transform(el.Center.X, el.Center.Y);
@@ -462,28 +393,6 @@ namespace LiteCAD.DraftEditor
                 var dist = (v2 - v1).Length;
                 ctx.gr.DrawString(dist.ToString("N2"), SystemFonts.DefaultFont, Brushes.Black, curp.X + 10, curp.Y);
             }
-            if (ctx.isLeftDrag)//rect tool
-            {
-                Pen pen = new Pen(Color.Blue, 2);
-                pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-
-                pen.DashPattern = new float[] { 4.0F, 2.0F, 1.0F, 3.0F };
-                var gcur = ctx.GetCursor();
-
-                var curp = ctx.Transform(gcur);
-
-                var t = ctx.Transform(new PointF(ctx.startx, ctx.starty));
-                var rxm = Math.Min(ctx.startx, curp.X);
-                var rym = Math.Min(ctx.starty, curp.Y);
-                var rdx = Math.Abs(ctx.startx - curp.X);
-                var rdy = Math.Abs(ctx.starty - curp.Y);
-                ctx.gr.DrawRectangle(pen, rxm, rym, rdx, rdy);
-                var pp = ctx.BackTransform(new PointF(ctx.startx, ctx.starty));
-                Vector2 v1 = new Vector2(pp.X, pp.Y);
-                Vector2 v2 = new Vector2(gcur.X, gcur.Y);
-                var dist = (v2 - v1).Length;
-                ctx.gr.DrawString(dist.ToString("N2"), SystemFonts.DefaultFont, Brushes.Black, curp.X + 10, curp.Y);
-            }
             pictureBox1.Image = ctx.Bmp;
         }
 
@@ -524,59 +433,13 @@ namespace LiteCAD.DraftEditor
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (selected == null || selected.Length == 0) return;
-            Backup();
-            foreach (var item in selected)
+            if (selected == null) return;
+            if (selected is DraftElement de)
+                _draft.RemoveElement(de);
+
+            if (selected is IDrawable dd)
             {
-                if (item is DraftElement de)
-                    _draft.RemoveElement(de);
-
-                if (item is IDrawable dd)
-                {
-                    _draft.RemoveChild(dd);
-                }
-            }
-        }
-
-        private void detectCOMToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var points = selected.OfType<DraftPoint>().ToArray();
-            if (points.Length == 0) return;
-            var sx = points.Sum(z => z.X) / points.Length;
-            var sy = points.Sum(z => z.Y) / points.Length;
-
-            _draft.AddElement(new DraftPoint(_draft, sx, sy));
-        }
-
-        private void approxByCircleToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var points = selected.OfType<DraftPoint>().ToArray();
-            if (points.Length == 0) return;
-            var sx = points.Sum(z => z.X) / points.Length;
-            var sy = points.Sum(z => z.Y) / points.Length;
-            var dp = new DraftPoint(_draft, sx, sy);
-            var rad = (decimal)(points.Select(z => (z.Location - dp.Location).Length).Average());
-
-            _draft.AddElement(new DraftEllipse(dp, rad, _draft));
-            if (GUIHelpers.ShowQuestion("Delete source points?", ParentForm.Text) == DialogResult.Yes)
-            {
-                for (int p = 0; p < points.Length; p++)
-                {
-                    _draft.RemoveElement(points[p]);
-                }
-            }
-
-        }
-
-        internal void FlipHorizontal()
-        {
-            var maxy = _draft.DraftPoints.Max(z => z.Y);
-            var miny = _draft.DraftPoints.Min(z => z.Y);
-            var my = (maxy + miny) / 2;
-            for (int i = 0; i < _draft.DraftPoints.Length; i++)
-            {
-                _draft.DraftPoints[i].Location.Y = 2 * my - _draft.DraftPoints[i].Location.Y;
-
+                _draft.RemoveChild(dd);
             }
         }
     }

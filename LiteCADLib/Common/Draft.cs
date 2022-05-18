@@ -15,12 +15,18 @@ namespace LiteCAD.Common
         public Draft()
         {
             Plane = new PlaneHelper() { Normal = Vector3d.UnitZ, Position = Vector3d.Zero };
-
             _inited = true;
-
         }
+
         public Draft(XElement el)
         {
+            Restore(el);
+            _inited = true;
+        }
+
+        public void Restore(XElement el)
+        {
+            Elements.Clear();
             Plane = new PlaneHelper(el.Element("plane"));
             Name = el.Attribute("name").Value;
             foreach (var item2 in el.Elements())
@@ -35,13 +41,15 @@ namespace LiteCAD.Common
                     DraftLine dl = new DraftLine(item2, this);
                     AddElement(dl);
                 }
+                if (item2.Name == "ellipse")
+                {
+                    DraftEllipse dl = new DraftEllipse(item2, this);
+                    AddElement(dl);
+                }
             }
 
             EndEdit();
-            _inited = true;
-
         }
-
         public DraftLine[][] GetWires()
         {
             var remains = DraftLines.Where(z => !z.Dummy).ToList();

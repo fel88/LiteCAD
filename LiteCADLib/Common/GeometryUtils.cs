@@ -150,14 +150,20 @@ namespace LiteCAD.Common
             var ty = rand.Next((int)(miny * 100), (int)(maxy * 100)) / 100f;
             PointF test = new PointF(tx, ty);
 
+            int cntr = 0;
             while (true)
             {
+                cntr++;
+                if (cntr > 1000)
+                {
+                    throw new LiteCadException("GetRandomInteriorPoint failed");
+                }
                 if (pnpoly(polygon.ToArray(), test.X, test.Y))
                 {
                     break;
                 }
-                tx = rand.Next((int)(minx * 100), (int)(maxx * 100)) / 100f;
-                ty = rand.Next((int)(miny * 100), (int)(maxy * 100)) / 100f;
+                tx = rand.Next((int)(minx * 10000), (int)(maxx * 10000)) / 10000f;
+                ty = rand.Next((int)(miny * 10000), (int)(maxy * 10000)) / 10000f;
                 test = new PointF(tx, ty);
             }
             return test;

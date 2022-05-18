@@ -16,7 +16,6 @@ namespace LiteCAD.BRep.Editor
         public float origsx, origsy;
         public bool isDrag = false;
         public  bool isMiddleDrag = false;
-        public bool isLeftDrag = false;
         public bool MiddleDrag { get { return isMiddleDrag; } }
         public float sx, sy;
         public float zoom = 1;
@@ -121,15 +120,6 @@ namespace LiteCAD.BRep.Editor
                 origsx = sx;
                 origsy = sy;
             }
-            if (e.Button == MouseButtons.Left)
-            {
-                isLeftDrag= true;
-
-                startx = pos.X;
-                starty = pos.Y;
-                origsx = sx;
-                origsy = sy;
-            }
 
             var tt = BackTransform(e.X, e.Y);
             MouseDown?.Invoke(tt.X, tt.Y, e.Button);
@@ -150,7 +140,6 @@ namespace LiteCAD.BRep.Editor
         {
             isDrag = false;
             isMiddleDrag = false;
-            isLeftDrag = false;
 
             var tt = BackTransform(e.X, e.Y);
             MouseUp?.Invoke(tt.X, tt.Y, e.Button);

@@ -129,16 +129,33 @@ namespace LiteCAD
 
         internal Line3D[] SplitPyPlane(PlaneHelper ph)
         {
-            var mm = Matrix.Calc();
-            var ret = Nodes.SelectMany(z => z.SplitByPlane(ph)).ToArray();
+            var mm = Matrix.Calc();            
+            var ret = Nodes.SelectMany(z => z.SplitByPlane(mm,ph)).ToArray();
+            mm = Matrix4d.Identity;
             for (int i = 0; i < ret.Length; i++)
             {
+
                 var res1 = Vector3d.Transform(ret[i].Start, mm);
                 var res2 = Vector3d.Transform(ret[i].End, mm);
                 ret[i].Start = res1;
                 ret[i].End = res2;
             }
             return ret;
+        }
+    }
+
+    public class Group : AbstractDrawable
+    {        
+        public Group()
+        {
+            Name = "group";
+        }
+        public override void Draw()
+        {
+            foreach (var item in Childs)
+            {
+                item.Draw();
+            }
         }
     }
 }

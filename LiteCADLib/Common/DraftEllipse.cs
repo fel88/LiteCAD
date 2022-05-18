@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Xml.Linq;
 
 namespace LiteCAD.Common
 {
@@ -14,6 +15,13 @@ namespace LiteCAD.Common
         {
             this.Center = center;
             this.Radius = radius;
+        }
+        public DraftEllipse(XElement elem, Draft parent)
+          : base(parent)
+        {
+            var c = Helpers.ParseVector2(elem.Attribute("center").Value);
+            Center = new DraftPoint(parent, c.X, c.Y);
+            Radius = Helpers.ParseDecimal(elem.Attribute("radius").Value);
         }
 
         internal decimal CutLength()

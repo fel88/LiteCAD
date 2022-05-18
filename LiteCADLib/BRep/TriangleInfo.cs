@@ -38,6 +38,20 @@ namespace LiteCAD.BRep
             return z1;
         }
         public Vector3d V0 => Vertices[0].Position;
+
+        internal TriangleInfo Multiply(Matrix4d matrix)
+        {
+            TriangleInfo ret = new TriangleInfo();
+            ret.Vertices = new VertexInfo[Vertices.Length];
+            for (int i = 0; i < Vertices.Length; i++)
+            {
+                ret.Vertices[i] = new VertexInfo();
+                ret.Vertices[i].Position = Vector3d.Transform(Vertices[i].Position, matrix);
+            }
+            
+            return ret;
+        }
+
         public Vector3d V1 => Vertices[1].Position;
         public Vector3d V2 => Vertices[2].Position;
         internal Line3D[] GetLines()
@@ -58,7 +72,7 @@ namespace LiteCAD.BRep
         }
         internal Line3D[] SplitByPlane(PlaneHelper pl)
         {
-            
+
             List<Vector3d> ret = new List<Vector3d>();
             var pl0 = GetPlane();
             var crs = Vector3d.Cross(pl0.Normal, pl.Normal);
@@ -91,8 +105,8 @@ namespace LiteCAD.BRep
                 if (good) pnts3.Add(item);
             }
             pnts = pnts3.ToArray();
-            if(pnts.Length==2)
-            return new[] { new Line3D() { Start = pnts[0], End = pnts[1] } };
+            if (pnts.Length == 2)
+                return new[] { new Line3D() { Start = pnts[0], End = pnts[1] } };
 
             return new Line3D[] { };
             //return pnts;

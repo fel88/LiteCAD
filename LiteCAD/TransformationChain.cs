@@ -22,13 +22,17 @@ namespace LiteCAD
         internal void RestoreXml(XElement xElement)
         {
             Items.Clear();
-            Type[] types = new[] { typeof(ScaleTransformChainItem), typeof(TranslateTransformChainItem) };
+            Type[] types = new[] {
+                typeof(ScaleTransformChainItem), 
+                typeof(TranslateTransformChainItem),
+                typeof(RotationTransformChainItem)
+            };
             foreach (var item in xElement.Element("transformationChain").Elements())
             {
                 var fr = types.First(z => (z.GetCustomAttributes(typeof(XmlNameAttribute), true).First() as XmlNameAttribute).XmlName == item.Name);
                 var v = Activator.CreateInstance(fr) as TransformationChainItem;
                 v.RestoreXml(item);
-                Items.Add(v);                
+                Items.Add(v);
             }
         }
 

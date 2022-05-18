@@ -36,6 +36,16 @@ namespace LiteCAD.Common
             }
             return ret;
         }
+        public static Vector2d ParseVector2(string value)
+        {
+            Vector2d ret = new Vector2d();
+            var spl = value.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(ParseDouble).ToArray();
+            for (int i = 0; i < 2; i++)
+            {
+                ret[i] = spl[i];
+            }
+            return ret;
+        }
     }
 
 }

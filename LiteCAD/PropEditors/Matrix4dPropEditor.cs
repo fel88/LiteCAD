@@ -51,7 +51,7 @@ namespace LiteCAD.PropEditors
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (listView1.SelectedItems.Count == 0) return;
-            
+
             var tci = listView1.SelectedItems[0].Tag as TransformationChainItem;
             propertyGrid1.SelectedObject = tci;
 
@@ -166,6 +166,19 @@ namespace LiteCAD.PropEditors
         {
             _matrix.Items.Add(new RotationTransformChainItem());
             updateList();
+        }
+
+        private void upToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listView1.SelectedItems.Count == 0) return;
+            var tci = listView1.SelectedItems[0].Tag as TransformationChainItem;
+            var ind = _matrix.Items.IndexOf(tci);
+            if (ind > 0)
+            {
+                _matrix.Items.Remove(tci);
+                _matrix.Items.Insert(ind - 1, tci);
+                updateList();
+            }
         }
     }
 }

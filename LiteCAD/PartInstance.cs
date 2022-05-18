@@ -28,10 +28,8 @@ namespace LiteCAD
         public PartInstance(LiteCADScene scene, XElement xitem)
         {
             Name = xitem.Attribute("name").Value;
-            X = Helpers.ParseDouble(xitem.Attribute("x").Value);
-            Y = Helpers.ParseDouble(xitem.Attribute("y").Value);
-            Z = Helpers.ParseDouble(xitem.Attribute("z").Value);
-            RotateZ = Helpers.ParseDouble(xitem.Attribute("rotZ").Value);
+            _matrix.RestoreXml(xitem.Element("transform"));
+
             var id = int.Parse(xitem.Attribute("id").Value);
             var ps = scene.Parts.OfType<IPartContainer>().First(z => z.Part.Id == id);
             Part = ps.Part;
@@ -39,29 +37,23 @@ namespace LiteCAD
 
         public override void Store(TextWriter writer)
         {
-            writer.WriteLine($"<instance id=\"{Part.Id}\" name=\"{Name}\" x=\"{X}\" y=\"{Y}\" z=\"{Z}\" rotZ=\"{RotateZ}\"/>");
+            writer.WriteLine($"<instance id=\"{Part.Id}\" name=\"{Name}\">");
+            writer.WriteLine("<transform>");
+            _matrix.StoreXml(writer);
+            writer.WriteLine("</transform>");
+            writer.WriteLine("</instance>");
         }
 
         public readonly Part Part;
-        Matrix4d _matrix  = Matrix4d.Identity;
-        public Matrix4d Matrix { get => _matrix; set => _matrix = value; }
-
-        public double X { get => Position.X; set => _position.X = value; }
-        public double Y { get => Position.Y; set => _position.Y = value; }
-        public double Z { get => Position.Z; set => _position.Z = value; }
-        Vector3d _position;
-
-
-        public Vector3d Position { get => _position; set => _position = value; }
-        public double RotateZ { get; set; }
+        TransformationChain _matrix = new TransformationChain();
+        public TransformationChain Matrix { get => _matrix; set => _matrix = value; }
 
         public override void Draw()
         {
             GL.PushMatrix();
-            GL.MultMatrix(ref _matrix);
-            GL.Rotate(RotateZ, Vector3d.UnitZ);
+            Matrix4d dd = _matrix.Calc();
+            GL.MultMatrix(ref dd);
 
-            GL.Translate(Position);
             Part.Draw();
             GL.PopMatrix();
         }

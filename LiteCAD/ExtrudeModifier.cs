@@ -25,12 +25,16 @@ namespace LiteCAD
 
         public ExtrudeModifier(XElement item)
         {
+            ctor = true;
+
             Source = new Draft(item.Element("source").Element("draft"));
             Height = Helpers.ParseDecimal(item.Attribute("height").Value);
             Source.Parent = this;
             CreatePart();
             Childs.Add(Source);
-            Id = FactoryHelper.NewId++;
+            Id = int.Parse(item.Attribute("id").Value);
+            ctor = false;
+
         }
 
         private void CreatePart()
@@ -170,13 +174,15 @@ namespace LiteCAD
         }
 
         decimal _height = 10;
+        bool ctor = false;
         public decimal Height
         {
             get => _height;
             set
             {
                 _height = value;
-                CreatePart();
+                if (!ctor)
+                    CreatePart();
             }
         }
 

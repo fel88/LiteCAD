@@ -1,5 +1,6 @@
 ﻿using OpenTK;
 using System;
+using System.IO;
 using System.Linq;
 
 namespace LiteCAD.Common
@@ -45,24 +46,52 @@ namespace LiteCAD.Common
             var ar = new[] { dp0, dp1 }.OrderBy(z => GeometryUtils.Random.Next(100)).ToArray();
             dp0 = ar[0];
             dp1 = ar[1];
-            if (dp1.Frozen)
+            if (dp1.Frozen || (dp1.V0 == CommonPoint && dp1.V1.Frozen) || (dp1.V1 == CommonPoint && dp1.V0.Frozen))
             {
                 var temp = dp1;
                 dp1 = dp0;
                 dp0 = temp;
             }
 
+            //generate all valid candidates first. then random select
+            //not frozen points to move
+            var mp = new[] { dp1.V0, dp1.V1, dp0.V1, dp0.V0 }.Distinct().Where(z => !z.Frozen).ToArray();
+
+            if (!CommonPoint.Frozen)
+            {
+                //intersect
+            }
+            else
             if (dp1.V0 == CommonPoint)
             {
                 var diff = dp1.Dir * dp1.Length;
                 var projectV = new Vector2d(-dp0.Dir.Y, dp0.Dir.X);
-                dp1.V1.Location = CommonPoint.Location + projectV * dp1.Length;
+                var cand1 = CommonPoint.Location + projectV * dp1.Length;
+                var cand2 = CommonPoint.Location - projectV * dp1.Length;
+                if ((cand1 - dp1.V1.Location).Length < (cand2 - dp1.V1.Location).Length)
+                {
+                    dp1.V1.SetLocation(cand1);
+                }
+                else
+                {
+                    dp1.V1.SetLocation(cand2);
+                }
             }
             else
             {
                 var diff = dp1.Dir * dp1.Length;
                 var projectV = new Vector2d(-dp0.Dir.Y, dp0.Dir.X);
-                dp1.V0.Location = CommonPoint.Location + projectV * dp1.Length;
+                //dp1.V0.SetLocation(CommonPoint.Location + projectV * dp1.Length);
+                var cand1 = CommonPoint.Location + projectV * dp1.Length;
+                var cand2 = CommonPoint.Location - projectV * dp1.Length;
+                if ((cand1 - dp1.V0.Location).Length < (cand2 - dp1.V0.Location).Length)
+                {
+                    dp1.V0.SetLocation(cand1);
+                }
+                else
+                {
+                    dp1.V0.SetLocation(cand2);
+                }
             }
             /* var diff = (dp1.Location - dp0.Location).Normalized();
              dp1.Location = dp0.Location + diff * (double)Length;*/
@@ -70,6 +99,16 @@ namespace LiteCAD.Common
         public bool IsSame(PerpendicularConstraint cc)
         {
             return new[] { Element2, Element1 }.Except(new[] { cc.Element1, cc.Element2 }).Count() == 0;
+        }
+
+        public override bool ContainsElement(DraftElement de)
+        {
+            return Element1 == de || Element2 == de;
+        }
+
+        internal override void Store(TextWriter writer)
+        {
+            writer.WriteLine($"<perpendicularConstraint p0=\"{Element1.Id}\" p1=\"{Element2.Id}\"/>");
         }
     }
 }

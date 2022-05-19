@@ -1,3 +1,4 @@
+*.bak
 .vs/
 packages/
 bin/

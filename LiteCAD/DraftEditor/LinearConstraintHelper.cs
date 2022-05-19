@@ -15,9 +15,10 @@ namespace LiteCAD.DraftEditor
             constraint = c;
         }
 
+        public decimal Length { get => constraint.Length; set => constraint.Length = value; }
         public Vector2d SnapPoint { get; set; }
         public DraftConstraint Constraint => constraint;
-
+        public int Shift { get; set; } = 10;
         public bool Enabled { get => constraint.Enabled; set => constraint.Enabled = value; }
 
         public void Draw(DrawingContext ctx)
@@ -27,11 +28,11 @@ namespace LiteCAD.DraftEditor
             //get perpencdicular
             var diff = (dp1.Location - dp0.Location).Normalized();
             var perp = new Vector2d(-diff.Y, diff.X);
-            var tr0 = ctx.Transform(dp0.Location + perp * 10);
-            var tr1 = ctx.Transform(dp1.Location + perp * 10);
+            var tr0 = ctx.Transform(dp0.Location + perp * Shift);
+            var tr1 = ctx.Transform(dp1.Location + perp * Shift);
             var tr2 = ctx.Transform(dp0.Location);
             var tr3 = ctx.Transform(dp1.Location);
-            var text = (dp0.Location + perp * 10 + dp1.Location + perp * 10) / 2 + perp;
+            var text = (dp0.Location + perp * Shift + dp1.Location + perp * Shift) / 2 + perp;
             var trt = ctx.Transform(text);
             ctx.gr.DrawString(constraint.Length.ToString(), SystemFonts.DefaultFont, Brushes.Black, trt);
             SnapPoint = text;

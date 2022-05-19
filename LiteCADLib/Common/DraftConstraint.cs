@@ -1,4 +1,7 @@
-﻿namespace LiteCAD.Common
+﻿using System;
+using System.IO;
+
+namespace LiteCAD.Common
 {
     public abstract class DraftConstraint
     {
@@ -6,5 +9,8 @@
         public abstract void RandomUpdate();
         public bool Enabled { get; set; } = true;
 
+        public abstract bool ContainsElement(DraftElement de);
+
+        internal abstract void Store(TextWriter writer);        
     }
 }

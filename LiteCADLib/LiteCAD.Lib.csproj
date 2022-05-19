@@ -83,12 +83,16 @@
     <Compile Include="Common\DraftEllipse.cs" />
     <Compile Include="Common\DraftLine.cs" />
     <Compile Include="Common\DraftPoint.cs" />
+    <Compile Include="Common\HorizontalConstraint.cs" />
     <Compile Include="Common\IDraftHelper.cs" />
+    <Compile Include="Common\IXmlStorable.cs" />
     <Compile Include="Common\Line3D.cs" />
     <Compile Include="Common\LinearConstaint.cs" />
     <Compile Include="Common\LineHelper.cs" />
     <Compile Include="Common\ParallelConstraint.cs" />
     <Compile Include="Common\PerpendicularConstraint.cs" />
+    <Compile Include="Common\VerticalConstraint.cs" />
+    <Compile Include="Common\XmlNameAttribute.cs" />
     <Compile Include="MessageFilter.cs" />
     <Compile Include="Common\DebugHelpers.cs" />
     <Compile Include="BRep\DrawItem.cs" />

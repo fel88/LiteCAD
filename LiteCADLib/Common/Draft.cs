@@ -48,6 +48,27 @@ namespace LiteCAD.Common
                 }
             }
 
+            var constr = el.Element("constraints");
+            if (constr != null)
+            {
+                Type[] types = new[] {
+                typeof(LinearConstraint),
+                typeof(VerticalConstraint),
+                typeof(HorizontalConstraint)
+            };
+                foreach (var item in constr.Elements())
+                {
+                    var fr = types.FirstOrDefault(z => (z.GetCustomAttributes(typeof(XmlNameAttribute), true).First() as XmlNameAttribute).XmlName == item.Name);
+                    if (fr == null) continue;
+                    var v = Activator.CreateInstance(fr, new object[] { item, this }) as DraftConstraint;
+                    //if (v is IXmlStorable xx)
+                    //{
+                    //    xx.RestoreXml(item);
+                    //}
+                    AddConstraint(v);
+                }
+            }
+
             EndEdit();
         }
         public DraftLine[][] GetWires()
@@ -93,8 +114,21 @@ namespace LiteCAD.Common
             {
                 item.Store(writer);
             }
+            writer.WriteLine("<constraints>");
+            foreach (var item in Constraints)
+            {
+                item.Store(writer);
+            }
+            writer.WriteLine("</constraints>");
+            writer.WriteLine("<helpers>");
+            foreach (var item in Helpers)
+            {
+                item.Store(writer);
+            }
+            writer.WriteLine("</helpers>");
             writer.WriteLine("</draft>");
         }
+
         bool _inited = false;
         public void RecalcConstraints()
         {
@@ -103,16 +137,23 @@ namespace LiteCAD.Common
             var lc = Constraints.Where(z => z.Enabled).ToArray();
             int counter = 0;
             int limit = 100;
+            StringWriter sw = new StringWriter();
+            Store(sw);
+            var elem = XElement.Parse(sw.ToString());
+
             while (true)
             {
                 counter++;
                 if (lc.All(z => z.IsSatisfied())) break;
+                //preserve Refs?
+                //Restore(elem);
 
                 if (counter > limit)
                 {
                     DebugHelpers.Error("constraints satisfaction error");
                     break;
                 }
+
                 foreach (var item in lc)
                 {
                     if (item.IsSatisfied())
@@ -131,10 +172,13 @@ namespace LiteCAD.Common
             Helpers.Add(h);
             h.Parent = this;
         }
+
+        public Action<DraftConstraint> ConstraintAdded;
         public void AddConstraint(DraftConstraint h)
-        {
+        {            
             Constraints.Add(h);
             RecalcConstraints();
+            ConstraintAdded?.Invoke(h);
         }
 
         public decimal CalcTotalCutLength()
@@ -213,6 +257,7 @@ namespace LiteCAD.Common
                     Elements.Remove(item);
                 }
             }
+            Helpers.RemoveAll(z => z.Constraint.ContainsElement(de));
             Elements.Remove(de);
         }
     }

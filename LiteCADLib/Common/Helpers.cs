@@ -25,6 +25,10 @@ namespace LiteCAD.Common
         {
             return new PointF((float)v.X, (float)v.Y);
         }
+        public static Vector2d ToVector2d(this PointF v)
+        {
+            return new Vector2d(v.X, v.Y);
+        }
 
         public static Vector3d ParseVector(string value)
         {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LiteCAD
+namespace LiteCAD.Common
 {
     public class XmlNameAttribute : Attribute
     {

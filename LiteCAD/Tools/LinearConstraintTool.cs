@@ -1,4 +1,6 @@
-﻿namespace LiteCAD.Tools
+﻿using System.Windows.Forms;
+
+namespace LiteCAD.Tools
 {
     public class LinearConstraintTool : AbstractTool
     {
@@ -14,12 +16,12 @@
 
         }
 
-        public override void MouseDown()
+        public override void MouseDown(MouseEventArgs e)
         {
 
         }
 
-        public override void MouseUp()
+        public override void MouseUp(MouseEventArgs e)
         {
 
         }

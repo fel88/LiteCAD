@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Xml.Linq;
 
-namespace LiteCAD
+namespace LiteCAD.Common
 {
     public interface IXmlStorable
     {

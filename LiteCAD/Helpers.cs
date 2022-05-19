@@ -9,12 +9,14 @@ namespace LiteCAD
 {
     public static class GUIHelpers
     {        
-        public static DialogResult ShowQuestion(string text, string caption, MessageBoxButtons btns = MessageBoxButtons.YesNo)
+        public static DialogResult ShowQuestion(string text, string caption = null, MessageBoxButtons btns = MessageBoxButtons.YesNo)
         {
+            if (caption == null) { caption = Form1.Form.Text; }
             return MessageBox.Show(text, caption, btns, MessageBoxIcon.Question);
         }
-        public static DialogResult Warning(string text, string caption, MessageBoxButtons btns = MessageBoxButtons.OK)
+        public static DialogResult Warning(string text, string caption=null,  MessageBoxButtons btns = MessageBoxButtons.OK)
         {
+            if (caption == null) { caption = Form1.Form.Text; }
             return MessageBox.Show(text, caption, btns, MessageBoxIcon.Warning);
         }              
     }

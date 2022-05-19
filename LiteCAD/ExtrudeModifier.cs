@@ -42,6 +42,7 @@ namespace LiteCAD
             //draft->brep
             _part = new Part();
             var bottomFace = new BRepPlaneFace(_part) { Surface = new BRepPlane() { Normal = Source.Plane.Normal, Location = Source.Plane.Position } };
+            _part.Faces.Add(bottomFace);
 
             //geta all wires
             var wires = Source.GetWires();
@@ -168,7 +169,7 @@ namespace LiteCAD
                     _part.Faces.Add(sideFace);
                 }
 
-            _part.Faces.Add(bottomFace);
+            
             _part.Faces.Add(topFace);
             _part.ExtractMesh();
         }
@@ -196,7 +197,17 @@ namespace LiteCAD
 
         public decimal TotalCutLength => Source.CalcTotalCutLength();
 
-        public decimal Volume => Source.CalcArea() * Height;
+        public decimal Volume
+        {
+            get
+            {
+                var mn = Part.Faces.First().ExtractMesh();
+                var area = mn.Triangles.Sum(z => z.Area());
+                //var area = Part.Nodes.First().Triangles.Sum(z => z.Area());
+                return ((decimal)area * Height)/(1000m*1000m*1000m);
+                return Source.CalcArea() * Height;
+            }
+        }
 
         Draft Source;
         Part _part;

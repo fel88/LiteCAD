@@ -16,7 +16,7 @@ using System.Xml.Linq;
 
 namespace LiteCAD.DraftEditor
 {
-    public partial class DraftEditorControl : UserControl
+    public partial class DraftEditorControl : UserControl, IDraftEditor
     {
         public DraftEditorControl()
         {
@@ -65,7 +65,7 @@ namespace LiteCAD.DraftEditor
                     ctx.starty = (float)tr.Y;
                 }
             }
-            if (e == MouseButtons.Left)
+            if (e == MouseButtons.Left && editor.CurrentTool is SelectionTool)
             {
                 ctx.isLeftDrag = true;
                 if (nearest is DraftPoint pp)
@@ -87,11 +87,11 @@ namespace LiteCAD.DraftEditor
         {
             if (editor.CurrentTool is SelectionTool && e.Button == MouseButtons.Left)
             {
-                if (nearest is LinearConstraintHelper lh)
+                //if (nearest is LinearConstraintHelper lh)
                 {
-                    editor.ObjectSelect(lh.constraint);
+                    //   editor.ObjectSelect(lh.constraint);
                 }
-                else
+                //  else
                 {
                     editor.ObjectSelect(nearest);
                 }
@@ -130,6 +130,7 @@ namespace LiteCAD.DraftEditor
                 if (queue.Count > 1)
                 {
                     var cc = new ParallelConstraint(queue[0] as DraftLine, queue[1] as DraftLine);
+
                     if (!_draft.Constraints.OfType<ParallelConstraint>().Any(z => z.IsSame(cc)))
                     {
                         _draft.AddConstraint(cc);
@@ -142,8 +143,37 @@ namespace LiteCAD.DraftEditor
                     }
                     queue.Clear();
                     editor.ResetTool();
+
                 }
             }
+            /*if (editor.CurrentTool is HorizontalConstraintTool && e.Button == MouseButtons.Left)
+            {
+                if (nearest is DraftLine dl)
+               
+                {
+                    var cc = new HorizontalConstraint(dl);
+
+                    if (!_draft.Constraints.OfType<HorizontalConstraint>().Any(z => z.IsSame(cc)))
+                    {
+                        _draft.AddConstraint(cc);
+                        //_draft.AddHelper(new ParallelConstraintHelper(cc));
+                        //_draft.Childs.Add(_draft.Helpers.Last());
+                    }
+                    else
+                    {
+                        GUIHelpers.Warning("such constraint already exist", ParentForm.Text);
+                    }
+                    queue.Clear();
+                    editor.ResetTool();
+
+                }
+            }*/
+            if (editor.CurrentTool is AbstractTool at)
+            {
+                at.Editor = this;
+            }
+            editor.CurrentTool.MouseDown(e);
+
             if (editor.CurrentTool is LinearConstraintTool && e.Button == MouseButtons.Left)
             {
                 if (nearest is DraftPoint)
@@ -151,9 +181,12 @@ namespace LiteCAD.DraftEditor
                     if (!queue.Contains(nearest))
                         queue.Add(nearest as DraftPoint);
                 }
-                if (queue.Count > 1)
+                if (nearest is DraftLine dl)
                 {
-                    var cc = new LinearConstraint(queue[0], queue[1], (decimal)((queue[0] as DraftPoint).Location - (queue[1] as DraftPoint).Location).Length);
+                    LinearConstraintLengthDialog lcd = new LinearConstraintLengthDialog();
+                    lcd.Init(dl.Length);
+                    lcd.ShowDialog();
+                    var cc = new LinearConstraint(dl.V0, dl.V1, lcd.Length);
                     if (!_draft.Constraints.OfType<LinearConstraint>().Any(z => z.IsSame(cc)))
                     {
                         _draft.AddConstraint(cc);
@@ -165,7 +198,26 @@ namespace LiteCAD.DraftEditor
                         GUIHelpers.Warning("such constraint already exist", ParentForm.Text);
                     }
                     queue.Clear();
-                    editor.ResetTool();
+                    //editor.ResetTool();
+                }
+                if (queue.Count > 1)
+                {
+                    LinearConstraintLengthDialog lcd = new LinearConstraintLengthDialog();
+                    lcd.Init(((queue[0] as DraftPoint).Location - (queue[1] as DraftPoint).Location).Length);
+                    lcd.ShowDialog();
+                    var cc = new LinearConstraint(queue[0], queue[1], lcd.Length);
+                    if (!_draft.Constraints.OfType<LinearConstraint>().Any(z => z.IsSame(cc)))
+                    {
+                        _draft.AddConstraint(cc);
+                        _draft.AddHelper(new LinearConstraintHelper(cc));
+                        _draft.Childs.Add(_draft.Helpers.Last());
+                    }
+                    else
+                    {
+                        GUIHelpers.Warning("such constraint already exist", ParentForm.Text);
+                    }
+                    queue.Clear();
+                    //editor.ResetTool();
                 }
             }
             if (editor.CurrentTool is DraftLineTool && e.Button == MouseButtons.Left)
@@ -303,7 +355,7 @@ namespace LiteCAD.DraftEditor
         }
 
         DrawingContext ctx = new DrawingContext() { DragButton = MouseButtons.Right };
-        object nearest;
+        public object nearest { get; private set; }
         object[] selected = new object[] { };
         void updateNearest()
         {
@@ -490,6 +542,7 @@ namespace LiteCAD.DraftEditor
         IEditor editor;
 
         Draft _draft;
+        public Draft Draft => _draft;
         public void SetDraft(Draft draft)
         {
             _draft = draft;
@@ -575,9 +628,15 @@ namespace LiteCAD.DraftEditor
             var my = (maxy + miny) / 2;
             for (int i = 0; i < _draft.DraftPoints.Length; i++)
             {
-                _draft.DraftPoints[i].Location.Y = 2 * my - _draft.DraftPoints[i].Location.Y;
+                _draft.DraftPoints[i].SetLocation(_draft.DraftPoints[i].X, 2 * my - _draft.DraftPoints[i].Location.Y);
 
             }
         }
+    }
+
+    public interface IDraftEditor
+    {
+        object nearest { get; }
+        Draft Draft { get; }
     }
 }

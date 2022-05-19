@@ -1,4 +1,5 @@
 ﻿using OpenTK;
+using System;
 using System.Globalization;
 using System.IO;
 using System.Xml.Linq;
@@ -8,7 +9,9 @@ namespace LiteCAD.Common
     public class DraftPoint : DraftElement
     {
 
-        public Vector2d Location;
+        public Vector2d _location;
+        public Vector2d Location { get => _location; private set => _location = value; }
+
         
 
         public double X
@@ -16,7 +19,7 @@ namespace LiteCAD.Common
             get => Location.X;
             set
             {
-                Location.X = value;
+                _location.X = value;
                 Parent.RecalcConstraints();                
             }
         }
@@ -25,7 +28,7 @@ namespace LiteCAD.Common
             get => Location.Y;
             set
             {
-                Location.Y = value;
+                _location.Y = value;
                 Parent.RecalcConstraints();
             }
         }
@@ -45,11 +48,26 @@ namespace LiteCAD.Common
             Id = int.Parse(item2.Attribute("id").Value);
             X = double.Parse(item2.Attribute("x").Value.Replace(",", "."), CultureInfo.InvariantCulture);
             Y = double.Parse(item2.Attribute("y").Value.Replace(",", "."), CultureInfo.InvariantCulture);
+            if (item2.Attribute("frozen") != null)
+                Frozen = bool.Parse(item2.Attribute("frozen").Value);
         }
 
         public override void Store(TextWriter writer)
         {
-            writer.WriteLine($"<point id=\"{Id}\" x=\"{X}\" y=\"{Y}\" />");
+            writer.WriteLine($"<point id=\"{Id}\" x=\"{X}\" y=\"{Y}\" frozen=\"{Frozen}\" />");
+        }
+
+        public void SetLocation(double x, double y)
+        {
+            SetLocation(new Vector2d(x, y));
+        }
+        public void SetLocation(Vector2d vector2d)
+        {
+            if (Frozen)
+            {
+                throw new LiteCadException("try update frozen");
+            }
+            _location = vector2d;
         }
     }
 }

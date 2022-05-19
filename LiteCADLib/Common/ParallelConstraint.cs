@@ -1,5 +1,6 @@
 ﻿using OpenTK;
 using System;
+using System.IO;
 using System.Linq;
 
 namespace LiteCAD.Common
@@ -53,13 +54,48 @@ namespace LiteCAD.Common
             var dir = dp0.Dir;
             var len = dp1.Length;
             var center = dp1.Center;
-            dp1.V0.Location = center + dir * len / 2;
-            dp1.V1.Location = center - dir * len / 2;
+            //tke all candidates and take minimum length to apply
+            if (!dp1.V0.Frozen && !dp1.V1.Frozen)
+            {
+                dp1.V0.SetLocation(center + dir * len / 2);
+                dp1.V1.SetLocation(center - dir * len / 2);
+            }
+            else if (dp1.V0.Frozen && !dp1.V1.Frozen)
+            {
+
+            }
+            else if (!dp1.V0.Frozen && dp1.V1.Frozen)
+            {
+                var cand1 = dp1.V1.Location + dir * len ;
+                var cand2 = dp1.V1.Location - dir * len ;
+                if ((dp1.V0.Location - cand1).Length < (dp1.V0.Location - cand2).Length)
+                {
+                    dp1.V0.SetLocation(cand1);
+                }
+                else
+                {
+                    dp1.V0.SetLocation(cand2);
+                }
+            }
+            else
+            {
+                throw new LiteCadException("const can't be applied");
+            }
         }
 
         public bool IsSame(ParallelConstraint cc)
         {
             return new[] { Element2, Element1 }.Except(new[] { cc.Element1, cc.Element2 }).Count() == 0;
+        }
+
+        public override bool ContainsElement(DraftElement de)
+        {
+            return Element2 == de || Element1 == de;
+        }
+
+        internal override void Store(TextWriter writer)
+        {
+            writer.WriteLine($"<parallelConstraint p0=\"{Element1.Id}\" p1=\"{Element2.Id}\"/>");
         }
     }
 }

@@ -123,7 +123,7 @@ namespace LiteCAD.BRep.Editor
             }
             if (e.Button == MouseButtons.Left)
             {
-                isLeftDrag= true;
+                //isLeftDrag= true;
 
                 startx = pos.X;
                 starty = pos.Y;

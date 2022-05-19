@@ -1,4 +1,5 @@
 ﻿using LiteCAD.Common;
+using LiteCAD.DraftEditor;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
@@ -13,12 +14,28 @@ namespace LiteCAD
         {
             var doc = XDocument.Load(fileName);
             var root = doc.Descendants("root");
+                        
             foreach (var item in root.Elements())
             {
                 if (item.Name == "draft")
                 {
                     Draft d = new Draft(item);
-
+                    //restore helpers
+                    foreach (var citem in d.Constraints)
+                    {
+                        if (citem is LinearConstraint lc)
+                        {
+                            d.AddHelper(new LinearConstraintHelper(lc));
+                        }
+                        if (citem is VerticalConstraint vc)
+                        {
+                            d.AddHelper(new VerticalConstraintHelper(vc));
+                        }
+                        if (citem is HorizontalConstraint hc)
+                        {
+                            d.AddHelper(new HorizontalConstraintHelper(hc));
+                        }
+                    }
                     Parts.Add(d);
                 }
                 if (item.Name == "extrude")
@@ -42,7 +59,7 @@ namespace LiteCAD
                     PlaneHelper d = new PlaneHelper(item);
                     Parts.Add(d);
                 }
-            }
+            }            
         }
 
         public void SaveToXml(string fileName)

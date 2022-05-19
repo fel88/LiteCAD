@@ -191,7 +191,8 @@ namespace LiteCAD
                 {
                     var d1 = dd.Helpers.OfType<object>().ToArray();
                     var d2 = dd.Elements.OfType<object>().ToArray();
-                    return d1.Union(d2).ToArray();
+                    var d3 = dd.Constraints.OfType<object>().ToArray();
+                    return d3.Union(d1.Union(d2)).ToArray();
                 }
             if (x is PartAssembly p)
             {
@@ -211,8 +212,9 @@ namespace LiteCAD
                     if (x is Draft dd)
                     {
                         var d1 = dd.Helpers.OfType<object>().ToArray();
+                        var d3 = dd.Constraints.OfType<object>().ToArray();
                         var d2 = dd.Elements.OfType<object>().ToArray();
-                        return d1.Union(d2).Any();
+                        return d1.Length > 0 || d2.Length > 0 || d3.Length > 0;
                     }
                 if (x is Draft)
                     return false;
@@ -414,12 +416,12 @@ namespace LiteCAD
 
         private void GlControl_MouseUp(object sender, MouseEventArgs e)
         {
-            CurrentTool.MouseUp();
+            CurrentTool.MouseUp(e);
         }
 
         private void GlControl_MouseDown(object sender, MouseEventArgs e)
         {
-            CurrentTool.MouseDown();
+            CurrentTool.MouseDown(e);
         }
 
         InfoPanel infoPanel = new InfoPanel();
@@ -1294,6 +1296,28 @@ namespace LiteCAD
         private void toolStripButton16_Click(object sender, EventArgs e)
         {
             de.Undo();
+        }
+
+        private void toolStripButton17_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void toolStripButton18_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void toolStripButton19_Click(object sender, EventArgs e)
+        {
+            HorizontalConstraintTool.Instance.Editor = de;
+            SetTool(HorizontalConstraintTool.Instance);
+        }
+
+        private void toolStripButton20_Click(object sender, EventArgs e)
+        {
+            SetTool(VerticalConstraintTool.Instance);
+
         }
     }
 

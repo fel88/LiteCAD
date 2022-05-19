@@ -15,7 +15,7 @@ namespace LiteCAD.Common
             var v0Id = int.Parse(el.Attribute("v0").Value);
             var v1Id = int.Parse(el.Attribute("v1").Value);
             Dummy = bool.Parse(el.Attribute("dummy").Value);
-
+            Id = int.Parse(el.Attribute("id").Value);
             V0 = parent.DraftPoints.First(z => z.Id == v0Id);
             V1 = parent.DraftPoints.First(z => z.Id == v1Id);
         }

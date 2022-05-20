@@ -45,9 +45,7 @@ namespace LiteCAD
         }
 
         public readonly Part Part;
-        TransformationChain _matrix = new TransformationChain();
-        public TransformationChain Matrix { get => _matrix; set => _matrix = value; }
-
+      
         public override void Draw()
         {
             GL.PushMatrix();

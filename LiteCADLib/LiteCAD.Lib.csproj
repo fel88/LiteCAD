@@ -91,6 +91,7 @@
     <Compile Include="Common\LineHelper.cs" />
     <Compile Include="Common\ParallelConstraint.cs" />
     <Compile Include="Common\PerpendicularConstraint.cs" />
+    <Compile Include="Common\TransformationChain.cs" />
     <Compile Include="Common\VerticalConstraint.cs" />
     <Compile Include="Common\XmlNameAttribute.cs" />
     <Compile Include="MessageFilter.cs" />
@@ -176,6 +177,8 @@
     <Compile Include="Common\StringFieldEditor.cs" />
     <Compile Include="Common\VectorEditor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Common\RotationTransformChainItem.cs" />
+    <Compile Include="Common\ScaleTransformChainItem.cs" />
     <Compile Include="Tools\CylinderProjectionPointEditorToolPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -191,6 +194,8 @@
     <Compile Include="Tools\ToolPanel.Designer.cs">
       <DependentUpon>ToolPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Common\TransformationChainItem.cs" />
+    <Compile Include="Common\TranslateTransformChainItem.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="OpenTK.dll.config" />

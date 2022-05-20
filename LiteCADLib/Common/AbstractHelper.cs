@@ -31,6 +31,10 @@ namespace LiteCAD.Common
 
         public IDrawable Parent { get; set; }
         public int Id { get; set; }
+
+        protected TransformationChain _matrix = new TransformationChain();
+        public TransformationChain Matrix { get => _matrix; set => _matrix = value; }
+
     }
 
     public static class FactoryHelper

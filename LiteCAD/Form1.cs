@@ -400,6 +400,7 @@ namespace LiteCAD
                     {
                         //check nesting
                         gr.Childs.Add(dr);
+                        dr.Parent = gr;
                     }
 
                 }

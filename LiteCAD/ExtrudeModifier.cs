@@ -217,6 +217,8 @@ namespace LiteCAD
 
         public int Id { get; set; }
 
+        public TransformationChain Matrix => throw new System.NotImplementedException();
+
         public void Draw()
         {
             if (Part == null) return;

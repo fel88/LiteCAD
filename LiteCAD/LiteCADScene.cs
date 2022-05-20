@@ -59,6 +59,11 @@ namespace LiteCAD
                     PlaneHelper d = new PlaneHelper(item);
                     Parts.Add(d);
                 }
+                if (item.Name == "group")
+                {
+                    Group d = new Group(this, item);
+                    Parts.Add(d);
+                }
             }            
         }
 

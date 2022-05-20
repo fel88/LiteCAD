@@ -1,12 +1,11 @@
-﻿using LiteCAD.Common;
-using OpenTK;
+﻿using OpenTK;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace LiteCAD
+namespace LiteCAD.Common
 {
     public class TransformationChain
     {
@@ -20,11 +19,11 @@ namespace LiteCAD
             writer.WriteLine("</transformationChain>");
         }
 
-        internal void RestoreXml(XElement xElement)
+        public void RestoreXml(XElement xElement)
         {
             Items.Clear();
             Type[] types = new[] {
-                typeof(ScaleTransformChainItem), 
+                typeof(ScaleTransformChainItem),
                 typeof(TranslateTransformChainItem),
                 typeof(RotationTransformChainItem)
             };

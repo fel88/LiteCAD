@@ -83,6 +83,7 @@
     <Compile Include="DraftEditor\PerpendicularConstraintHelper.cs" />
     <Compile Include="DraftEditor\VerticalConstraintHelper.cs" />
     <Compile Include="ExtrudeModifier.cs" />
+    <Compile Include="Group.cs" />
     <Compile Include="IEconomicsDetail.cs" />
     <Compile Include="IEditor.cs" />
     <Compile Include="Info.cs">
@@ -108,8 +109,6 @@
     <Compile Include="PropEditors\Vector3dPropEditor.Designer.cs">
       <DependentUpon>Vector3dPropEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="RotationTransformChainItem.cs" />
-    <Compile Include="ScaleTransformChainItem.cs" />
     <Compile Include="Tools\DraftEllipseTool.cs" />
     <Compile Include="Tools\DraftLineTool.cs" />
     <Compile Include="EventWrapperGlControl.cs" />
@@ -136,9 +135,6 @@
     <Compile Include="Tools\RectDraftTool.cs" />
     <Compile Include="Tools\SelectionTool.cs" />
     <Compile Include="Tools\VerticalConstraintTool.cs" />
-    <Compile Include="TransformationChain.cs" />
-    <Compile Include="TransformationChainItem.cs" />
-    <Compile Include="TranslateTransformChainItem.cs" />
     <EmbeddedResource Include="DraftEditor\DraftEditor.resx">
       <DependentUpon>DraftEditor.cs</DependentUpon>
     </EmbeddedResource>

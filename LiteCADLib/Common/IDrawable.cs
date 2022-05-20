@@ -12,6 +12,7 @@ namespace LiteCAD.Common
         bool Visible { get; set; }
         void Draw();
         bool Selected { get; set; }
+        TransformationChain Matrix { get; }
 
         void RemoveChild(IDrawable dd);
         void Store(TextWriter writer);

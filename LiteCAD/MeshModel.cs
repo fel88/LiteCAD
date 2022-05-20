@@ -62,6 +62,11 @@ namespace LiteCAD
             if (!Visible) return;
 
             GL.PushMatrix();
+            if (Parent != null)
+            {
+                var dd2 = Parent.Matrix.Calc();
+                GL.MultMatrix(ref dd2);
+            }
             Matrix4d dd = _matrix.Calc();
             GL.MultMatrix(ref dd);
 
@@ -141,21 +146,6 @@ namespace LiteCAD
                 ret[i].End = res2;
             }
             return ret;
-        }
-    }
-
-    public class Group : AbstractDrawable
-    {        
-        public Group()
-        {
-            Name = "group";
-        }
-        public override void Draw()
-        {
-            foreach (var item in Childs)
-            {
-                item.Draw();
-            }
         }
     }
 }

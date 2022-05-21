@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace LiteCAD.Common
@@ -14,12 +15,14 @@ namespace LiteCAD.Common
         bool Selected { get; set; }
         TransformationChain Matrix { get; }
 
+        IDrawable[] GetAll(Predicate<IDrawable> p);
         void RemoveChild(IDrawable dd);
         void Store(TextWriter writer);
     }
 
     public interface IPartContainer
     {
+        int Id { get; }
         Part Part { get; }
     }
 }

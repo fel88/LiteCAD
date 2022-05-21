@@ -46,6 +46,7 @@ namespace LiteCAD.Common
         }
         public static Vector2d[][] TriangulateWithHoles(Vector2d[][] points, Vector2d[][] holes, bool checkArea = true)
         {
+            //holes = holes.Where(z => z.Length > 2).ToArray();//skip bad holes
             #region checker
             double area = 0;
             foreach (var item in points)

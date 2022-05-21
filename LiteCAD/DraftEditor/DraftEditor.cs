@@ -546,6 +546,24 @@ namespace LiteCAD.DraftEditor
         public void SetDraft(Draft draft)
         {
             _draft = draft;
+
+            //restore helpers
+            foreach (var citem in draft.Constraints)
+            {
+                if (draft.Helpers.Any(z => z.Constraint == citem)) continue;
+                if (citem is LinearConstraint lc)
+                {
+                    draft.AddHelper(new LinearConstraintHelper(lc));
+                }
+                if (citem is VerticalConstraint vc)
+                {
+                    _draft.AddHelper(new VerticalConstraintHelper(vc));
+                }
+                if (citem is HorizontalConstraint hc)
+                {
+                    _draft.AddHelper(new HorizontalConstraintHelper(hc));
+                }
+            }
         }
         internal void Init(IEditor editor)
         {

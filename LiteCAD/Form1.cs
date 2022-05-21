@@ -194,6 +194,8 @@ namespace LiteCAD
                     var d3 = dd.Constraints.OfType<object>().ToArray();
                     return d3.Union(d1.Union(d2)).ToArray();
                 }
+            if (x is Draft)
+                return new object[] { };
             if (x is PartAssembly p)
             {
                 return p.Parts.ToArray();
@@ -388,7 +390,7 @@ namespace LiteCAD
                     if (dr is IPartContainer pc)
                         pas.Parts.Add(new PartInstance(pc));
                     if (dr is Part p)
-                        pas.Parts.Add(new PartInstance(p));
+                        pas.Parts.Add(new PartInstance(p));//create LinkReference to part instance
                 }
                 if (targetNode is Group gr)
                 {

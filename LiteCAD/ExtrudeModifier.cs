@@ -2,6 +2,7 @@
 using LiteCAD.BRep.Surfaces;
 using LiteCAD.Common;
 using OpenTK;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -26,6 +27,11 @@ namespace LiteCAD
         public ExtrudeModifier(XElement item)
         {
             ctor = true;
+            if (item.Attribute("visible") != null)            
+                Visible = bool.Parse(item.Attribute("visible").Value);
+
+            if (item.Attribute("name") != null)
+                Name = item.Attribute("name").Value;
 
             Source = new Draft(item.Element("source").Element("draft"));
             Height = Helpers.ParseDecimal(item.Attribute("height").Value);
@@ -217,10 +223,12 @@ namespace LiteCAD
 
         public int Id { get; set; }
 
-        public TransformationChain Matrix => throw new System.NotImplementedException();
+        protected TransformationChain _matrix = new TransformationChain();
+        public TransformationChain Matrix { get => _matrix; set => _matrix = value; }
 
         public void Draw()
         {
+            if (!Visible) return;
             if (Part == null) return;
             Part.Draw();
         }
@@ -231,15 +239,18 @@ namespace LiteCAD
             Childs.Remove(dd);
             Source = null;
             _part = null;
-
         }
 
         public void Store(TextWriter writer)
         {
-            writer.WriteLine($"<extrude id=\"{Id}\" height=\"{Height}\"><source>");
-
+            writer.WriteLine($"<extrude id=\"{Id}\" height=\"{Height}\" visible=\"{Visible}\" name=\"{Name}\"><source>");
             Source.Store(writer);
             writer.WriteLine("</source></extrude>");
+        }
+
+        public IDrawable[] GetAll(Predicate<IDrawable> p)
+        {
+            return Childs.SelectMany(z => z.GetAll(p)).Union(new[] { this}).ToArray();
         }
     }
 }

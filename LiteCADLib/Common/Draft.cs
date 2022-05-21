@@ -71,6 +71,7 @@ namespace LiteCAD.Common
 
             EndEdit();
         }
+
         public DraftLine[][] GetWires()
         {
             var remains = DraftLines.Where(z => !z.Dummy).ToList();
@@ -78,28 +79,39 @@ namespace LiteCAD.Common
 
             while (remains.Any())
             {
-                var fr = remains.First();
-                remains.RemoveAt(0);
-                bool good = false;
-                foreach (var item in ret)
+                List<DraftLine> added = new List<DraftLine>();
+                foreach (var rem in remains)
                 {
-                    var arr1 = item.SelectMany(z => new[] { z.V0, z.V1 }).ToArray();
-                    if (arr1.Contains(fr.V0) || arr1.Contains(fr.V1))
+                    bool good = false;
+
+                    foreach (var item in ret)
                     {
-                        item.Add(fr);
-                        good = true;
-                        break;
+                        var arr1 = item.SelectMany(z => new[] { z.V0, z.V1 }).ToArray();
+                        if (arr1.Contains(rem.V0) || arr1.Contains(rem.V1))
+                        {
+                            item.Add(rem);
+                            good = true;
+                            break;
+                        }
+                    }
+                    if (good)
+                    {
+                        added.Add(rem);
                     }
                 }
-                if (!good)
+                if (added.Count == 0)
                 {
                     ret.Add(new List<DraftLine>());
-                    ret.Last().Add(fr);
+                    ret.Last().Add(remains[0]);
+                    added.Add(remains[0]);
+                }
+                foreach (var item in added)
+                {
+                    remains.Remove(item);
                 }
             }
 
             return ret.Select(z => z.ToArray()).ToArray();
-
         }
 
         public override void Store(TextWriter writer)
@@ -175,7 +187,7 @@ namespace LiteCAD.Common
 
         public Action<DraftConstraint> ConstraintAdded;
         public void AddConstraint(DraftConstraint h)
-        {            
+        {
             Constraints.Add(h);
             RecalcConstraints();
             ConstraintAdded?.Invoke(h);
@@ -257,9 +269,10 @@ namespace LiteCAD.Common
                     Elements.Remove(item);
                 }
             }
+            Constraints.RemoveAll(z => z.ContainsElement(de));
             Helpers.RemoveAll(z => z.Constraint.ContainsElement(de));
             Elements.Remove(de);
         }
-    }
 
+    }
 }

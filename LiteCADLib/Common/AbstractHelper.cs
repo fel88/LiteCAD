@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace LiteCAD.Common
 {
@@ -22,6 +24,13 @@ namespace LiteCAD.Common
         public virtual void Store(TextWriter writer)
         {
 
+        }
+
+        public IDrawable[] GetAll(Predicate<IDrawable> p)
+        {
+            if (Childs.Count == 0)
+                return new[] { this };
+            return Childs.SelectMany(z => z.GetAll(p)).ToArray();
         }
 
         public bool Visible { get; set; } = true;

@@ -1,6 +1,8 @@
 ﻿using LiteCAD.Common;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using System;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -9,16 +11,16 @@ namespace LiteCAD
 {
     public class PartInstance : AbstractDrawable
     {
-        public PartInstance(Part part)
+        /*public PartInstance(Part part)
         {
             Part = part;
             Name = Part.Name;
-        }
+        }*/
 
         public PartInstance(IPartContainer part)
         {
-            Part = part.Part;
-            Name = Part.Name;
+            Part = part;
+            Name = Part.Part.Name;
             if (part is IDrawable dd)
             {
                 Name = dd.Name;
@@ -29,31 +31,41 @@ namespace LiteCAD
         {
             Name = xitem.Attribute("name").Value;
             _matrix.RestoreXml(xitem.Element("transform"));
+            if (xitem.Attribute("color") != null)
+            {
+                var rgb = xitem.Attribute("color").Value.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToArray();
+                Color = Color.FromArgb(rgb[0], rgb[1], rgb[2]);
+            }
 
             var id = int.Parse(xitem.Attribute("id").Value);
-            var ps = scene.Parts.OfType<IPartContainer>().First(z => z.Part.Id == id);
-            Part = ps.Part;
+            var ps = scene.GetAll(z=>z is IPartContainer).OfType<IPartContainer>().First(z => z.Id == id);
+            Part = ps;
         }
 
         public override void Store(TextWriter writer)
         {
-            writer.WriteLine($"<instance id=\"{Part.Id}\" name=\"{Name}\">");
+            writer.WriteLine($"<instance id=\"{Part.Id}\" name=\"{Name}\" color=\"{Color.R};{Color.G};{Color.B}\">");
             writer.WriteLine("<transform>");
             _matrix.StoreXml(writer);
             writer.WriteLine("</transform>");
             writer.WriteLine("</instance>");
         }
 
-        public readonly Part Part;
-      
+        public readonly IPartContainer Part;
+        public Color Color { get; set; } = Color.LightGray;
         public override void Draw()
         {
+            if (!Visible) return;
+            GL.Color3(Color);
+            GL.Enable(EnableCap.ColorMaterial);
             GL.PushMatrix();
             Matrix4d dd = _matrix.Calc();
             GL.MultMatrix(ref dd);
 
-            Part.Draw();
+            Part.Part.Draw();
             GL.PopMatrix();
+            GL.Disable(EnableCap.ColorMaterial);
+
         }
     }
 }

@@ -1,41 +1,36 @@
 ﻿using LiteCAD.Common;
 using LiteCAD.DraftEditor;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class LiteCADScene
+    public class LiteCADScene 
     {
         public List<IDrawable> Parts = new List<IDrawable>();
 
+        public IDrawable[] GetAll(Predicate<IDrawable> p)
+        {
+            var t = Parts.SelectMany(z=>z.GetAll(p)).ToArray();
+            return t;
+        }
+
         internal void FromXml(string fileName)
         {
+            FactoryHelper.NewId = 0;
+            DraftElement.NewId = 0;
             var doc = XDocument.Load(fileName);
             var root = doc.Descendants("root");
-                        
+
             foreach (var item in root.Elements())
             {
                 if (item.Name == "draft")
                 {
                     Draft d = new Draft(item);
-                    //restore helpers
-                    foreach (var citem in d.Constraints)
-                    {
-                        if (citem is LinearConstraint lc)
-                        {
-                            d.AddHelper(new LinearConstraintHelper(lc));
-                        }
-                        if (citem is VerticalConstraint vc)
-                        {
-                            d.AddHelper(new VerticalConstraintHelper(vc));
-                        }
-                        if (citem is HorizontalConstraint hc)
-                        {
-                            d.AddHelper(new HorizontalConstraintHelper(hc));
-                        }
-                    }
+                   
                     Parts.Add(d);
                 }
                 if (item.Name == "extrude")
@@ -46,8 +41,8 @@ namespace LiteCAD
                 }
                 if (item.Name == "assembly")
                 {
-                    PartAssembly d = new PartAssembly(this, item);
-                    Parts.Add(d);
+                    // PartAssembly d = new PartAssembly(this, item);
+                    // Parts.Add(d);
                 }
                 if (item.Name == "mesh")
                 {
@@ -64,7 +59,15 @@ namespace LiteCAD
                     Group d = new Group(this, item);
                     Parts.Add(d);
                 }
-            }            
+            }
+            foreach (var item in root.Elements())
+            {
+                if (item.Name == "assembly")
+                {
+                    PartAssembly d = new PartAssembly(this, item);
+                    Parts.Add(d);
+                }
+            }
         }
 
         public void SaveToXml(string fileName)
@@ -79,9 +82,11 @@ namespace LiteCAD
                     {
                         item.Store(writer);
                     }
-                    writer.WriteLine("</root>");                    
-                }                
+                    writer.WriteLine("</root>");
+                }
             }
         }
     }
+
+    
 }

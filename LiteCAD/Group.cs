@@ -30,6 +30,12 @@ namespace LiteCAD
                     Childs.Add(d);
                     d.Parent = this;
                 }
+                if (item.Name == "extrude")
+                {
+                    ExtrudeModifier d = new ExtrudeModifier(item);
+                    Childs.Add(d);
+                    d.Parent = this;                    
+                }
             }
         }
         public override void Store(TextWriter writer)

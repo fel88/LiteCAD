@@ -57,6 +57,7 @@
     <Compile Include="BRep\Editor\ProjectMapEditor.Designer.cs">
       <DependentUpon>ProjectMapEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Common\FactoryHelper.cs" />
     <Compile Include="Common\Helpers.cs" />
     <Compile Include="BRep\ProjectPolygon.cs" />
     <Compile Include="BRep\Faces\BRepBSplineWithKnotsSurfaceFace.cs" />
@@ -157,7 +158,7 @@
     <Compile Include="Parsers\Step\VertexPointParseItem.cs" />
     <Compile Include="Parsers\Step\WrongArgumentsException.cs" />
     <Compile Include="PolyBool.cs" />
-    <Compile Include="Common\AbstractHelper.cs" />
+    <Compile Include="Common\AbstractDrawable.cs" />
     <Compile Include="BRep\BRepCurve.cs" />
     <Compile Include="BRep\BRepEdge.cs" />
     <Compile Include="BRep\BRepFace.cs" />

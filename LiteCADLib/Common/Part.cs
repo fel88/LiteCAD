@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace LiteCAD.Common
 {
-    public class Part : AbstractDrawable, IPartContainer
+    public class Part : AbstractDrawable, IPartContainer, IMesh
     {
         
         Part IPartContainer.Part => this;
@@ -47,7 +47,7 @@ namespace LiteCAD.Common
 
         public static bool AutoExtractMeshOnLoad = true;
 
-        IEnumerable<Vector3d> getPoints()
+        public IEnumerable<Vector3d> GetPoints()
         {
             foreach (var item in Nodes)
             {
@@ -72,7 +72,7 @@ namespace LiteCAD.Common
                 {
                     int? sign = null;
                     bool good = true;
-                    foreach (var pp in getPoints())
+                    foreach (var pp in GetPoints())
                     {
                         var dot = Vector3d.Dot(pl.Normal, pp - pl.Location);
                         if (Math.Abs(dot) < eps1) continue;
@@ -261,5 +261,9 @@ namespace LiteCAD.Common
                 }
             }
         }
+    }
+    public interface IMesh
+    {
+        IEnumerable<Vector3d> GetPoints();
     }
 }

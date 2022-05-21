@@ -2,6 +2,7 @@
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class PartInstance : AbstractDrawable
+    public class PartInstance : AbstractDrawable, IPlaneSplittable, IMesh
     {
         /*public PartInstance(Part part)
         {
@@ -38,7 +39,7 @@ namespace LiteCAD
             }
 
             var id = int.Parse(xitem.Attribute("id").Value);
-            var ps = scene.GetAll(z=>z is IPartContainer).OfType<IPartContainer>().First(z => z.Id == id);
+            var ps = scene.GetAll(z => z is IPartContainer).OfType<IPartContainer>().First(z => z.Id == id);
             Part = ps;
         }
 
@@ -65,7 +66,29 @@ namespace LiteCAD
             Part.Part.Draw();
             GL.PopMatrix();
             GL.Disable(EnableCap.ColorMaterial);
+        }
 
+        public Line3D[] SplitPyPlane(PlaneHelper ph)
+        {
+            //convert to mesh
+            var tr = Part.Part.Nodes.SelectMany(z => z.SplitByPlane(Matrix.Calc(), ph)).ToArray();
+            return tr;
+        }
+
+        public IEnumerable<Vector3d> GetPoints()
+        {
+            var mtrx = Matrix.Calc();
+            foreach (var item in Part.Part.Nodes)
+            {
+                foreach (var t in item.Triangles)
+                {
+                    var tt = t.Multiply(mtrx);
+                    foreach (var v in tt.Vertices)
+                    {
+                        yield return v.Position;
+                    }
+                }
+            }
         }
     }
 }

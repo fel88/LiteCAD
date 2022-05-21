@@ -554,12 +554,13 @@ namespace LiteCAD
             // return p2.Union(p1).ToArray();
         }
 
-        Vector3d[] getAllPoints(Part[] parts)
+        Vector3d[] getAllPoints(IMesh[] parts)
         {
             List<Vector3d> vv = new List<Vector3d>();
             foreach (var p in parts)
             {
-                var nn = p.Nodes.SelectMany(z => z.Triangles.SelectMany(u => u.Vertices.Select(zz => zz.Position))).ToArray();
+                vv.AddRange(p.GetPoints());
+                /*var nn = p.Nodes.SelectMany(z => z.Triangles.SelectMany(u => u.Vertices.Select(zz => zz.Position))).ToArray();
                 vv.AddRange(nn);
                 foreach (var face in p.Faces)
                 {
@@ -571,7 +572,7 @@ namespace LiteCAD
                             vv.Add(li.End);
                         }
                     }
-                }
+                }*/
             }
             return vv.ToArray();
         }
@@ -933,7 +934,12 @@ namespace LiteCAD
         private void fitToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;
-            var vv = getAllPoints(treeListView1.SelectedObjects.OfType<Part>().ToArray());
+            //var vv = getAllPoints(treeListView1.SelectedObjects.OfType<IMesh>().ToArray());
+            var t1 = treeListView1.SelectedObjects.OfType<IMesh>().ToArray();
+            var ad = treeListView1.SelectedObjects.OfType<AbstractDrawable>().ToArray();
+            var t2 = ad.SelectMany(z => z.GetAll((xx) => xx is IMesh)).OfType<IMesh>();
+            var vv = getAllPoints(t1.Union(t2).ToArray());
+
             fitAll(vv);
             camToSelected(vv);
         }
@@ -1154,6 +1160,9 @@ namespace LiteCAD
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;
             var vv = treeListView1.SelectedObjects.OfType<IEconomicsDetail>().ToArray();
+            var vv2 = treeListView1.SelectedObjects.OfType<PartInstance>().ToArray();
+            var vv3 = vv2.Where(z => z.Part is IEconomicsDetail).Select(z=>(IEconomicsDetail)z.Part).OfType<IEconomicsDetail>().ToArray();
+            vv = vv.Union(vv3).ToArray();
             if (vv.Length == 0) return;
             Info inf = new Info();
             inf.Init(vv[0]);
@@ -1226,11 +1235,6 @@ namespace LiteCAD
             updateList();
         }
 
-        private void matrixEditToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void propertyGrid1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             var gi = propertyGrid1.SelectedGridItem;
@@ -1243,7 +1247,7 @@ namespace LiteCAD
 
         private void cutAllByPlaneToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var models = treeListView1.SelectedObjects.OfType<MeshModel>().ToArray();
+            var models = treeListView1.SelectedObjects.OfType<IPlaneSplittable>().ToArray();
             if (models.Length == 0) return;
             var ph = treeListView1.SelectedObjects.OfType<PlaneHelper>().FirstOrDefault();
             if (ph == null) return;
@@ -1320,8 +1324,17 @@ namespace LiteCAD
         private void toolStripButton20_Click(object sender, EventArgs e)
         {
             SetTool(VerticalConstraintTool.Instance);
-
         }
+
+        private void setCameraToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeListView1.SelectedObjects.Count <= 0) return;
+            var t1 = treeListView1.SelectedObjects.OfType<IMesh>().ToArray();
+            var ad = treeListView1.SelectedObjects.OfType<AbstractDrawable>().ToArray();
+            var t2 = ad.SelectMany(z => z.GetAll((xx) => xx is IMesh)).OfType<IMesh>();
+            var vv = getAllPoints(t1.Union(t2).ToArray());
+            camToSelected(vv);
+        }        
     }
 
     public enum EditModeEnum
@@ -1333,4 +1346,6 @@ namespace LiteCAD
         void Init(object o);
         object ReturnValue { get; }
     }
+
+    
 }

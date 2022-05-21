@@ -11,7 +11,7 @@ using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class MeshModel : AbstractDrawable
+    public class MeshModel : AbstractDrawable, IPlaneSplittable, IMesh
     {
         public List<MeshNode> Nodes = new List<MeshNode>();
         public void RestoreXml(XElement elem)
@@ -39,8 +39,6 @@ namespace LiteCAD
             writer.WriteLine("</mesh>");
         }
 
-        TransformationChain _matrix = new TransformationChain();
-
         public MeshModel()
         {
 
@@ -51,8 +49,6 @@ namespace LiteCAD
                 Name = item.Attribute("name").Value;
             RestoreXml(item);
         }
-
-        public TransformationChain Matrix { get => _matrix; set => _matrix = value; }
 
         public bool Wireframe { get; set; }
         public bool Fill { get; set; } = true;
@@ -132,10 +128,10 @@ namespace LiteCAD
 
         }
 
-        internal Line3D[] SplitPyPlane(PlaneHelper ph)
+        public Line3D[] SplitPyPlane(PlaneHelper ph)
         {
-            var mm = Matrix.Calc();            
-            var ret = Nodes.SelectMany(z => z.SplitByPlane(mm,ph)).ToArray();
+            var mm = Matrix.Calc();
+            var ret = Nodes.SelectMany(z => z.SplitByPlane(mm, ph)).ToArray();
             mm = Matrix4d.Identity;
             for (int i = 0; i < ret.Length; i++)
             {
@@ -147,5 +143,26 @@ namespace LiteCAD
             }
             return ret;
         }
+
+        public IEnumerable<Vector3d> GetPoints()
+        {
+            var mtrx = Matrix.Calc();
+            foreach (var item in Nodes)
+            {
+                foreach (var t in item.Triangles)
+                {
+                    var tt = t.Multiply(mtrx);
+                    foreach (var v in tt.Vertices)
+                    {
+                        yield return v.Position;
+                    }
+                }
+            }
+        }
+    }
+
+    public interface IPlaneSplittable
+    {
+        Line3D[] SplitPyPlane(PlaneHelper ph);
     }
 }

@@ -45,10 +45,4 @@ namespace LiteCAD.Common
         public TransformationChain Matrix { get => _matrix; set => _matrix = value; }
 
     }
-
-    public static class FactoryHelper
-    {
-
-        public static int NewId;
-    }
 }

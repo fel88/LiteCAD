@@ -39,7 +39,7 @@ namespace LiteCAD.BRep
         }
         public Vector3d V0 => Vertices[0].Position;
 
-        internal TriangleInfo Multiply(Matrix4d matrix)
+        public TriangleInfo Multiply(Matrix4d matrix)
         {
             TriangleInfo ret = new TriangleInfo();
             ret.Vertices = new VertexInfo[Vertices.Length];

@@ -16,6 +16,11 @@ namespace LiteCAD
             return Matrix4d.Rotate(Axis, Angle * Math.PI / 180);
         }
 
+        internal override TransformationChainItem Clone()
+        {
+            return new RotationTransformChainItem() { Axis = Axis, Angle = Angle };
+        }
+
         internal override void RestoreXml(XElement elem)
         {
             Axis = Helpers.ParseVector(elem.Attribute("axis").Value);

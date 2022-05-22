@@ -26,7 +26,7 @@ namespace LiteCAD.Common
 
         }
 
-        public IDrawable[] GetAll(Predicate<IDrawable> p)
+        public virtual IDrawable[] GetAll(Predicate<IDrawable> p)
         {
             if (Childs.Count == 0)
                 return new[] { this };

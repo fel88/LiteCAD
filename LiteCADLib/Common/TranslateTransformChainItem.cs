@@ -14,6 +14,11 @@ namespace LiteCAD
             return Matrix4d.CreateTranslation(Vector);
         }
 
+        internal override TransformationChainItem Clone()
+        {
+            return new TranslateTransformChainItem() { Vector = Vector };
+        }
+
         internal override void RestoreXml(XElement elem)
         {
             Vector = Helpers.ParseVector(elem.Attribute("vec").Value);

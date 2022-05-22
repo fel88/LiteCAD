@@ -388,9 +388,9 @@ namespace LiteCAD
                 if (targetNode is PartAssembly pas)
                 {
                     if (dr is IPartContainer pc)
-                        pas.Parts.Add(new PartInstance(pc));
+                        pas.AddPart(new PartInstance(pc));
                     if (dr is Part p)
-                        pas.Parts.Add(new PartInstance(p));//create LinkReference to part instance
+                        pas.AddPart(new PartInstance(p));//create LinkReference to part instance
                 }
                 if (targetNode is Group gr)
                 {
@@ -546,7 +546,12 @@ namespace LiteCAD
         }
         Vector3d[] getAllPoints()
         {
-            var p1 = getAllPoints(Parts.OfType<Part>().ToArray());
+            var t1 = Parts.OfType<IMesh>().ToArray();
+            var ad = Parts.OfType<AbstractDrawable>().ToArray();
+            var t2 = ad.SelectMany(z => z.GetAll((xx) => xx is IMesh)).OfType<IMesh>();
+            var p1 = getAllPoints(t1.Union(t2).ToArray());
+
+            //var p1 = getAllPoints(Parts.OfType<Part>().ToArray());
             return p1;
             //var drafts = Parts.OfType<Draft>();
             // var p2 = drafts.SelectMany(z => z.DraftPoints.Select(u => u.Location));
@@ -605,7 +610,7 @@ namespace LiteCAD
             fitAll();
         }
 
-        
+
         void deleteItem()
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;
@@ -636,7 +641,34 @@ namespace LiteCAD
             }
             updateList();
         }
+        void cloneItem()
+        {
+            if (treeListView1.SelectedObjects.Count <= 0) return;
 
+            foreach (var item in treeListView1.SelectedObjects)
+            {
+                if (item is PartInstance pi)
+                {
+                    PartInstance pp = new PartInstance(pi.Part);
+                    pp.Name = pi.Name + "_cloned";
+                    pp.Matrix = pi.Matrix.Clone();
+                    pp.Color = pi.Color;
+                    if (pi.Parent != null)
+                    {
+                        pp.Parent = pi.Parent;
+                        if (pp.Parent is PartAssembly)
+                            pp.Parent.Childs.Add(pp);
+                    }
+                    else
+                    {
+                        Parts.Add(pp);
+                    }
+                    updateList();
+                }
+
+            }
+            updateList();
+        }
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             deleteItem();
@@ -1160,10 +1192,20 @@ namespace LiteCAD
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;
             var vv = treeListView1.SelectedObjects.OfType<IEconomicsDetail>().ToArray();
+            var vv4 = treeListView1.SelectedObjects.OfType<PartAssembly>().ToArray();
             var vv2 = treeListView1.SelectedObjects.OfType<PartInstance>().ToArray();
-            var vv3 = vv2.Where(z => z.Part is IEconomicsDetail).Select(z=>(IEconomicsDetail)z.Part).OfType<IEconomicsDetail>().ToArray();
+            var vv3 = vv2.Where(z => z.Part is IEconomicsDetail).Select(z => (IEconomicsDetail)z.Part).OfType<IEconomicsDetail>().ToArray();
             vv = vv.Union(vv3).ToArray();
-            if (vv.Length == 0) return;
+            if (vv.Length == 0)
+            {
+                if (vv4.Any())
+                {
+                    Info inf2 = new Info();
+                    inf2.Init(vv4[0].GetAll(x => x is IEconomicsDetail).OfType<IEconomicsDetail>().ToArray());
+                    inf2.Show(this);
+                }
+                return;
+            }
             Info inf = new Info();
             inf.Init(vv[0]);
             inf.Show(this);
@@ -1297,7 +1339,7 @@ namespace LiteCAD
 
         private void toolStripButton15_Click(object sender, EventArgs e)
         {
-            de.FlipHorizontal();            
+            de.FlipHorizontal();
         }
 
         private void toolStripButton16_Click(object sender, EventArgs e)
@@ -1307,7 +1349,7 @@ namespace LiteCAD
 
         private void toolStripButton17_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void toolStripButton18_Click(object sender, EventArgs e)
@@ -1334,7 +1376,12 @@ namespace LiteCAD
             var t2 = ad.SelectMany(z => z.GetAll((xx) => xx is IMesh)).OfType<IMesh>();
             var vv = getAllPoints(t1.Union(t2).ToArray());
             camToSelected(vv);
-        }        
+        }
+
+        private void cloneToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            cloneItem();
+        }
     }
 
     public enum EditModeEnum
@@ -1346,6 +1393,4 @@ namespace LiteCAD
         void Init(object o);
         object ReturnValue { get; }
     }
-
-    
 }

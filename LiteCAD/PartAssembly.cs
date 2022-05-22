@@ -1,6 +1,8 @@
 ﻿using LiteCAD.Common;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace LiteCAD
@@ -17,11 +19,24 @@ namespace LiteCAD
             Name = item.Attribute("name").Value;
             foreach (var xitem in item.Elements("instance"))
             {
-                Parts.Add(new PartInstance(scene, xitem));
+                AddPart(new PartInstance(scene, xitem));
             }
         }
 
-        public List<PartInstance> Parts = new List<PartInstance>();
+        public PartInstance[] Parts => Childs.OfType<PartInstance>().ToArray();
+
+        public override IDrawable[] GetAll(Predicate<IDrawable> p)
+        {
+            List<IDrawable> ret = new List<IDrawable>();
+            ret.Add(this);
+            foreach (var item in Parts)
+            {
+                var rr1 = item.GetAll(p);
+                ret.AddRange(rr1);
+            }
+            //var ret = Parts.SelectMany(z => z.GetAll(p)).Union(new[] { this }).ToArray();
+            return ret.ToArray();
+        }
 
         public override void Store(TextWriter writer)
         {
@@ -39,6 +54,12 @@ namespace LiteCAD
             {
                 item.Draw();
             }
+        }
+
+        internal void AddPart(PartInstance partInstance)
+        {
+            Childs.Add(partInstance);
+            partInstance.Parent = this;
         }
     }
 }

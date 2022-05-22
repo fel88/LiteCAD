@@ -225,6 +225,7 @@ namespace LiteCAD
 
         protected TransformationChain _matrix = new TransformationChain();
         public TransformationChain Matrix { get => _matrix; set => _matrix = value; }
+        public ProduceOperation Operation { get; set; }
 
         public void Draw()
         {

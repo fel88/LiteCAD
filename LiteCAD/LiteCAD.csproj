@@ -97,6 +97,7 @@
     <Compile Include="MeshModel.cs" />
     <Compile Include="PartAssembly.cs" />
     <Compile Include="PartInstance.cs" />
+    <Compile Include="ProductionStuff.cs" />
     <Compile Include="PropEditors\Matrix4dPropEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>

@@ -62,6 +62,7 @@
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.commandsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cutAllByPlaneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.setCameraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.listView1 = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -134,7 +135,7 @@
             this.toolStripButton16 = new System.Windows.Forms.ToolStripButton();
             this.toolStrip4 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton6 = new System.Windows.Forms.ToolStripButton();
-            this.setCameraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cloneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.treeListView1)).BeginInit();
@@ -241,6 +242,7 @@
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.addToolStripMenuItem,
             this.importToolStripMenuItem,
+            this.cloneToolStripMenuItem,
             this.deleteToolStripMenuItem,
             this.toolStripSeparator1,
             this.editToolStripMenuItem,
@@ -253,7 +255,7 @@
             this.commandsToolStripMenuItem,
             this.setCameraToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(135, 242);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 286);
             // 
             // addToolStripMenuItem
             // 
@@ -423,7 +425,7 @@
             this.commandsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.cutAllByPlaneToolStripMenuItem});
             this.commandsToolStripMenuItem.Name = "commandsToolStripMenuItem";
-            this.commandsToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.commandsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.commandsToolStripMenuItem.Text = "commands";
             // 
             // cutAllByPlaneToolStripMenuItem
@@ -432,6 +434,13 @@
             this.cutAllByPlaneToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.cutAllByPlaneToolStripMenuItem.Text = "cut all by plane";
             this.cutAllByPlaneToolStripMenuItem.Click += new System.EventHandler(this.cutAllByPlaneToolStripMenuItem_Click);
+            // 
+            // setCameraToolStripMenuItem
+            // 
+            this.setCameraToolStripMenuItem.Name = "setCameraToolStripMenuItem";
+            this.setCameraToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.setCameraToolStripMenuItem.Text = "set camera";
+            this.setCameraToolStripMenuItem.Click += new System.EventHandler(this.setCameraToolStripMenuItem_Click);
             // 
             // propertyGrid1
             // 
@@ -1164,12 +1173,12 @@
             this.toolStripButton6.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.toolStripButton6.Click += new System.EventHandler(this.toolStripButton6_Click);
             // 
-            // setCameraToolStripMenuItem
+            // cloneToolStripMenuItem
             // 
-            this.setCameraToolStripMenuItem.Name = "setCameraToolStripMenuItem";
-            this.setCameraToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.setCameraToolStripMenuItem.Text = "set camera";
-            this.setCameraToolStripMenuItem.Click += new System.EventHandler(this.setCameraToolStripMenuItem_Click);
+            this.cloneToolStripMenuItem.Name = "cloneToolStripMenuItem";
+            this.cloneToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.cloneToolStripMenuItem.Text = "clone";
+            this.cloneToolStripMenuItem.Click += new System.EventHandler(this.cloneToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -1321,6 +1330,7 @@
         private System.Windows.Forms.ToolStripButton toolStripButton19;
         private System.Windows.Forms.ToolStripButton toolStripButton20;
         private System.Windows.Forms.ToolStripMenuItem setCameraToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cloneToolStripMenuItem;
     }
 }
 

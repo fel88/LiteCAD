@@ -46,5 +46,15 @@ namespace LiteCAD.Common
             }
             return r;
         }
+
+        public TransformationChain Clone()
+        {
+            TransformationChain ret = new TransformationChain();
+            foreach (var item in Items)
+            {
+                ret.Items.Add(item.Clone());
+            }
+            return ret;
+        }
     }
 }

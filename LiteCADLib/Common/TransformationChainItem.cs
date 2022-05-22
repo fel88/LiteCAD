@@ -21,5 +21,7 @@ namespace LiteCAD
         {
             StoreXml(writer); 
         }
+
+        internal abstract TransformationChainItem Clone();
     }
 }

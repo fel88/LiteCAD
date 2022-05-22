@@ -28,6 +28,12 @@ namespace LiteCAD
             }
         }
 
+        public override IDrawable[] GetAll(Predicate<IDrawable> p)
+        {
+            var ret = Childs.SelectMany(z => z.GetAll(p)).Union(new object[] { this, Part }).OfType<IDrawable>().Where(zz => p(zz)).ToArray();
+            return ret;
+        }
+
         public PartInstance(LiteCADScene scene, XElement xitem)
         {
             Name = xitem.Attribute("name").Value;
@@ -77,6 +83,9 @@ namespace LiteCAD
 
         public IEnumerable<Vector3d> GetPoints()
         {
+            if (!Visible)
+                yield break;
+
             var mtrx = Matrix.Calc();
             foreach (var item in Part.Part.Nodes)
             {

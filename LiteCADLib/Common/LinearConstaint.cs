@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTK;
+using System;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -6,7 +7,6 @@ using System.Xml.Linq;
 namespace LiteCAD.Common
 {
     [XmlName(XmlName = "linearConstraint")]
-
     public class LinearConstraint : DraftConstraint
     {
         public DraftElement Element1;
@@ -27,20 +27,33 @@ namespace LiteCAD.Common
             Element2 = parent.Elements.OfType<DraftPoint>().First(z => z.Id == int.Parse(el.Attribute("p1").Value));
             Length = Helpers.ParseDecimal(el.Attribute("length").Value);            
         }
+
         public LinearConstraint(DraftElement draftPoint1, DraftElement draftPoint2, decimal len)
         {
             this.Element1 = draftPoint1;
             this.Element2 = draftPoint2;
             Length = len;
-
         }
 
         public override bool IsSatisfied(float eps = 1e-6f)
         {
-            var dp0 = Element1 as DraftPoint;
-            var dp1 = Element2 as DraftPoint;
+            var elems = new[] { Element1, Element2 };
+            if (Element1 is DraftPoint dp0 && Element2 is DraftPoint dp1)
+            {
             var diff = (dp1.Location - dp0.Location).Length;
             return Math.Abs(diff - (double)Length) < eps;
+        }
+            if (elems.Any(z => z is DraftLine) && elems.Any(z => z is DraftPoint))
+            {
+                var dp = elems.OfType<DraftPoint>().First();
+                var dl = elems.OfType<DraftLine>().First();
+
+                //get proj of point to line
+                var pp = GeometryUtils.GetProjPoint(dp.Location, dl.V0.Location, dl.Dir);
+                var diff = (pp - dp.Location).Length;
+                return Math.Abs(diff - (double)Length) < eps;
+            }
+            throw new NotImplementedException();
         }
 
         internal void Update()
@@ -50,10 +63,13 @@ namespace LiteCAD.Common
             var diff = (dp1.Location - dp0.Location).Normalized();
             dp1.SetLocation( dp0.Location + diff * (double)Length);
         }
+
         public override void RandomUpdate()
         {
-            var dp0 = Element1 as DraftPoint;
-            var dp1 = Element2 as DraftPoint;
+            var elems = new[] { Element1, Element2 };
+
+            if (Element1 is DraftPoint dp0 && Element2 is DraftPoint dp1)
+            {
             if (dp0.Frozen && dp1.Frozen)
             {
                 throw new ConstraintsException("double frozen");
@@ -69,6 +85,24 @@ namespace LiteCAD.Common
             }
             var diff = (dp1.Location - dp0.Location).Normalized();
             dp1.SetLocation(dp0.Location + diff * (double)Length);
+        }
+            if (elems.Any(z => z is DraftLine) && elems.Any(z => z is DraftPoint))
+            {
+                var dp = elems.OfType<DraftPoint>().First();
+                var dl = elems.OfType<DraftLine>().First();
+                var pp = GeometryUtils.GetProjPoint(dp.Location, dl.V0.Location, dl.Dir);
+
+                var cand1 = pp + dl.Normal * (double)Length;
+                var cand2 = pp - dl.Normal * (double)Length;
+                if (GeometryUtils.Random.Next(100) < 50)
+                {
+                    dp.SetLocation(cand1);
+                }
+                else
+                {
+                    dp.SetLocation(cand2);
+                }
+            }
         }
         public bool IsSame(LinearConstraint cc)
         {

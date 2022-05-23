@@ -9,6 +9,7 @@ namespace LiteCAD.Common
         public bool Frozen { get; set; }//can't be changed during constraints satisfaction
         public static int NewId { get; set; }
         public Draft Parent;
+        public bool Dummy { get; set; }//dummy line. don't export
 
         protected DraftElement(Draft parent)
         {

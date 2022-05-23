@@ -60,6 +60,7 @@ namespace LiteCAD.DraftEditor
                 ctx.isMiddleDrag = true;
                 if (nearest is DraftPoint pp)
                 {
+                    startMiddleDragNearest = nearest;
                     var tr = ctx.Transform(pp.Location);
                     ctx.startx = (float)tr.X;
                     ctx.starty = (float)tr.Y;
@@ -183,6 +184,27 @@ namespace LiteCAD.DraftEditor
                 }
                 if (nearest is DraftLine dl)
                 {
+                    if (queue.Count > 0 && queue[0] is DraftPoint dp1)
+                    {
+                        LinearConstraintLengthDialog lcd = new LinearConstraintLengthDialog();
+                        lcd.Init(dl.Length);
+                        lcd.ShowDialog();
+                        var cc = new LinearConstraint(dl, dp1, lcd.Length);
+                        if (!_draft.Constraints.OfType<LinearConstraint>().Any(z => z.IsSame(cc)))
+                        {
+                            _draft.AddConstraint(cc);
+                            _draft.AddHelper(new LinearConstraintHelper(cc));
+                            _draft.Childs.Add(_draft.Helpers.Last());
+                        }
+                        else
+                        {
+                            GUIHelpers.Warning("such constraint already exist", ParentForm.Text);
+                        }
+                        queue.Clear();
+                        //editor.ResetTool();
+                    }
+                    else
+                    {
                     LinearConstraintLengthDialog lcd = new LinearConstraintLengthDialog();
                     lcd.Init(dl.Length);
                     lcd.ShowDialog();
@@ -199,6 +221,9 @@ namespace LiteCAD.DraftEditor
                     }
                     queue.Clear();
                     //editor.ResetTool();
+                }
+                    return;
+
                 }
                 if (queue.Count > 1)
                 {
@@ -262,10 +287,30 @@ namespace LiteCAD.DraftEditor
                     _draft.AddElement(p2);
                     _draft.AddElement(p3);
 
-                    _draft.AddElement(new DraftLine(p0, p1, _draft));
-                    _draft.AddElement(new DraftLine(p1, p2, _draft));
-                    _draft.AddElement(new DraftLine(p2, p3, _draft));
-                    _draft.AddElement(new DraftLine(p3, p0, _draft));
+                    var line1 = new DraftLine(p0, p1, _draft);
+                    var line2 = new DraftLine(p1, p2, _draft);
+                    var line3 = new DraftLine(p2, p3, _draft);
+                    var line4 = new DraftLine(p3, p0, _draft);
+                    _draft.AddElement(line1);
+                    _draft.AddElement(line2);
+                    _draft.AddElement(line3);
+                    _draft.AddElement(line4);
+
+                    _draft.AddConstraint(new HorizontalConstraint(line1));
+                    _draft.AddConstraint(new VerticalConstraint(line2));
+                    _draft.AddConstraint(new HorizontalConstraint(line3));
+                    _draft.AddConstraint(new VerticalConstraint(line4));
+
+                    foreach (var item in _draft.Constraints.OfType<VerticalConstraint>())
+                    {
+                        if (_draft.Helpers.Any(z => z.Constraint == item)) continue;
+                        _draft.AddHelper(new VerticalConstraintHelper(item));
+                    }
+                    foreach (var item in _draft.Constraints.OfType<HorizontalConstraint>())
+                    {
+                        if (_draft.Helpers.Any(z => z.Constraint == item)) continue;
+                        _draft.AddHelper(new HorizontalConstraintHelper(item));
+                    }
                 }
             }
             if (editor.CurrentTool is DraftEllipseTool && e.Button == MouseButtons.Left)
@@ -356,6 +401,7 @@ namespace LiteCAD.DraftEditor
 
         DrawingContext ctx = new DrawingContext() { DragButton = MouseButtons.Right };
         public object nearest { get; private set; }
+        public object startMiddleDragNearest;
         object[] selected = new object[] { };
         void updateNearest()
         {
@@ -416,11 +462,19 @@ namespace LiteCAD.DraftEditor
             else
                 nearest = null;
         }
+
+        public enum SubSnapTypeEnum
+        {
+            None, Point, PointOnLine, CenterLine, Perpendicular, PointOnCircle
+        }
+
+        SubSnapTypeEnum subSnapType;
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (!Visible) return;
             ctx.gr.Clear(Color.White);
             ctx.UpdateDrag();
+            subSnapType = SubSnapTypeEnum.None;
             updateNearest();
 
             ctx.DrawLine(Pens.Blue, new PointF(0, 0), new PointF(0, 100));
@@ -488,15 +542,54 @@ namespace LiteCAD.DraftEditor
             {
                 Pen pen = new Pen(Color.Blue, 2);
                 pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-
                 pen.DashPattern = new float[] { 4.0F, 2.0F, 1.0F, 3.0F };
-                var gcur = ctx.GetCursor();
 
+                var gcur = ctx.GetCursor();
                 var curp = ctx.Transform(gcur);
+                double maxSnapDist = 10 / ctx.zoom;
+
+                //check perpendicular of lines?
+                foreach (var item in Draft.DraftLines)
+                {
+                    //get projpoint                     
+                    var proj = GeometryUtils.GetProjPoint(gcur.ToVector2d(), item.V0.Location, item.Dir);
+                    var sx = ctx.BackTransform(ctx.startx, ctx.starty);
+                    var proj2 = GeometryUtils.GetProjPoint(new Vector2d(sx.X, sx.Y), item.V0.Location, item.Dir);
+                    if (!item.ContainsPoint(proj))
+                        continue;
+
+                    var len = (proj - gcur.ToVector2d()).Length;
+                    var len2 = (proj2 - gcur.ToVector2d()).Length;
+                    if (len < maxSnapDist)
+                    {
+                        //sub nearest = projpoint
+                        curp = ctx.Transform(proj);
+                        gcur = proj.ToPointF();
+                        subSnapType = SubSnapTypeEnum.PointOnLine;
+                    }
+                    if (len2 < maxSnapDist)
+                    {
+                        //sub nearest = projpoint
+                        curp = ctx.Transform(proj2);
+                        gcur = proj2.ToPointF();
+                        subSnapType = SubSnapTypeEnum.Perpendicular;
+                    }
+                }
+
                 if (nearest is DraftPoint dp)
                 {
                     curp = ctx.Transform(dp.Location);
                     gcur = dp.Location.ToPointF();
+                }
+                if (nearest is DraftLine dl)
+                {
+                    var len = (dl.Center - gcur.ToVector2d()).Length;
+                    if (len < maxSnapDist)
+                    {
+                        curp = ctx.Transform(dl.Center);
+                        gcur = dl.Center.ToPointF();
+                        subSnapType = SubSnapTypeEnum.CenterLine;
+                    }
                 }
                 if (nearest is DraftEllipse de)
                 {
@@ -507,12 +600,32 @@ namespace LiteCAD.DraftEditor
                     gcur = onEl.ToPointF();
                 }
                 var t = ctx.Transform(new PointF(ctx.startx, ctx.starty));
+
+                //snap starto
+                if (startMiddleDragNearest is DraftPoint sdp)
+                {
+
+                }
+
                 ctx.gr.DrawLine(pen, ctx.startx, ctx.starty, curp.X, curp.Y);
                 var pp = ctx.BackTransform(new PointF(ctx.startx, ctx.starty));
                 Vector2 v1 = new Vector2(pp.X, pp.Y);
                 Vector2 v2 = new Vector2(gcur.X, gcur.Y);
                 var dist = (v2 - v1).Length;
-                ctx.gr.DrawString(dist.ToString("N2"), SystemFonts.DefaultFont, Brushes.Black, curp.X + 10, curp.Y);
+                var hintText = dist.ToString("N2");
+                if (subSnapType == SubSnapTypeEnum.PointOnLine)
+                {
+                    hintText = "[point on line] : " + hintText;
+                }
+                if (subSnapType == SubSnapTypeEnum.CenterLine)
+                {
+                    hintText = "[line center] : " + hintText;
+                }
+                if (subSnapType == SubSnapTypeEnum.Perpendicular)
+                {
+                    hintText = "[perpendicular] : " + hintText;
+                }
+                ctx.gr.DrawString(hintText, SystemFonts.DefaultFont, Brushes.Black, curp.X + 10, curp.Y);
             }
             if (ctx.isLeftDrag)//rect tool
             {

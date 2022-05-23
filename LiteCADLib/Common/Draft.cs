@@ -72,10 +72,10 @@ namespace LiteCAD.Common
             EndEdit();
         }
 
-        public DraftLine[][] GetWires()
+        public DraftElement[][] GetWires()
         {
             var remains = DraftLines.Where(z => !z.Dummy).ToList();
-            List<List<DraftLine>> ret = new List<List<DraftLine>>();
+            List<List<DraftLine>> ret1 = new List<List<DraftLine>>();
 
             while (remains.Any())
             {
@@ -84,7 +84,7 @@ namespace LiteCAD.Common
                 {
                     bool good = false;
 
-                    foreach (var item in ret)
+                    foreach (var item in ret1)
                     {
                         var arr1 = item.SelectMany(z => new[] { z.V0, z.V1 }).ToArray();
                         if (arr1.Contains(rem.V0) || arr1.Contains(rem.V1))
@@ -101,14 +101,26 @@ namespace LiteCAD.Common
                 }
                 if (added.Count == 0)
                 {
-                    ret.Add(new List<DraftLine>());
-                    ret.Last().Add(remains[0]);
+                    ret1.Add(new List<DraftLine>());
+                    ret1.Last().Add(remains[0]);
                     added.Add(remains[0]);
                 }
                 foreach (var item in added)
                 {
                     remains.Remove(item);
                 }
+            }
+
+            List<List<DraftElement>> ret = new List<List<DraftElement>>();
+            var remains1 = DraftEllipses.Where(z => !z.Dummy).ToList();
+
+            ret.AddRange(ret1.Select(z => z.Select(u => u as DraftElement).ToList()));
+            foreach (var item in remains1)
+            {
+                ret.Add(new List<DraftElement>()
+                {
+                    item
+                });
             }
 
             return ret.Select(z => z.ToArray()).ToArray();

@@ -12,7 +12,14 @@ namespace LiteCAD.Common
 {
     public class GeometryUtils
     {
-
+        public static Vector2d GetProjPoint(Vector2d point, Vector2d loc, Vector2d norm)
+        {
+            var v = point - loc;
+            var dist = Vector2d.Dot(v, norm);
+            //var proj = point - dist * norm;
+            //return proj;
+            return dist * norm + loc;
+        }
         public static Vector3d? Intersect3dCrossedLines(Line3D ln0, Line3D ln1)
         {
             var v0 = ln0.Start;

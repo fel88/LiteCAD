@@ -1,4 +1,5 @@
-﻿using LiteCAD.Common;
+﻿using LiteCAD.BRep;
+using LiteCAD.Common;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
@@ -10,7 +11,7 @@ using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class PartInstance : AbstractDrawable, IPlaneSplittable, IMesh
+    public class PartInstance : AbstractDrawable, IPlaneSplittable, IMesh, IMeshNodesContainer
     {
         /*public PartInstance(Part part)
         {
@@ -60,6 +61,27 @@ namespace LiteCAD
 
         public readonly IPartContainer Part;
         public Color Color { get; set; } = Color.LightGray;
+
+        public BRep.MeshNode[] Nodes
+        {
+            get
+            {
+                var mtr = Matrix.Calc();
+                List<MeshNode> ret = new List<MeshNode>();
+                foreach (var item in Part.Part.Nodes)
+                {
+                    var mn = new MeshNode();
+                    foreach (var titem in item.Triangles)
+                    {
+                        mn.Triangles.Add(titem.Multiply(mtr));
+                    }
+                    ret.Add(mn);
+                }                
+                return ret.ToArray();
+            }
+        }
+
+
         public override void Draw()
         {
             if (!Visible) return;

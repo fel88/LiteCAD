@@ -11,9 +11,11 @@ using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class MeshModel : AbstractDrawable, IPlaneSplittable, IMesh
+    public class MeshModel : AbstractDrawable, IPlaneSplittable, IMesh, IMeshNodesContainer
     {
         public List<MeshNode> Nodes = new List<MeshNode>();
+        MeshNode[] IMeshNodesContainer.Nodes => Nodes.ToArray();
+
         public void RestoreXml(XElement elem)
         {
             _matrix.RestoreXml(elem.Element("transform"));
@@ -161,8 +163,7 @@ namespace LiteCAD
         }
     }
 
-    public interface IPlaneSplittable
-    {
-        Line3D[] SplitPyPlane(PlaneHelper ph);
-    }
+    
+
+    
 }

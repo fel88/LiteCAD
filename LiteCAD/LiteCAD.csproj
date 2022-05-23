@@ -92,6 +92,7 @@
     <Compile Include="Info.Designer.cs">
       <DependentUpon>Info.cs</DependentUpon>
     </Compile>
+    <Compile Include="Intersection.cs" />
     <Compile Include="ITool.cs" />
     <Compile Include="LiteCADScene.cs" />
     <Compile Include="MeshModel.cs" />

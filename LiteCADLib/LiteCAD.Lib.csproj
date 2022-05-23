@@ -92,6 +92,7 @@
     <Compile Include="Common\LineHelper.cs" />
     <Compile Include="Common\ParallelConstraint.cs" />
     <Compile Include="Common\PerpendicularConstraint.cs" />
+    <Compile Include="Common\PlaneDataTransferObject.cs" />
     <Compile Include="Common\TransformationChain.cs" />
     <Compile Include="Common\VerticalConstraint.cs" />
     <Compile Include="Common\XmlNameAttribute.cs" />

@@ -1,4 +1,5 @@
 ﻿using OpenTK;
+using System;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -9,7 +10,7 @@ namespace LiteCAD.Common
     {
         public readonly DraftPoint V0;
         public readonly DraftPoint V1;
-        public bool Dummy { get; set; }//dummy line. don't export
+
         public DraftLine(XElement el, Draft parent) : base(parent)
         {
             var v0Id = int.Parse(el.Attribute("v0").Value);
@@ -28,10 +29,16 @@ namespace LiteCAD.Common
 
         public Vector2d Center => (V0.Location + V1.Location) / 2;
         public Vector2d Dir => (V1.Location - V0.Location).Normalized();
+        public Vector2d Normal => new Vector2d(-Dir.Y, Dir.X);
         public double Length => (V1.Location - V0.Location).Length;
         public override void Store(TextWriter writer)
         {
             writer.WriteLine($"<line id=\"{Id}\" dummy=\"{Dummy}\" v0=\"{V0.Id}\" v1=\"{V1.Id}\" />");
+        }
+
+        public bool ContainsPoint(Vector2d proj)
+        {
+            return Math.Abs(((V0.Location - proj).Length + (V1.Location - proj).Length) - Length) < 1e-8f;
         }
     }
 }

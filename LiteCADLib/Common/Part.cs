@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace LiteCAD.Common
 {
-    public class Part : AbstractDrawable, IPartContainer, IMesh
+    public class Part : AbstractDrawable, IPartContainer, IMesh, IMeshNodesContainer, IPlaneSplittable
     {
         
         Part IPartContainer.Part => this;
@@ -261,9 +261,33 @@ namespace LiteCAD.Common
                 }
             }
         }
+
+        public Line3D[] SplitPyPlane(PlaneHelper ph)
+        {
+            var mm = Matrix.Calc();
+            var ret = Nodes.SelectMany(z => z.SplitByPlane(mm, ph)).ToArray();
+            mm = Matrix4d.Identity;
+            for (int i = 0; i < ret.Length; i++)
+            {
+
+                var res1 = Vector3d.Transform(ret[i].Start, mm);
+                var res2 = Vector3d.Transform(ret[i].End, mm);
+                ret[i].Start = res1;
+                ret[i].End = res2;
+            }
+            return ret;
+        }
     }
     public interface IMesh
     {
         IEnumerable<Vector3d> GetPoints();
+    }
+    public interface IMeshNodesContainer
+    {
+        MeshNode[] Nodes { get; }
+    }
+    public interface IPlaneSplittable
+    {
+        Line3D[] SplitPyPlane(PlaneHelper ph);
     }
 }

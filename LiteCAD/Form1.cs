@@ -43,14 +43,55 @@ namespace LiteCAD
                 glControl.MakeCurrent();
             }
 
-
             Redraw();
-
         }
+
+        IntersectInfo pick;
+
+        public void UpdatePickTriangle()
+        {
+            List<IMeshNodesContainer> ret = new List<IMeshNodesContainer>();
+            foreach (var item in Parts)
+            {
+                ret.AddRange(item.GetAll(z => z is IMeshNodesContainer).OfType<IMeshNodesContainer>());
+            }
+
+            foreach (var item in ret)
+            {
+                if (item is IDrawable d)
+                {
+                    if (!d.Visible) continue;
+                }
+                UpdatePickTriangle(item);
+            }
+        }
+
+        public void UpdatePickTriangle(IMeshNodesContainer part)
+        {
+            //if (CurrentModel == null) return;
+            //var r = (CurrentModel.ShellInfo as RectTubeShellInfo);
+
+            MouseRay.UpdateMatrices();
+            var mr = new MouseRay(glControl.PointToClient(Cursor.Position));
+
+            //var mds = Helpers.CurrentModel.Nodes.Where(z=>z.IsVisible).Where(z => z.Tag is NodeInfo).Select(z => z.Model).ToArray();
+            //var mds = part.Nodes.Where(z => z.IsVisible).Select(z => z.Model).ToArray();
+
+            var inter = Intersection.AllRayIntersect(part.Nodes, mr);
+            if (inter == null || inter.Count() == 0) return;
+            var fr = inter.OrderBy(z => z.Distance).First();
+
+            pick = fr;
+        }
+        bool pickEnable = true;
 
         bool drawAxes = true;
         void Redraw()
         {
+
+
+            UpdatePickTriangle();
+
             CurrentTool.Update();
             ViewManager.Update();
 
@@ -149,13 +190,116 @@ namespace LiteCAD
                 if (!item.Visible) continue;
                 item.Draw();
             }
+
+
+
+
             CurrentTool.Draw();
+            if (pick != null)
+            {
+                float pickEps = 10;
+
+                var pp = new[] { pick.Target.V0,
+                pick.Target.V1,pick.Target.V2}.ToArray();
+
+                if (pp.Any(uu => (uu - pick.Point).Length < pickEps))
+                {
+                    var fr = pp.First(uu => (uu - pick.Point).Length < pickEps);
+                    toolStripStatusLabel3.Text = $"hovered point: X: {fr.X:N3} Y: {fr.Y:N3} Z: {fr.Z:N3}";
+                    float gap1 = 3;
+                    GL.Disable(EnableCap.Lighting);
+                    //draw 3d rect
+                    GL.Color3(Color.Red);
+                    //GL.Begin(PrimitiveType.LineLoop);
+                    //GL.Vertex3(fr + new Vector3d(gap1, gap1, gap1));
+                    //GL.Vertex3(fr + new Vector3d(gap1, -gap1, gap1));
+                    //GL.Vertex3(fr + new Vector3d(-gap1, -gap1, gap1));
+                    //GL.Vertex3(fr + new Vector3d(-gap1, gap1, gap1));
+                    //GL.End();
+
+                    //GL.Begin(PrimitiveType.Lines);
+                    //GL.Vertex3(fr + new Vector3d(gap1, gap1, -gap1));
+                    //GL.Vertex3(fr + new Vector3d(gap1, gap1, gap1));
+
+                    //GL.Vertex3(fr + new Vector3d(-gap1, gap1, -gap1));
+                    //GL.Vertex3(fr + new Vector3d(-gap1, gap1, gap1));
+
+                    //GL.Vertex3(fr + new Vector3d(gap1, -gap1, -gap1));
+                    //GL.Vertex3(fr + new Vector3d(gap1, -gap1, gap1));
+
+                    //GL.Vertex3(fr + new Vector3d(-gap1, -gap1, -gap1));
+                    //GL.Vertex3(fr + new Vector3d(-gap1, -gap1, gap1));
+                    //GL.End();
+
+                    //GL.Begin(PrimitiveType.LineLoop);
+                    //GL.Vertex3(fr + new Vector3d(gap1, gap1, -gap1));
+                    //GL.Vertex3(fr + new Vector3d(gap1, -gap1, -gap1));
+                    //GL.Vertex3(fr + new Vector3d(-gap1, -gap1, -gap1));
+                    //GL.Vertex3(fr + new Vector3d(-gap1, gap1, -gap1));
+                    ///*foreach (var item in pick.Target.Vertices)
+                    //{
+                    //    GL.Vertex3(item.Position);
+                    //}*/
+
+                    //GL.End();
+                    GL.PointSize(10);
+                    GL.Begin(PrimitiveType.Points);
+                    GL.Vertex3(fr);
+                    GL.End();
+                }
+
+
+            }
+            hoverText.Visible = middleDrag;
+            if (middleDrag)
+            {
+                if (pick != null)
+                {
+                    var snap2 = SnapPoint(pick);
+                    var snap1 = SnapPoint(startMeasurePick);
+                    if (snap1 != null && snap2 != null)
+                    {
+
+                        GL.LineStipple(1, 0x3F07);
+                        GL.LineWidth(3);
+                        GL.Enable(EnableCap.LineStipple);
+                        
+                        GL.Color3(Color.Orange);
+                        GL.Begin(PrimitiveType.Lines);
+                        GL.Vertex3(snap1.Value);
+                        GL.Vertex3(snap2.Value);
+                        GL.End();
+                        hoverText.Text = $"dist: {(snap1.Value - snap2.Value).Length:N4}";
+                        GL.PointSize(10);
+                        GL.Begin(PrimitiveType.Points);
+                        GL.Vertex3(snap1.Value);
+                        GL.Vertex3(snap2.Value);
+                        GL.End();
+                        GL.Disable(EnableCap.LineStipple);
+                    }
+                }
+            }
             GL.Disable(EnableCap.Lighting);
 
             glControl.SwapBuffers();
         }
-        DraftEditorControl de;
 
+        Vector3d? SnapPoint(IntersectInfo inter)
+        {
+            float pickEps = 10;
+            var pp = new[] {
+                inter.Target.V0,
+                inter.Target.V1,
+                inter.Target.V2}.ToArray();
+            if (pp.Any(uu => (uu - inter.Point).Length < pickEps))
+            {
+                return pp.OrderBy(uu => (uu - inter.Point).Length).First(uu => (uu - inter.Point).Length < pickEps);
+            }
+            return null;
+        }
+
+        DraftEditorControl de;
+        Label hoverText;
         public Form1()
         {
             InitializeComponent();
@@ -264,6 +408,13 @@ namespace LiteCAD
             {
                 glControl = new OpenTK.GLControl(new OpenTK.Graphics.GraphicsMode(32, 24, 0, 8));
             }
+
+            hoverText = new Label();
+            glControl.Controls.Add(hoverText);
+            hoverText.Text = "dist:";
+            hoverText.BackColor = Color.Transparent;
+            hoverText.ForeColor = Color.White;
+            hoverText.AutoSize = true;
             evwrapper = new EventWrapperGlControl(glControl);
 
             glControl.MouseDown += GlControl_MouseDown;
@@ -419,11 +570,22 @@ namespace LiteCAD
 
         private void GlControl_MouseUp(object sender, MouseEventArgs e)
         {
+            middleDrag = false;
             CurrentTool.MouseUp(e);
         }
 
+        bool middleDrag = false;
+        IntersectInfo startMeasurePick = null;
         private void GlControl_MouseDown(object sender, MouseEventArgs e)
         {
+            if (e.Button == MouseButtons.Middle)
+            {
+                if (pick != null)
+                {
+                    middleDrag = true;
+                    startMeasurePick = pick;
+                }
+            }
             CurrentTool.MouseDown(e);
         }
 
@@ -1393,4 +1555,13 @@ namespace LiteCAD
         void Init(object o);
         object ReturnValue { get; }
     }
+    public class IntersectInfo
+    {
+        public double Distance;
+        public TriangleInfo Target;
+        public IDrawable Model;
+        public Vector3d Point { get; set; }
+        public object Parent;
+    }
+
 }

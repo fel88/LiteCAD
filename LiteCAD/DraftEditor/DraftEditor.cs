@@ -169,10 +169,7 @@ namespace LiteCAD.DraftEditor
 
                 }
             }*/
-            if (editor.CurrentTool is AbstractTool at)
-            {
-                at.Editor = this;
-            }
+            
             editor.CurrentTool.MouseDown(e);
 
             if (editor.CurrentTool is LinearConstraintTool && e.Button == MouseButtons.Left)

@@ -19,6 +19,16 @@ namespace LiteCAD.BRep
             var crs = Vector3d.Cross(v0, v1);
             return crs.Length / 2;
         }
+
+        internal bool IsSame(TriangleInfo tr)
+        {
+            float eps = 1e-8f;
+            return tr.Vertices.All(uu =>
+            {
+                return Vertices.Any(zz => (zz.Position - uu.Position).Length < eps);
+            });
+        }
+
         public Vector3d Normal()
         {
             var v0 = Vertices[1].Position - Vertices[0].Position;

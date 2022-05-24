@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractDraftTool.cs" />
     <Compile Include="AbstractTool.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="CameraViewManager.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="Info.Designer.cs">
       <DependentUpon>Info.cs</DependentUpon>
     </Compile>
+    <Compile Include="IntersectInfo.cs" />
     <Compile Include="Intersection.cs" />
     <Compile Include="ITool.cs" />
     <Compile Include="LiteCADScene.cs" />
@@ -111,6 +113,7 @@
     <Compile Include="PropEditors\Vector3dPropEditor.Designer.cs">
       <DependentUpon>Vector3dPropEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Tools\AdjoinTool.cs" />
     <Compile Include="Tools\DraftEllipseTool.cs" />
     <Compile Include="Tools\DraftLineTool.cs" />
     <Compile Include="EventWrapperGlControl.cs" />

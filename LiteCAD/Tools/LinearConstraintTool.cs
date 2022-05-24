@@ -1,10 +1,15 @@
-﻿using System.Windows.Forms;
+﻿using LiteCAD.DraftEditor;
+using System.Windows.Forms;
 
 namespace LiteCAD.Tools
 {
-    public class LinearConstraintTool : AbstractTool
+    public class LinearConstraintTool : AbstractDraftTool
     {
-        public static LinearConstraintTool Instance = new LinearConstraintTool();
+        public LinearConstraintTool(IDraftEditor ee) : base(ee)
+        {
+
+        }
+
 
         public override void Deselect()
         {

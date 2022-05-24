@@ -11,7 +11,7 @@ using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class PartInstance : AbstractDrawable, IPlaneSplittable, IMesh, IMeshNodesContainer
+    public class PartInstance : AbstractDrawable, IPlaneSplittable, IMesh, IMeshNodesContainer, IPartContainer
     {
         /*public PartInstance(Part part)
         {
@@ -19,6 +19,8 @@ namespace LiteCAD
             Name = Part.Name;
         }*/
 
+
+        public bool Frozen { get; set; }
         public PartInstance(IPartContainer part)
         {
             Part = part;
@@ -44,7 +46,10 @@ namespace LiteCAD
                 var rgb = xitem.Attribute("color").Value.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToArray();
                 Color = Color.FromArgb(rgb[0], rgb[1], rgb[2]);
             }
-
+            if (xitem.Attribute("frozen") != null)
+            {
+                Frozen = bool.Parse(xitem.Attribute("frozen").Value);
+            }
             var id = int.Parse(xitem.Attribute("id").Value);
             var ps = scene.GetAll(z => z is IPartContainer).OfType<IPartContainer>().First(z => z.Id == id);
             Part = ps;
@@ -52,7 +57,7 @@ namespace LiteCAD
 
         public override void Store(TextWriter writer)
         {
-            writer.WriteLine($"<instance id=\"{Part.Id}\" name=\"{Name}\" color=\"{Color.R};{Color.G};{Color.B}\">");
+            writer.WriteLine($"<instance id=\"{Part.Id}\" name=\"{Name}\" color=\"{Color.R};{Color.G};{Color.B}\" frozen=\"{Frozen}\">");
             writer.WriteLine("<transform>");
             _matrix.StoreXml(writer);
             writer.WriteLine("</transform>");
@@ -81,6 +86,7 @@ namespace LiteCAD
             }
         }
 
+        Part IPartContainer.Part => Part.Part;
 
         public override void Draw()
         {

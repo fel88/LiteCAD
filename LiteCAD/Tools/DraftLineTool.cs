@@ -1,10 +1,15 @@
-﻿using System.Windows.Forms;
+﻿using LiteCAD.DraftEditor;
+using System.Windows.Forms;
 
 namespace LiteCAD.Tools
 {
-    public class DraftLineTool : AbstractTool
+    public class DraftLineTool : AbstractDraftTool
     {
-        public static DraftLineTool Instance = new DraftLineTool();
+        public DraftLineTool(IDraftEditor editor) : base(editor)
+        {
+
+        }
+
         public override void Deselect()
         {
             

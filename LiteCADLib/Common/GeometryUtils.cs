@@ -190,6 +190,15 @@ namespace LiteCAD.Common
             return area / 2.0;
         }
 
+        public static bool Contains(BRepWire bRepWire, TriangleInfo target)
+        {
+            var pnts = bRepWire.Edges.SelectMany(z => new[] { z.Start, z.End }).ToArray();
+            var p = new[] { target.V0, target.V1, target.V2 };
+
+            float eps = 1e-5f;
+            return p.All(z => pnts.Any(uu => (uu - z).Length < eps));
+        }
+
         public static bool AlmostEqual(double a, double b, double eps = 1e-8)
         {
             return Math.Abs(a - b) <= eps;
@@ -211,6 +220,16 @@ namespace LiteCAD.Common
 
             // Return the result.
             return Math.Abs(area);
+        }
+
+        public static bool Contains(BRepWire bRepWire, TriangleInfo target, Matrix4d matrix4d)
+        {
+            var pnts = bRepWire.Edges.SelectMany(z => new[] { z.Start, z.End }).ToArray();
+            pnts = pnts.Select(zz => Vector3d.Transform(zz, matrix4d)).ToArray();
+            var p = new[] { target.V0, target.V1, target.V2 };
+
+            float eps = 1e-5f;
+            return p.All(z => pnts.Any(uu => (uu - z).Length < eps));
         }
 
         internal static Vector3d CalcConjugateNormal(Vector3d nm, Vector3d point0, Vector3d point1, Segment3d edge)

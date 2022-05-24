@@ -1,10 +1,14 @@
-﻿using System.Windows.Forms;
+﻿using LiteCAD.DraftEditor;
+using System.Windows.Forms;
 
 namespace LiteCAD.Tools
 {
-    public class PerpendicularConstraintTool : AbstractTool
+    public class PerpendicularConstraintTool : AbstractDraftTool
     {
-        public static PerpendicularConstraintTool Instance = new PerpendicularConstraintTool();
+        public PerpendicularConstraintTool(IDraftEditor ee) : base(ee)
+        {
+        }
+
 
         public override void Deselect()
         {

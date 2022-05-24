@@ -1,26 +1,28 @@
-﻿using System.Windows.Forms;
+﻿using LiteCAD.DraftEditor;
+using System.Windows.Forms;
 
 namespace LiteCAD
 {
-    public abstract class AbstractTool : ITool
+    public abstract class AbstractDraftTool : ITool
     {
-        protected IEditor Editor;
-        public AbstractTool(IEditor editor)
+        
+        public AbstractDraftTool(IDraftEditor editor)
         {
             Editor = editor;
         }
 
         public abstract void Deselect();
-   
+
+
         public abstract void Draw();
 
+        public IDraftEditor Editor;
         public abstract void MouseDown(MouseEventArgs e);
 
         public abstract void MouseUp(MouseEventArgs e);
 
-        public abstract void Select();        
+        public abstract void Select();
 
         public abstract void Update();
-        
     }
 }

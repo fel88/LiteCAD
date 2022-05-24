@@ -5,9 +5,10 @@ using System.Windows.Forms;
 
 namespace LiteCAD.Tools
 {
-    public class HorizontalConstraintTool : AbstractTool
+    public class HorizontalConstraintTool : AbstractDraftTool
     {
-        public static HorizontalConstraintTool Instance = new HorizontalConstraintTool();
+        
+        public HorizontalConstraintTool(IDraftEditor e) : base(e) { }        
 
         public override void Deselect()
         {

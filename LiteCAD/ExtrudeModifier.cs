@@ -68,7 +68,11 @@ namespace LiteCAD
         {
             //draft->brep
             _part = new Part();
-            var bottomFace = new BRepPlaneFace(_part) { Surface = new BRepPlane() { Normal = Source.Plane.Normal, Location = Source.Plane.Position } };
+            var bottomFace = new BRepPlaneFace(_part)
+            {
+                Parent = _part,
+                Surface = new BRepPlane() { Normal = Source.Plane.Normal, Location = Source.Plane.Position }
+            };
             _part.Faces.Add(bottomFace);
 
             var basis = Source.Plane.GetBasis();
@@ -123,10 +127,14 @@ namespace LiteCAD
                     }
                 }
                 bottomFace.Wires.Add(new BRep.BRepWire() { Edges = edges });
-
             }
+
             var shift = Source.Plane.Normal * (double)Height;
-            var topFace = new BRepPlaneFace(_part) { Surface = new BRepPlane() { Normal = -Source.Plane.Normal, Location = Source.Plane.Position + Source.Plane.Normal * (double)Height } };
+            var topFace = new BRepPlaneFace(_part)
+            {
+                Parent = _part,
+                Surface = new BRepPlane() { Normal = -Source.Plane.Normal, Location = Source.Plane.Position + Source.Plane.Normal * (double)Height }
+            };
 
             foreach (var item in bottomFace.Wires)
             {
@@ -192,6 +200,7 @@ namespace LiteCAD
                     dir = new Vector3d(-dir.Y, dir.X, 0);
                     var sideFace = new BRepPlaneFace(_part)
                     {
+                            Parent = _part,
                         Surface = new BRepPlane()
                         {
                             Normal = -dir,

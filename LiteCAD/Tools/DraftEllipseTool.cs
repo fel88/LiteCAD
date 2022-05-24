@@ -4,7 +4,10 @@ namespace LiteCAD.Tools
 {
     public class DraftEllipseTool : AbstractTool
     {
-        public static DraftEllipseTool Instance = new DraftEllipseTool();
+        public DraftEllipseTool(IEditor editor) : base(editor)
+        {
+
+        }
 
         public override void Deselect()
         {

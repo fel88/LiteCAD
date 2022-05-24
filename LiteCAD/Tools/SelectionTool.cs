@@ -4,11 +4,14 @@ namespace LiteCAD.Tools
 {
     public class SelectionTool : AbstractTool
     {
-        public static SelectionTool Instance = new SelectionTool();
+        public SelectionTool(IEditor editor) : base(editor)
+        {
+
+        }
 
         public override void Deselect()
         {
-            Form1.Form.ViewManager.Detach();
+            //Form1.Form.ViewManager.Detach();
         }
 
         public override void Draw()
@@ -28,7 +31,7 @@ namespace LiteCAD.Tools
 
         public override void Select()
         {
-            Form1.Form.ViewManager.Attach(Form1.Form.evwrapper, Form1.Form.camera1);
+            //Form1.Form.ViewManager.Attach(Form1.Form.evwrapper, Form1.Form.camera1);
 
         }
 

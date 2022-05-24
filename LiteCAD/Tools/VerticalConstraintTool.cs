@@ -5,9 +5,11 @@ using System.Windows.Forms;
 
 namespace LiteCAD.Tools
 {
-    public class VerticalConstraintTool : AbstractTool
+    public class VerticalConstraintTool : AbstractDraftTool
     {
-        public static VerticalConstraintTool Instance = new VerticalConstraintTool();
+        public VerticalConstraintTool(IDraftEditor editor):base(editor)
+        {            
+        }
 
         public override void Deselect()
         {

@@ -113,6 +113,8 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
+            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.toolStrip3 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton5 = new System.Windows.Forms.ToolStripButton();
@@ -135,9 +137,9 @@
             this.toolStripButton8 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton16 = new System.Windows.Forms.ToolStripButton();
             this.toolStrip4 = new System.Windows.Forms.ToolStrip();
+            this.toolStripButton18 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton6 = new System.Windows.Forms.ToolStripButton();
-            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripButton17 = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.treeListView1)).BeginInit();
@@ -933,6 +935,17 @@
             this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
             this.toolStripProgressBar1.Visible = false;
             // 
+            // toolStripStatusLabel2
+            // 
+            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
+            this.toolStripStatusLabel2.Size = new System.Drawing.Size(1236, 17);
+            this.toolStripStatusLabel2.Spring = true;
+            // 
+            // toolStripStatusLabel3
+            // 
+            this.toolStripStatusLabel3.Name = "toolStripStatusLabel3";
+            this.toolStripStatusLabel3.Size = new System.Drawing.Size(0, 17);
+            // 
             // toolStripContainer1
             // 
             // 
@@ -1168,11 +1181,25 @@
             // 
             this.toolStrip4.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip4.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton6});
+            this.toolStripButton18,
+            this.toolStripButton6,
+            this.toolStripButton17});
             this.toolStrip4.Location = new System.Drawing.Point(92, 76);
             this.toolStrip4.Name = "toolStrip4";
-            this.toolStrip4.Size = new System.Drawing.Size(62, 38);
+            this.toolStrip4.Size = new System.Drawing.Size(198, 38);
             this.toolStrip4.TabIndex = 5;
+            // 
+            // toolStripButton18
+            // 
+            this.toolStripButton18.Image = global::LiteCAD.Properties.Resources.cursor;
+            this.toolStripButton18.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.toolStripButton18.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton18.Name = "toolStripButton18";
+            this.toolStripButton18.Size = new System.Drawing.Size(59, 35);
+            this.toolStripButton18.Text = "Selection";
+            this.toolStripButton18.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.toolStripButton18.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.toolStripButton18.Click += new System.EventHandler(this.toolStripButton18_Click_1);
             // 
             // toolStripButton6
             // 
@@ -1184,16 +1211,15 @@
             this.toolStripButton6.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.toolStripButton6.Click += new System.EventHandler(this.toolStripButton6_Click);
             // 
-            // toolStripStatusLabel2
+            // toolStripButton17
             // 
-            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            this.toolStripStatusLabel2.Size = new System.Drawing.Size(1236, 17);
-            this.toolStripStatusLabel2.Spring = true;
-            // 
-            // toolStripStatusLabel3
-            // 
-            this.toolStripStatusLabel3.Name = "toolStripStatusLabel3";
-            this.toolStripStatusLabel3.Size = new System.Drawing.Size(0, 17);
+            this.toolStripButton17.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton17.Image")));
+            this.toolStripButton17.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton17.Name = "toolStripButton17";
+            this.toolStripButton17.Size = new System.Drawing.Size(46, 35);
+            this.toolStripButton17.Text = "Adjoin";
+            this.toolStripButton17.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.toolStripButton17.Click += new System.EventHandler(this.toolStripButton17_Click_1);
             // 
             // Form1
             // 
@@ -1348,6 +1374,8 @@
         private System.Windows.Forms.ToolStripMenuItem cloneToolStripMenuItem;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
+        private System.Windows.Forms.ToolStripButton toolStripButton17;
+        private System.Windows.Forms.ToolStripButton toolStripButton18;
     }
 }
 

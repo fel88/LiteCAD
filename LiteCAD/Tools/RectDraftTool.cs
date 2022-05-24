@@ -1,10 +1,14 @@
-﻿using System.Windows.Forms;
+﻿using LiteCAD.DraftEditor;
+using System.Windows.Forms;
 
 namespace LiteCAD.Tools
 {
-    public class RectDraftTool : AbstractTool
+    public class RectDraftTool : AbstractDraftTool
     {
-        public static RectDraftTool Instance = new RectDraftTool();
+        public RectDraftTool(IDraftEditor editor):base(editor)
+        {
+
+        }        
 
         public override void Deselect()
         {

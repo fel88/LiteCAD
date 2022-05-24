@@ -4,7 +4,7 @@ namespace LiteCAD.Tools
 {
     public class ParallelConstraintTool : AbstractTool
     {
-        public static ParallelConstraintTool Instance = new ParallelConstraintTool();
+        public ParallelConstraintTool(IEditor editor) : base(editor) { }
 
         public override void Deselect()
         {

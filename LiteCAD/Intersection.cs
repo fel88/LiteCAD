@@ -9,10 +9,10 @@ namespace LiteCAD
 {
     public static class Intersection
     {
-        public static IntersectInfo[] AllRayIntersect(MeshNode[] array, MouseRay mr)
+        public static IntersectInfo[] AllRayIntersect(IMeshNodesContainer mesh, MouseRay mr)
         {
             List<IntersectInfo> ret = new List<IntersectInfo>();
-            foreach (var bindMesh in array)
+            foreach (var bindMesh in mesh.Nodes)
             {
                 var dd = CheckIntersect(mr, bindMesh.Triangles.ToArray());
 
@@ -24,7 +24,7 @@ namespace LiteCAD
                         dd.Parent = bindMesh.Tag;
                     }*/
                     var dist = dd.Distance;
-                    //dd.Model = bindMesh;
+                    //dd.Model = bindMesh.Parent.Parent.Parent;
                     ret.Add(dd);
                 }
             }

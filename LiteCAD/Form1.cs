@@ -46,6 +46,7 @@ namespace LiteCAD
             Redraw();
         }
 
+        public IntersectInfo Pick => pick;
         IntersectInfo pick;
 
         public void UpdatePickTriangle()
@@ -56,17 +57,25 @@ namespace LiteCAD
                 ret.AddRange(item.GetAll(z => z is IMeshNodesContainer).OfType<IMeshNodesContainer>());
             }
 
-            foreach (var item in ret)
+            List<IntersectInfo> rr = new List<IntersectInfo>();
+            foreach (var item in ret.OfType<PartInstance>())
             {
                 if (item is IDrawable d)
                 {
                     if (!d.Visible) continue;
                 }
-                UpdatePickTriangle(item);
+                var r = UpdatePickTriangle(item);
+                if (r != null)
+                    rr.Add(r);
+            }
+            pick = null;
+            if (rr.Any())
+            {
+                pick = rr.OrderBy(z => z.Distance).First();
             }
         }
 
-        public void UpdatePickTriangle(IMeshNodesContainer part)
+        public IntersectInfo UpdatePickTriangle(IMeshNodesContainer part)
         {
             //if (CurrentModel == null) return;
             //var r = (CurrentModel.ShellInfo as RectTubeShellInfo);
@@ -77,19 +86,21 @@ namespace LiteCAD
             //var mds = Helpers.CurrentModel.Nodes.Where(z=>z.IsVisible).Where(z => z.Tag is NodeInfo).Select(z => z.Model).ToArray();
             //var mds = part.Nodes.Where(z => z.IsVisible).Select(z => z.Model).ToArray();
 
-            var inter = Intersection.AllRayIntersect(part.Nodes, mr);
-            if (inter == null || inter.Count() == 0) return;
+            var inter = Intersection.AllRayIntersect(part, mr);
+            if (inter == null || inter.Count() == 0) return null;
             var fr = inter.OrderBy(z => z.Distance).First();
 
-            pick = fr;
+            var rpick = fr;
+            rpick.Model = part;
+            return rpick;
         }
+
         bool pickEnable = true;
 
         bool drawAxes = true;
+        Vector3d lastHovered;
         void Redraw()
         {
-
-
             UpdatePickTriangle();
 
             CurrentTool.Update();
@@ -185,14 +196,12 @@ namespace LiteCAD
             {
                 parts = Parts.ToArray();
             }
+
             foreach (var item in parts)
             {
                 if (!item.Visible) continue;
                 item.Draw();
             }
-
-
-
 
             CurrentTool.Draw();
             if (pick != null)
@@ -205,51 +214,72 @@ namespace LiteCAD
                 if (pp.Any(uu => (uu - pick.Point).Length < pickEps))
                 {
                     var fr = pp.First(uu => (uu - pick.Point).Length < pickEps);
+                    lastHovered = fr;
                     toolStripStatusLabel3.Text = $"hovered point: X: {fr.X:N3} Y: {fr.Y:N3} Z: {fr.Z:N3}";
                     float gap1 = 3;
                     GL.Disable(EnableCap.Lighting);
                     //draw 3d rect
                     GL.Color3(Color.Red);
-                    //GL.Begin(PrimitiveType.LineLoop);
-                    //GL.Vertex3(fr + new Vector3d(gap1, gap1, gap1));
-                    //GL.Vertex3(fr + new Vector3d(gap1, -gap1, gap1));
-                    //GL.Vertex3(fr + new Vector3d(-gap1, -gap1, gap1));
-                    //GL.Vertex3(fr + new Vector3d(-gap1, gap1, gap1));
-                    //GL.End();
 
-                    //GL.Begin(PrimitiveType.Lines);
-                    //GL.Vertex3(fr + new Vector3d(gap1, gap1, -gap1));
-                    //GL.Vertex3(fr + new Vector3d(gap1, gap1, gap1));
-
-                    //GL.Vertex3(fr + new Vector3d(-gap1, gap1, -gap1));
-                    //GL.Vertex3(fr + new Vector3d(-gap1, gap1, gap1));
-
-                    //GL.Vertex3(fr + new Vector3d(gap1, -gap1, -gap1));
-                    //GL.Vertex3(fr + new Vector3d(gap1, -gap1, gap1));
-
-                    //GL.Vertex3(fr + new Vector3d(-gap1, -gap1, -gap1));
-                    //GL.Vertex3(fr + new Vector3d(-gap1, -gap1, gap1));
-                    //GL.End();
-
-                    //GL.Begin(PrimitiveType.LineLoop);
-                    //GL.Vertex3(fr + new Vector3d(gap1, gap1, -gap1));
-                    //GL.Vertex3(fr + new Vector3d(gap1, -gap1, -gap1));
-                    //GL.Vertex3(fr + new Vector3d(-gap1, -gap1, -gap1));
-                    //GL.Vertex3(fr + new Vector3d(-gap1, gap1, -gap1));
-                    ///*foreach (var item in pick.Target.Vertices)
-                    //{
-                    //    GL.Vertex3(item.Position);
-                    //}*/
-
-                    //GL.End();
                     GL.PointSize(10);
                     GL.Begin(PrimitiveType.Points);
                     GL.Vertex3(fr);
                     GL.End();
                 }
+                //select plane
+                else if (pick.Model is IPartContainer part && pick.Target != null)
+                {
+                    MeshNode frr = null;
+                    if (part is PartInstance pii)
+                    {
+                        var mtr1 = pii.Matrix.Calc();
+                        frr = part.Part.Nodes.FirstOrDefault(zzz => zzz.Contains(pick.Target, mtr1));
+                    }
+                    else
+                    {
+                        frr = part.Part.Nodes.FirstOrDefault(zzz => zzz.Contains(pick.Target));
+                    }
+                    if (frr != null)
+                    {
+                        var face = frr.Parent;
+                        BRep.BRepWire wire = null;
+                        if (part is PartInstance pii2)
+                        {
+                            wire = face.Wires.FirstOrDefault(yy => GeometryUtils.Contains(yy, pick.Target, pii2.Matrix.Calc()));
+                        }
+                        else
+                        {
+                            wire = face.Wires.FirstOrDefault(yy => GeometryUtils.Contains(yy, pick.Target));
+                        }
 
+                        if (wire != null)
+                        {
+                            GL.Disable(EnableCap.Lighting);
+                            GL.LineWidth(3);
+                            GL.PushMatrix();
+                            if (part is PartInstance pii3)
+                            {
+                                var ref1 = pii3.Matrix.Calc();
+                                GL.MultMatrix(ref ref1);
 
+                            }
+                            GL.Color3(Color.Orange);
+                            GL.Begin(PrimitiveType.Lines);
+                            foreach (var edge in wire.Edges)
+                            {
+
+                                GL.Vertex3(edge.Start);
+                                GL.Vertex3(edge.End);
             }
+                            GL.End();
+                            GL.LineWidth(1);
+                            GL.Enable(EnableCap.Lighting);
+                            GL.PopMatrix();
+                        }
+                    }
+                }
+            }
+            GL.Disable(EnableCap.Lighting);
             hoverText.Visible = middleDrag;
             if (middleDrag)
             {
@@ -259,7 +289,6 @@ namespace LiteCAD
                     var snap1 = SnapPoint(startMeasurePick);
                     if (snap1 != null && snap2 != null)
                     {
-
                         GL.LineStipple(1, 0x3F07);
                         GL.LineWidth(3);
                         GL.Enable(EnableCap.LineStipple);
@@ -303,7 +332,7 @@ namespace LiteCAD
         public Form1()
         {
             InitializeComponent();
-
+            _currentTool = new SelectionTool(this);
             foreach (Control c in propertyGrid1.Controls)
             {
                 c.MouseDoubleClick += C_MouseClick;
@@ -586,6 +615,7 @@ namespace LiteCAD
                     startMeasurePick = pick;
                 }
             }
+
             CurrentTool.MouseDown(e);
         }
 
@@ -939,12 +969,22 @@ namespace LiteCAD
             face.Node.SwitchNormal();
         }
 
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Decimal)
+            {
+                camToSelected(new[] { lastHovered });
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         private void treeListView1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Delete)
             {
                 deleteItem();
             }
+          
         }
 
         private void checkBox6_CheckedChanged(object sender, EventArgs e)
@@ -1071,7 +1111,7 @@ namespace LiteCAD
         }
 
         public EditModeEnum EditMode;
-        ITool _currentTool = SelectionTool.Instance;
+        ITool _currentTool;
         public void SetTool(ITool tool)
         {
             _currentTool.Deselect();
@@ -1083,7 +1123,7 @@ namespace LiteCAD
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
-            SetTool(DraftLineTool.Instance);
+            SetTool(new DraftLineTool(de));
             uncheckedAllToolButtons();
             toolStripButton2.Checked = true;
         }
@@ -1095,7 +1135,7 @@ namespace LiteCAD
         Draft editedDraft;
         private void toolStripButton3_Click(object sender, EventArgs e)
         {
-            SetTool(RectDraftTool.Instance);
+            SetTool(new RectDraftTool(de));
             uncheckedAllToolButtons();
             toolStripButton3.Checked = true;
         }
@@ -1108,7 +1148,7 @@ namespace LiteCAD
             de.Visible = false;
             de.Finish();
             glControl.Visible = true;
-            SetTool(SelectionTool.Instance);
+            SetTool(new SelectionTool(this));
             editedDraft = null;
             toolStrip2.Visible = false;
             toolStrip3.Visible = false;
@@ -1140,16 +1180,19 @@ namespace LiteCAD
 
         private void toolStripButton9_Click(object sender, EventArgs e)
         {
-            SetTool(SelectionTool.Instance);
+            SetTool(new SelectionTool(this));
             uncheckedAllToolButtons();
-            toolStripButton9.Checked = true;
+            toolStripButton18.Checked = true;
         }
 
         void uncheckedAllToolButtons()
         {
             toolStripButton9.Checked = false;
+            toolStripButton18.Checked = false;
             toolStripButton2.Checked = false;
             toolStripButton3.Checked = false;
+            toolStripButton4.Checked = false;
+            toolStripButton17.Checked = false;
 
         }
 
@@ -1165,12 +1208,14 @@ namespace LiteCAD
 
         private void toolStripButton5_Click(object sender, EventArgs e)
         {
-            SetTool(LinearConstraintTool.Instance);
+            SetTool(new LinearConstraintTool(de));
         }
 
         public void ResetTool()
         {
-            SetTool(SelectionTool.Instance);
+            uncheckedAllToolButtons();
+            SetTool(new SelectionTool(this));
+            toolStripButton9.Checked = true;
         }
 
         public void ObjectSelect(object nearest)
@@ -1297,8 +1342,12 @@ namespace LiteCAD
         {
 
         }
+
         public LiteCADScene Scene = new LiteCADScene();
         public List<IDrawable> Parts => Scene.Parts;
+
+        IDrawable[] IEditor.Parts => Parts.ToArray();
+
         private void assemblyToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Parts.Add(new PartAssembly());
@@ -1320,7 +1369,7 @@ namespace LiteCAD
 
         private void toolStripButton4_Click(object sender, EventArgs e)
         {
-            SetTool(DraftEllipseTool.Instance);
+            SetTool(new DraftEllipseTool(this));
             uncheckedAllToolButtons();
             toolStripButton4.Checked = true;
         }
@@ -1375,13 +1424,12 @@ namespace LiteCAD
 
         private void toolStripButton14_Click(object sender, EventArgs e)
         {
-            SetTool(PerpendicularConstraintTool.Instance);
+            SetTool(new PerpendicularConstraintTool(de));
         }
 
         private void toolStripButton12_Click(object sender, EventArgs e)
         {
-            SetTool(ParallelConstraintTool.Instance);
-
+            SetTool(new ParallelConstraintTool(this));
         }
 
         private void meshToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -1521,13 +1569,12 @@ namespace LiteCAD
 
         private void toolStripButton19_Click(object sender, EventArgs e)
         {
-            HorizontalConstraintTool.Instance.Editor = de;
-            SetTool(HorizontalConstraintTool.Instance);
+            SetTool(new HorizontalConstraintTool(de));
         }
 
         private void toolStripButton20_Click(object sender, EventArgs e)
         {
-            SetTool(VerticalConstraintTool.Instance);
+            SetTool(new VerticalConstraintTool(de));
         }
 
         private void setCameraToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1544,6 +1591,20 @@ namespace LiteCAD
         {
             cloneItem();
         }
+
+        private void toolStripButton17_Click_1(object sender, EventArgs e)
+        {
+            SetTool(new AdjoinTool(this));
+            uncheckedAllToolButtons();
+            toolStripButton17.Checked = true;
+        }
+
+        private void toolStripButton18_Click_1(object sender, EventArgs e)
+        {
+            SetTool(new SelectionTool(this));
+            uncheckedAllToolButtons();
+            toolStripButton18.Checked = true;
+        }
     }
 
     public enum EditModeEnum
@@ -1554,14 +1615,6 @@ namespace LiteCAD
     {
         void Init(object o);
         object ReturnValue { get; }
-    }
-    public class IntersectInfo
-    {
-        public double Distance;
-        public TriangleInfo Target;
-        public IDrawable Model;
-        public Vector3d Point { get; set; }
-        public object Parent;
     }
 
 }

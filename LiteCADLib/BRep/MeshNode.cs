@@ -16,6 +16,11 @@ namespace LiteCAD.BRep
         public BRepFace Parent;
         public List<TriangleInfo> Triangles = new List<TriangleInfo>();
 
+        public bool Contains(TriangleInfo tr)
+        {
+            return Triangles.Any(z => z.IsSame(tr));
+        }
+
         public virtual void SwitchNormal()
         {
             //if (!(Parent.Surface is BRepPlane pl)) return;
@@ -63,6 +68,11 @@ namespace LiteCAD.BRep
                 item.StoreXml(writer);
             }
             writer.WriteLine("</mesh>");
+        }
+
+        public bool Contains(TriangleInfo target, Matrix4d mtr1)
+        {
+            return Triangles.Any(z => z.Multiply(mtr1).IsSame(target));
         }
     }
 }

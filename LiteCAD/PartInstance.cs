@@ -37,7 +37,7 @@ namespace LiteCAD
             return ret;
         }
 
-        public PartInstance(LiteCADScene scene, XElement xitem)
+        public PartInstance(LiteCADScene scene, XElement xitem) : base(xitem)
         {
             Name = xitem.Attribute("name").Value;
             _matrix.RestoreXml(xitem.Element("transform"));
@@ -50,14 +50,14 @@ namespace LiteCAD
             {
                 Frozen = bool.Parse(xitem.Attribute("frozen").Value);
             }
-            var id = int.Parse(xitem.Attribute("id").Value);
-            var ps = scene.GetAll(z => z is IPartContainer).OfType<IPartContainer>().First(z => z.Id == id);
+            var partId = int.Parse(xitem.Attribute("partId").Value);
+            var ps = scene.GetAll(z => z is IPartContainer).OfType<IPartContainer>().First(z => z.Id == partId);
             Part = ps;
         }
 
         public override void Store(TextWriter writer)
         {
-            writer.WriteLine($"<instance id=\"{Part.Id}\" name=\"{Name}\" color=\"{Color.R};{Color.G};{Color.B}\" frozen=\"{Frozen}\">");
+            writer.WriteLine($"<instance id=\"{Id}\" partId=\"{Part.Id}\" name=\"{Name}\" color=\"{Color.R};{Color.G};{Color.B}\" frozen=\"{Frozen}\">");
             writer.WriteLine("<transform>");
             _matrix.StoreXml(writer);
             writer.WriteLine("</transform>");
@@ -81,7 +81,7 @@ namespace LiteCAD
                         mn.Triangles.Add(titem.Multiply(mtr));
                     }
                     ret.Add(mn);
-                }                
+                }
                 return ret.ToArray();
             }
         }

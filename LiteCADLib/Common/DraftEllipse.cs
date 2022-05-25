@@ -17,7 +17,7 @@ namespace LiteCAD.Common
             this.Radius = radius;
         }
         public DraftEllipse(XElement elem, Draft parent)
-          : base(parent)
+          : base(elem, parent)
         {
             var c = Helpers.ParseVector2(elem.Attribute("center").Value);
             Center = new DraftPoint(parent, c.X, c.Y);
@@ -31,7 +31,7 @@ namespace LiteCAD.Common
 
         public override void Store(TextWriter writer)
         {
-            writer.WriteLine($"<ellipse center=\"{Center.X}; {Center.Y}\" radius=\"{Radius}\">");
+            writer.WriteLine($"<ellipse id=\"{Id}\" center=\"{Center.X}; {Center.Y}\" radius=\"{Radius}\">");
             writer.WriteLine("</ellipse>");
         }
     }

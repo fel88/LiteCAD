@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace LiteCAD.Common
 {
@@ -11,6 +12,18 @@ namespace LiteCAD.Common
         public AbstractDrawable()
         {
             Id = FactoryHelper.NewId++;
+        }
+        public AbstractDrawable(XElement item)
+        {
+            if (item.Attribute("id") != null)
+            {
+                Id = int.Parse(item.Attribute("id").Value);
+                FactoryHelper.NewId = Math.Max(FactoryHelper.NewId, Id + 1);
+            }
+            else
+            {
+                Id = FactoryHelper.NewId++;
+            }
         }
         public string Name { get; set; }
 

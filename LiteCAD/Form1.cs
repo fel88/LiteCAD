@@ -214,7 +214,7 @@ namespace LiteCAD
 
                 if (pp.Any(uu => (uu - pick.Point).Length < pickEps))
                 {
-                    var fr = pp.First(uu => (uu - pick.Point).Length < pickEps);
+                    var fr = pp.OrderBy(uu => (uu - pick.Point).Length).First(uu => (uu - pick.Point).Length < pickEps);
                     lastHovered = fr;
                     toolStripStatusLabel3.Text = $"hovered point: X: {fr.X:N3} Y: {fr.Y:N3} Z: {fr.Z:N3}";
                     float gap1 = 3;
@@ -244,28 +244,28 @@ namespace LiteCAD
                     {
                         var face = frr.Parent;
                         GL.Disable(EnableCap.DepthTest);
-                            GL.Disable(EnableCap.Lighting);
-                            GL.LineWidth(3);
-                            GL.PushMatrix();
-                            if (part is PartInstance pii3)
-                            {
-                                var ref1 = pii3.Matrix.Calc();
-                                GL.MultMatrix(ref ref1);
+                        GL.Disable(EnableCap.Lighting);
+                        GL.LineWidth(3);
+                        GL.PushMatrix();
+                        if (part is PartInstance pii3)
+                        {
+                            var ref1 = pii3.Matrix.Calc();
+                            GL.MultMatrix(ref ref1);
 
-                            }
-                            GL.Color3(Color.Orange);
-                            GL.Begin(PrimitiveType.Lines);
+                        }
+                        GL.Color3(Color.Orange);
+                        GL.Begin(PrimitiveType.Lines);
                         foreach (var wire in face.Wires)
                             foreach (var edge in wire.Edges)
                             {
 
                                 GL.Vertex3(edge.Start);
                                 GL.Vertex3(edge.End);
-            }
-                            GL.End();
-                            GL.LineWidth(1);
-                            GL.Enable(EnableCap.Lighting);
-                            GL.PopMatrix();
+                            }
+                        GL.End();
+                        GL.LineWidth(1);
+                        GL.Enable(EnableCap.Lighting);
+                        GL.PopMatrix();
                         GL.Enable(EnableCap.DepthTest);
                     }
                 }
@@ -283,7 +283,7 @@ namespace LiteCAD
                         GL.LineStipple(1, 0x3F07);
                         GL.LineWidth(3);
                         GL.Enable(EnableCap.LineStipple);
-                        
+
                         GL.Color3(Color.Orange);
                         GL.Begin(PrimitiveType.Lines);
                         GL.Vertex3(snap1.Value);
@@ -975,7 +975,7 @@ namespace LiteCAD
             {
                 deleteItem();
             }
-          
+
         }
 
         private void checkBox6_CheckedChanged(object sender, EventArgs e)

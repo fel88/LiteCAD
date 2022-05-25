@@ -37,7 +37,7 @@ namespace LiteCAD.Common
                     AddElement(dl);
                 }
                 if (item2.Name == "line")
-                {
+                {                    
                     DraftLine dl = new DraftLine(item2, this);
                     AddElement(dl);
                 }

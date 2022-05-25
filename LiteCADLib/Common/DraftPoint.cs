@@ -12,7 +12,7 @@ namespace LiteCAD.Common
         public Vector2d _location;
         public Vector2d Location { get => _location; private set => _location = value; }
 
-        
+
 
         public double X
         {
@@ -20,7 +20,7 @@ namespace LiteCAD.Common
             set
             {
                 _location.X = value;
-                Parent.RecalcConstraints();                
+                Parent.RecalcConstraints();
             }
         }
         public double Y
@@ -43,9 +43,8 @@ namespace LiteCAD.Common
             Location = new Vector2d(x, y);
         }
 
-        public DraftPoint(XElement item2, Draft d):base(d)
+        public DraftPoint(XElement item2, Draft d) : base(item2, d)
         {
-            Id = int.Parse(item2.Attribute("id").Value);
             X = double.Parse(item2.Attribute("x").Value.Replace(",", "."), CultureInfo.InvariantCulture);
             Y = double.Parse(item2.Attribute("y").Value.Replace(",", "."), CultureInfo.InvariantCulture);
             if (item2.Attribute("frozen") != null)

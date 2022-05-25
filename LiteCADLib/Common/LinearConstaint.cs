@@ -23,8 +23,8 @@ namespace LiteCAD.Common
         }
         public LinearConstraint(XElement el, Draft parent)
         {
-            Element1 = parent.Elements.OfType<DraftPoint>().First(z => z.Id == int.Parse(el.Attribute("p0").Value));
-            Element2 = parent.Elements.OfType<DraftPoint>().First(z => z.Id == int.Parse(el.Attribute("p1").Value));
+            Element1 = parent.Elements.First(z => z.Id == int.Parse(el.Attribute("p0").Value));
+            Element2 = parent.Elements.First(z => z.Id == int.Parse(el.Attribute("p1").Value));
             Length = Helpers.ParseDecimal(el.Attribute("length").Value);            
         }
 

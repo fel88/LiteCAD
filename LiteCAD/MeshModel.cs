@@ -28,7 +28,7 @@ namespace LiteCAD
 
         public override void Store(TextWriter writer)
         {
-            writer.WriteLine($"<mesh name=\"{Name}\">");
+            writer.WriteLine($"<mesh id=\"{Id}\" name=\"{Name}\">");
             writer.WriteLine("<transform>");
             _matrix.StoreXml(writer);
             writer.WriteLine("</transform>");
@@ -45,7 +45,7 @@ namespace LiteCAD
         {
 
         }
-        public MeshModel(LiteCADScene liteCADScene, XElement item)
+        public MeshModel(LiteCADScene liteCADScene, XElement item) : base(item)
         {
             if (item.Attribute("name") != null)
                 Name = item.Attribute("name").Value;
@@ -163,7 +163,7 @@ namespace LiteCAD
         }
     }
 
-    
 
-    
+
+
 }

@@ -59,7 +59,15 @@ namespace LiteCAD
             Source.Parent = this;
             CreatePart();
             Childs.Add(Source);
-            Id = int.Parse(item.Attribute("id").Value);
+            if (item.Attribute("id") != null)
+            {
+                Id = int.Parse(item.Attribute("id").Value);
+                FactoryHelper.NewId = Math.Max(FactoryHelper.NewId, Id + 1);
+            }
+            else
+            {
+                Id = FactoryHelper.NewId++;
+            }
             ctor = false;
 
         }

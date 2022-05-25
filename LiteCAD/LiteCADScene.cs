@@ -8,29 +8,29 @@ using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class LiteCADScene 
+    public class LiteCADScene
     {
         public List<IDrawable> Parts = new List<IDrawable>();
 
         public IDrawable[] GetAll(Predicate<IDrawable> p)
         {
-            var t = Parts.SelectMany(z=>z.GetAll(p)).ToArray();
+            var t = Parts.SelectMany(z => z.GetAll(p)).ToArray();
             return t;
         }
 
         internal void FromXml(string fileName)
         {
             FactoryHelper.NewId = 0;
-            DraftElement.NewId = 0;
             var doc = XDocument.Load(fileName);
             var root = doc.Descendants("root");
+            int fId = 0;
 
             foreach (var item in root.Elements())
             {
                 if (item.Name == "draft")
                 {
                     Draft d = new Draft(item);
-                   
+                    fId = Math.Max(d.Elements.Max(z => z.Id), fId);
                     Parts.Add(d);
                 }
                 if (item.Name == "extrude")
@@ -68,6 +68,8 @@ namespace LiteCAD
                     Parts.Add(d);
                 }
             }
+
+            FactoryHelper.NewId = Math.Max(fId, GetAll(z => true).Max(z => z.Id) + 1);
         }
 
         public void SaveToXml(string fileName)
@@ -88,5 +90,5 @@ namespace LiteCAD
         }
     }
 
-    
+
 }

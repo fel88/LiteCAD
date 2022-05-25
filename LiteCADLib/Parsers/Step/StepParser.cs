@@ -88,7 +88,15 @@ namespace LiteCAD.Parsers.Step
             part.Name = new FileInfo(filename).Name;
             if (Part.AutoExtractMeshOnLoad)
                 part.ExtractMesh();
+            try
+            {
+                //todo: make fix normals via topology (outter wire always has outside normals, inside wire always has inside normals) or cutting planes
             part.FixNormals();
+            }
+            catch (Exception ex)
+            {
+                DebugHelpers.Error("fix normals exception: " + ex.Message);
+            }
             DebugHelpers.Progress(false, 0);
             return part;
         }

@@ -88,7 +88,7 @@ namespace LiteCAD.Tools
                         }
                         else
                         {//non-collinear
-
+                            DebugHelpers.Warning("non-collinear");
                         }
                     }
                 }

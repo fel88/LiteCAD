@@ -252,7 +252,7 @@ namespace LiteCAD
                     _part.Faces.Add(sideFace);
                 }
                     else
-                    if (false && (item.Curve is BRep.Curves.BRepCircleCurve cc))
+                    if ((item.Curve is BRep.Curves.BRepCircleCurve cc))
                     {
                         //4 edges required. 2 circle+2 seam
                         List<BRep.BRepEdge> edges2 = new List<BRep.BRepEdge>();
@@ -260,7 +260,7 @@ namespace LiteCAD
                         {
                             Surface = new BRepCylinder()
                             {
-                                RefDir = cc.Dir,
+                                RefDir = cc.Dir.Normalized(),
                                 Radius = cc.Radius,
                                 Axis = cc.Axis,
                                 Location = cc.Location
@@ -272,14 +272,14 @@ namespace LiteCAD
                         {
                             Curve = new BRep.Curves.BRepCircleCurve()
                             {
-                                Dir = cc.Dir,
+                                Dir = cc.Dir.Normalized(),
                                 SweepAngle = cc.SweepAngle,
                                 Axis = cc.Axis,
                                 Location = cc.Location + shift,
                                 Radius = cc.Radius
                             },
                             Start = item.Start + shift,
-                            End = item.Start + shift
+                            End = item.End + shift
                         });
 
                         edges2.Add(new BRep.BRepEdge()
@@ -290,21 +290,21 @@ namespace LiteCAD
                                 Vector = cc.Axis
                             },
                             Start = item.Start + shift,
-                            End = item.Start
+                            End = item.End
                         });
 
                         edges2.Add(new BRep.BRepEdge()
                         {
                             Curve = new BRep.Curves.BRepCircleCurve()
                             {
-                                Dir = cc.Dir,
+                                Dir = cc.Dir.Normalized(),
                                 SweepAngle = cc.SweepAngle,
                                 Axis = cc.Axis,
                                 Location = cc.Location,
                                 Radius = cc.Radius
                             },
                             Start = item.Start,
-                            End = item.Start
+                            End = item.End
                         });
 
                         edges2.Add(new BRep.BRepEdge()

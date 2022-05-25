@@ -80,6 +80,7 @@
             this.projectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.fitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.extract3dContourToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.switchNormalsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -140,7 +141,7 @@
             this.toolStripButton18 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton6 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton17 = new System.Windows.Forms.ToolStripButton();
-            this.extract3dContourToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.treeListView1)).BeginInit();
@@ -544,14 +545,15 @@
             this.contextMenuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.visibleSwitchToolStripMenuItem,
             this.meshToolStripMenuItem,
-            this.switchNormalsToolStripMenuItem});
+            this.switchNormalsToolStripMenuItem,
+            this.deleteToolStripMenuItem2});
             this.contextMenuStrip2.Name = "contextMenuStrip2";
-            this.contextMenuStrip2.Size = new System.Drawing.Size(181, 92);
+            this.contextMenuStrip2.Size = new System.Drawing.Size(181, 114);
             // 
             // visibleSwitchToolStripMenuItem
             // 
             this.visibleSwitchToolStripMenuItem.Name = "visibleSwitchToolStripMenuItem";
-            this.visibleSwitchToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.visibleSwitchToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.visibleSwitchToolStripMenuItem.Text = "visible switch";
             this.visibleSwitchToolStripMenuItem.Click += new System.EventHandler(this.visibleSwitchToolStripMenuItem_Click);
             // 
@@ -570,35 +572,42 @@
             // updateToolStripMenuItem
             // 
             this.updateToolStripMenuItem.Name = "updateToolStripMenuItem";
-            this.updateToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
+            this.updateToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.updateToolStripMenuItem.Text = "update";
             this.updateToolStripMenuItem.Click += new System.EventHandler(this.updateToolStripMenuItem_Click);
             // 
             // projectionToolStripMenuItem
             // 
             this.projectionToolStripMenuItem.Name = "projectionToolStripMenuItem";
-            this.projectionToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
+            this.projectionToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.projectionToolStripMenuItem.Text = "projection";
             this.projectionToolStripMenuItem.Click += new System.EventHandler(this.projectionToolStripMenuItem_Click);
             // 
             // deleteToolStripMenuItem1
             // 
             this.deleteToolStripMenuItem1.Name = "deleteToolStripMenuItem1";
-            this.deleteToolStripMenuItem1.Size = new System.Drawing.Size(128, 22);
+            this.deleteToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
             this.deleteToolStripMenuItem1.Text = "delete";
             this.deleteToolStripMenuItem1.Click += new System.EventHandler(this.deleteToolStripMenuItem1_Click);
             // 
             // fitToolStripMenuItem
             // 
             this.fitToolStripMenuItem.Name = "fitToolStripMenuItem";
-            this.fitToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
+            this.fitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.fitToolStripMenuItem.Text = "fit";
             this.fitToolStripMenuItem.Click += new System.EventHandler(this.fitToolStripMenuItem_Click);
+            // 
+            // extract3dContourToolStripMenuItem
+            // 
+            this.extract3dContourToolStripMenuItem.Name = "extract3dContourToolStripMenuItem";
+            this.extract3dContourToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.extract3dContourToolStripMenuItem.Text = "extract 3d contour";
+            this.extract3dContourToolStripMenuItem.Click += new System.EventHandler(this.extract3dContourToolStripMenuItem_Click);
             // 
             // switchNormalsToolStripMenuItem
             // 
             this.switchNormalsToolStripMenuItem.Name = "switchNormalsToolStripMenuItem";
-            this.switchNormalsToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.switchNormalsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.switchNormalsToolStripMenuItem.Text = "switch normals";
             this.switchNormalsToolStripMenuItem.Click += new System.EventHandler(this.switchNormalsToolStripMenuItem_Click);
             // 
@@ -1223,12 +1232,12 @@
             this.toolStripButton17.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.toolStripButton17.Click += new System.EventHandler(this.toolStripButton17_Click_1);
             // 
-            // extract3dContourToolStripMenuItem
+            // deleteToolStripMenuItem2
             // 
-            this.extract3dContourToolStripMenuItem.Name = "extract3dContourToolStripMenuItem";
-            this.extract3dContourToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.extract3dContourToolStripMenuItem.Text = "extract 3d contour";
-            this.extract3dContourToolStripMenuItem.Click += new System.EventHandler(this.extract3dContourToolStripMenuItem_Click);
+            this.deleteToolStripMenuItem2.Name = "deleteToolStripMenuItem2";
+            this.deleteToolStripMenuItem2.Size = new System.Drawing.Size(180, 22);
+            this.deleteToolStripMenuItem2.Text = "delete";
+            this.deleteToolStripMenuItem2.Click += new System.EventHandler(this.deleteToolStripMenuItem2_Click);
             // 
             // Form1
             // 
@@ -1386,6 +1395,7 @@
         private System.Windows.Forms.ToolStripButton toolStripButton17;
         private System.Windows.Forms.ToolStripButton toolStripButton18;
         private System.Windows.Forms.ToolStripMenuItem extract3dContourToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem2;
     }
 }
 

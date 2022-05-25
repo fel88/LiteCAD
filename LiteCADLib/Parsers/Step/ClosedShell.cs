@@ -2,8 +2,9 @@
 
 namespace LiteCAD.Parsers.Step
 {
-    public class ClosedShell
+    public class Shell
     {
+        public bool Closed;
         public List<AdvancedFace> Faces = new List<AdvancedFace>();
     }
 }

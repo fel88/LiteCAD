@@ -46,7 +46,8 @@ namespace LiteCAD.Parsers.Step
             ItemParsers.Add(new LineParseItem());
             ItemParsers.Add(new PCurveParseItem());
             ItemParsers.Add(new DefinitionalRepresentationParseItem());
-            ItemParsers.Add(new ShellParseItem());
+            ItemParsers.Add(new ClosedShellParseItem());
+            ItemParsers.Add(new OpenShellParseItem());
 
             if (ItemParsers.GroupBy(z => z.Key).Any(z => z.Count() > 1))
                 throw new StepParserException("duplicate parser items");
@@ -56,7 +57,7 @@ namespace LiteCAD.Parsers.Step
         public Part ToPart()
         {
             Part ret = new Part();
-            foreach (var item in Shells.Select(z => z.Value.Tag).OfType<ClosedShell>())
+            foreach (var item in Shells.Select(z => z.Value.Tag).OfType<Shell>())
             {
                 foreach (var face in item.Faces)
                 {

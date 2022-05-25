@@ -58,7 +58,8 @@ namespace LiteCAD
             }
 
             List<IntersectInfo> rr = new List<IntersectInfo>();
-            foreach (var item in ret.OfType<PartInstance>())
+            //foreach (var item in ret.OfType<PartInstance>())
+            foreach (var item in ret)
             {
                 if (item is IDrawable d)
                 {
@@ -242,18 +243,7 @@ namespace LiteCAD
                     if (frr != null)
                     {
                         var face = frr.Parent;
-                        BRep.BRepWire wire = null;
-                        if (part is PartInstance pii2)
-                        {
-                            wire = face.Wires.FirstOrDefault(yy => GeometryUtils.Contains(yy, pick.Target, pii2.Matrix.Calc()));
-                        }
-                        else
-                        {
-                            wire = face.Wires.FirstOrDefault(yy => GeometryUtils.Contains(yy, pick.Target));
-                        }
-
-                        if (wire != null)
-                        {
+                        GL.Disable(EnableCap.DepthTest);
                             GL.Disable(EnableCap.Lighting);
                             GL.LineWidth(3);
                             GL.PushMatrix();
@@ -265,6 +255,7 @@ namespace LiteCAD
                             }
                             GL.Color3(Color.Orange);
                             GL.Begin(PrimitiveType.Lines);
+                        foreach (var wire in face.Wires)
                             foreach (var edge in wire.Edges)
                             {
 
@@ -275,7 +266,7 @@ namespace LiteCAD
                             GL.LineWidth(1);
                             GL.Enable(EnableCap.Lighting);
                             GL.PopMatrix();
-                        }
+                        GL.Enable(EnableCap.DepthTest);
                     }
                 }
             }
@@ -1623,6 +1614,23 @@ namespace LiteCAD
             PolylineHelper p = new PolylineHelper(ll.ToArray());
             Parts.Add(p);
             updateList();
+        }
+
+        private void deleteToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            if (listView2.SelectedItems.Count == 0) return;
+            List<BRepFace> faces = new List<BRepFace>();
+            for (int i = 0; i < listView2.SelectedItems.Count; i++)
+            {
+                var face = listView2.SelectedItems[i].Tag as BRepFace;
+                faces.Add(face);
+            }
+
+            if (faces.Count == 0) return;
+            foreach (var item in faces)
+            {
+                faces[0].Parent.Faces.Remove(item);
+            }
         }
     }
 

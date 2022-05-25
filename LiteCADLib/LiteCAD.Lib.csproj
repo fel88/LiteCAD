@@ -139,6 +139,7 @@
     <Compile Include="Parsers\Step\LinearExtrusionSurfaceParseItem.cs" />
     <Compile Include="Parsers\Step\LineParseItem.cs" />
     <Compile Include="NURBS\NURBS.cs" />
+    <Compile Include="Parsers\Step\OpenShellParseItem.cs" />
     <Compile Include="Parsers\Step\OrientedEdge.cs" />
     <Compile Include="Parsers\Step\OrientedEdgeParseItem.cs" />
     <Compile Include="Parsers\Step\ParserItem.cs" />

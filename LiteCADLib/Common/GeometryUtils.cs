@@ -1,4 +1,5 @@
 ﻿using LiteCAD.BRep;
+using LiteCAD.BRep.Curves;
 using LiteCAD.BRep.Surfaces;
 using OpenTK;
 using System;
@@ -19,6 +20,43 @@ namespace LiteCAD.Common
             //var proj = point - dist * norm;
             //return proj;
             return dist * norm + loc;
+
+        }
+        public static bool IntersectSegments(Vector2d p0, Vector2d p1, Vector2d q0, Vector2d q1, ref Vector2d c0)
+        {
+            double ux = p1.X - p0.X;
+            double uy = p1.Y - p0.Y;
+            double vx = q1.X - q0.X;
+            double vy = q1.Y - q0.Y;
+            double wx = p0.X - q0.X;
+            double wy = p0.Y - q0.Y;
+
+            double d = (ux * vy - uy * vx);
+            double s = (vx * wy - vy * wx) / d;
+
+            // Intersection point
+            c0.X = p0.X + s * ux;
+            c0.Y = p0.Y + s * uy;
+            if (!IsPointInsideSegment(p0, p1, c0)) return false;
+            if (!IsPointInsideSegment(q0, q1, c0)) return false;
+            return true;
+        }
+        public static bool IsPointOnLine(Vector2d start, Vector2d end, Vector2d pnt, double epsilon = 10e-6f)
+        {
+            float tolerance = 10e-6f;
+            var d1 = pnt - start;
+            if (d1.Length < tolerance) return true;
+            if ((end - start).Length < tolerance) throw new LiteCadException("degenerated line");
+            d1 = d1.Normalized();
+            var p2 = (end - start).Normalized();
+            var crs = Vector3d.Cross(new Vector3d(d1.X, d1.Y, 0), new Vector3d(p2.X, p2.Y, 0));
+            return Math.Abs(crs.Length) < epsilon;
+        }
+        public static bool IsPointInsideSegment(Vector2d start, Vector2d end, Vector2d pnt, double epsilon = 10e-6f)
+        {
+            if (!IsPointOnLine(start, end, pnt, epsilon)) return false;
+            var diff1 = (pnt - start).Length + (pnt - end).Length;
+            return Math.Abs(diff1 - (end - start).Length) < epsilon;
         }
         public static Vector3d? Intersect3dCrossedLines(Line3D ln0, Line3D ln1)
         {
@@ -222,6 +260,45 @@ namespace LiteCAD.Common
             return Math.Abs(area);
         }
 
+        internal static Vector3d[] ExtractPoints(BRepEdge edge, BRepCircleCurve cc, double step)
+        {
+            List<Vector3d> pnts = new List<Vector3d>();
+
+            //check
+            var mtr44 = Matrix4d.CreateFromAxisAngle(cc.Axis, cc.SweepAngle);
+            var res44 = Vector4d.Transform(new Vector4d(cc.Dir), mtr44);
+            var checkPoint = (cc.Location + res44.Xyz);
+            var realAxis = cc.Axis;
+            if ((checkPoint - edge.End).Length > 1e-5)
+            {
+                //try to fix, by switch rotation
+                realAxis *= -1;
+            }
+
+            for (double i = 0; i < cc.SweepAngle; i += step)
+            {
+                var mtr4 = Matrix4d.CreateFromAxisAngle(realAxis, i);
+                var res = Vector4d.Transform(new Vector4d(cc.Dir), mtr4);
+                pnts.Add(cc.Location + res.Xyz);
+            }
+
+            //check #2
+            mtr44 = Matrix4d.CreateFromAxisAngle(realAxis, cc.SweepAngle);
+            res44 = Vector4d.Transform(new Vector4d(cc.Dir), mtr44);
+            checkPoint = (cc.Location + res44.Xyz);
+
+            if ((checkPoint - edge.End).Length > 1e-5)
+            {
+                throw new LiteCadException("wrong end point");
+            }
+
+            if ((pnts.Last() - edge.End).Length > 1e-8 && (pnts.First() - edge.End).Length > 1e-8)
+            {
+                pnts.Add(edge.End);
+            }
+            return pnts.ToArray();
+        }
+
         public static bool Contains(BRepWire bRepWire, TriangleInfo target, Matrix4d matrix4d)
         {
             var pnts = bRepWire.Edges.SelectMany(z => new[] { z.Start, z.End }).ToArray();
@@ -250,6 +327,38 @@ namespace LiteCAD.Common
             var trans = Vector3d.Transform(neg, mtr2);
 
             return trans;
+        }
+
+        public static double CalculateAngle(Vector3d dir1, Vector3d dir2, Vector3d axis)
+        {
+            var crs = Vector3d.Cross(dir2, dir1);
+            var ang2 = Vector3d.CalculateAngle(dir1, dir2);
+            if (!(Vector3d.Dot(axis, crs) < 0))
+            {
+                ang2 = (2 * Math.PI) - ang2;
+            }
+            return ang2;
+        }
+
+        internal static string PointHashKey(Vector2d z, int v)
+        {
+            return (int)(z.X * v) + ";" + (int)(z.Y * v);
+        }
+
+        internal static string SegmentHashKey(BRep.Segment z, int v)
+        {            
+            return PointHashKey(z.Start, v) + ";" + PointHashKey(z.End, v);
+        }
+
+        internal static string SegmentHashKeyInvariant(BRep.Segment z, int v)
+        {
+            var str1 = PointHashKey(z.Start, v);
+            var str2 = PointHashKey(z.End, v);
+            if (string.Compare(str1,str2)<0)
+            {
+                return str1 + ";" + str2;
+            }
+            return str2 + ";" + str1;
         }
     }
 }

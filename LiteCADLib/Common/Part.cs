@@ -131,7 +131,6 @@ namespace LiteCAD.Common
                 }
             }
 
-
             //2 phase
             do
             {

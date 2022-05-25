@@ -140,6 +140,7 @@
             this.toolStripButton18 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton6 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton17 = new System.Windows.Forms.ToolStripButton();
+            this.extract3dContourToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.treeListView1)).BeginInit();
@@ -545,7 +546,7 @@
             this.meshToolStripMenuItem,
             this.switchNormalsToolStripMenuItem});
             this.contextMenuStrip2.Name = "contextMenuStrip2";
-            this.contextMenuStrip2.Size = new System.Drawing.Size(155, 70);
+            this.contextMenuStrip2.Size = new System.Drawing.Size(181, 92);
             // 
             // visibleSwitchToolStripMenuItem
             // 
@@ -560,9 +561,10 @@
             this.updateToolStripMenuItem,
             this.projectionToolStripMenuItem,
             this.deleteToolStripMenuItem1,
-            this.fitToolStripMenuItem});
+            this.fitToolStripMenuItem,
+            this.extract3dContourToolStripMenuItem});
             this.meshToolStripMenuItem.Name = "meshToolStripMenuItem";
-            this.meshToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.meshToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.meshToolStripMenuItem.Text = "mesh";
             // 
             // updateToolStripMenuItem
@@ -1186,7 +1188,7 @@
             this.toolStripButton17});
             this.toolStrip4.Location = new System.Drawing.Point(92, 76);
             this.toolStrip4.Name = "toolStrip4";
-            this.toolStrip4.Size = new System.Drawing.Size(198, 38);
+            this.toolStrip4.Size = new System.Drawing.Size(167, 38);
             this.toolStrip4.TabIndex = 5;
             // 
             // toolStripButton18
@@ -1220,6 +1222,13 @@
             this.toolStripButton17.Text = "Adjoin";
             this.toolStripButton17.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.toolStripButton17.Click += new System.EventHandler(this.toolStripButton17_Click_1);
+            // 
+            // extract3dContourToolStripMenuItem
+            // 
+            this.extract3dContourToolStripMenuItem.Name = "extract3dContourToolStripMenuItem";
+            this.extract3dContourToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.extract3dContourToolStripMenuItem.Text = "extract 3d contour";
+            this.extract3dContourToolStripMenuItem.Click += new System.EventHandler(this.extract3dContourToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -1376,6 +1385,7 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
         private System.Windows.Forms.ToolStripButton toolStripButton17;
         private System.Windows.Forms.ToolStripButton toolStripButton18;
+        private System.Windows.Forms.ToolStripMenuItem extract3dContourToolStripMenuItem;
     }
 }
 

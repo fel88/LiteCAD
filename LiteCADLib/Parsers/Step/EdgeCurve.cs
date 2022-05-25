@@ -7,6 +7,7 @@ namespace LiteCAD.Parsers.Step
         public VertexPoint Start;
         public VertexPoint End;
         public Curve EdgeGeometry;
+        public bool SameSense;
     }
     public class SeamCurve : Curve
     {

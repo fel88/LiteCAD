@@ -19,6 +19,7 @@ namespace LiteCAD.Parsers.Step
             var refs = spl.Where(z => z.StartsWith("#")).Select(z => int.Parse(z.TrimStart('#'))).ToArray();
             var objs = refs.Select(z => ctx.GetRefObj(z)).ToArray();
             ret.Curve = objs[0] as EdgeCurve;
+            ret.Orientation = spl.Last().Contains("T.");
 
             return ret;
         }

@@ -84,7 +84,54 @@ namespace LiteCAD.BRep.Faces
             }
             return ll1.ToArray();
         }
+        public Line3D[] get3DSegments(BRepEdge edge, double eps = 1e-8)
+        {
+            var cl = Cylinder;
+            List<Line3D> ll1 = new List<Line3D>();
+           
+            if (edge.Curve is BRepCircleCurve cc)
+            {
+                List<Vector3d> pnts = new List<Vector3d>();
+                var step = Math.PI * 15 / 180f;
+                for (double i = 0; i < cc.SweepAngle; i += step)
+                {
+                    var mtr4 = Matrix4d.CreateFromAxisAngle(cc.Axis, i);
+                    var res = Vector4d.Transform(new Vector4d(cc.Dir), mtr4);
+                    pnts.Add(cc.Location + res.Xyz);
+                }
+                if ((pnts.Last() - edge.End).Length > 1e-8 && (pnts.First() - edge.End).Length > 1e-8)
+                {
+                    pnts.Add(edge.End);
+                }
+                for (int i = 1; i < pnts.Count; i++)
+                {
+                    var pp0 = pnts[i - 1];
+                    var pp1 = pnts[i];
 
+
+                    ll1.Add(new Line3D() { Start = pp0, End = pp1 });
+
+                }
+            }
+            else if (edge.Curve is BRepLineCurve lnc)
+            {                
+                ll1.Add(new Line3D() { Start = edge.Start, End = edge.End });
+            }
+            else if (edge.Curve is BRepBSplineWithKnotsCurve bspline)
+            {
+                ll1.Add(new Line3D() { Start = edge.Start, End = edge.End });                
+            }
+            else if (edge.Curve is BRepSeamCurve seam)
+            {
+                ll1.Add(new Line3D() { Start = edge.Start, End = edge.End });                
+            }
+            
+            else
+            {
+                DebugHelpers.Warning($"unknown curve: {edge.Curve}");
+            }
+            return ll1.ToArray();
+        }
         Segment[] getSegments(BRepEdge edge, double eps = 1e-8)
         {
             var cl = Cylinder;
@@ -142,66 +189,65 @@ namespace LiteCAD.BRep.Faces
                     var pp1 = pnts[i];
                     var p0 = cl.GetProj(pp0);
                     var p1 = cl.GetProj(pp1);
-                    if (p0.X >= (Math.PI * 2 - 2 * step) && p1.X < 2 * step)
-                    {
-                        var dy = p1.Y - p0.Y;
-                        var dx = (p1.X + Math.PI * 2) - p0.X;
-                        var tx = (Math.PI * 2 - p0.X) / dx;
-                        var ty = dy * tx;
+                    //if (p0.X >= (Math.PI * 2 - 2 * step) && p1.X < 2 * step)
+                    //{
+                    //    var dy = p1.Y - p0.Y;
+                    //    var dx = (p1.X + Math.PI * 2) - p0.X;
+                    //    var tx = (Math.PI * 2 - p0.X) / dx;
+                    //    var ty = dy * tx;
 
-                        ll1.Add(new Segment() { Start = p0, End = new Vector2d(Math.PI * 2, ty + p0.Y) });
-                        ll1.Add(new Segment() { Start = new Vector2d(0, ty + p0.Y), End = p1 });
-                        ll1.RemoveAll(z => z.Length() < 1e-16);
+                    //    ll1.Add(new Segment() { Start = p0, End = new Vector2d(Math.PI * 2, ty + p0.Y) });
+                    //    ll1.Add(new Segment() { Start = new Vector2d(0, ty + p0.Y), End = p1 });
+                    //    ll1.RemoveAll(z => z.Length() < 1e-16);
 
-                    }
-                    else if (p1.X >= (Math.PI * 2 - 2 * step) && p0.X < 2 * step)
-                    {
-                        var dy = p0.Y - p1.Y;
-                        var dx = (p0.X + Math.PI * 2) - p1.X;
-                        var tx = (Math.PI * 2 - p1.X) / dx;
-                        var ty = dy * tx;
+                    //}
+                    //else if (p1.X >= (Math.PI * 2 - 2 * step) && p0.X < 2 * step)
+                    //{
+                    //    var dy = p0.Y - p1.Y;
+                    //    var dx = (p0.X + Math.PI * 2) - p1.X;
+                    //    var tx = (Math.PI * 2 - p1.X) / dx;
+                    //    var ty = dy * tx;
 
-                        ll1.Add(new Segment() { Start = p1, End = new Vector2d(Math.PI * 2, ty + p1.Y) });
-                        ll1.Add(new Segment() { Start = new Vector2d(0, ty + p1.Y), End = p0 });
-                        ll1.RemoveAll(z => z.Length() < 1e-16);
-                    }
-                    else
-                    if (Math.Abs((p0 - p1).Length - step) > step)
-                    {
+                    //    ll1.Add(new Segment() { Start = p1, End = new Vector2d(Math.PI * 2, ty + p1.Y) });
+                    //    ll1.Add(new Segment() { Start = new Vector2d(0, ty + p1.Y), End = p0 });
+                    //    ll1.RemoveAll(z => z.Length() < 1e-16);
+                    //}
+                    //else                    if (Math.Abs((p0 - p1).Length - step) > step)
+                    //{
 
-                        if (Math.Abs(p0.X) < 1e-16)
-                        {
-                            p0.X += Math.PI * 2;
-                            if (Math.Abs((p0 - p1).Length - step) > step)
-                            {
-                                throw new LiteCadException("wrong angles");
+                    //    if (Math.Abs(p0.X) < 1e-16)
+                    //    {
+                    //        p0.X += Math.PI * 2;
+                    //        if (Math.Abs((p0 - p1).Length - step) > step)
+                    //        {
+                    //            throw new LiteCadException("wrong angles");
 
-                            }
-                            else
-                            {
-                                ll1.Add(new Segment() { Start = p0, End = p1 });
-                            }
-                        }
-                        else if (Math.Abs(p1.X) < 1e-16)
-                        {
-                            p1.X += Math.PI * 2;
-                            if (Math.Abs((p0 - p1).Length - step) > step)
-                            {
-                                throw new LiteCadException("wrong angles");
+                    //        }
+                    //        else
+                    //        {
+                    //            ll1.Add(new Segment() { Start = p0, End = p1 });
+                    //        }
+                    //    }
+                    //    else if (Math.Abs(p1.X) < 1e-16)
+                    //    {
+                    //        p1.X += Math.PI * 2;
+                    //        if (Math.Abs((p0 - p1).Length - step) > step)
+                    //        {
+                    //            throw new LiteCadException("wrong angles");
 
-                            }
-                            else
-                            {
-                                ll1.Add(new Segment() { Start = p0, End = p1 });
-                            }
-                        }
-                        else
-                        {
-                            throw new LiteCadException("wrong angles");
+                    //        }
+                    //        else
+                    //        {
+                    //            ll1.Add(new Segment() { Start = p0, End = p1 });
+                    //        }
+                    //    }
+                    //    else
+                    //    {
+                    //        throw new LiteCadException("wrong angles");
 
-                        }
-                    }
-                    else
+                    //    }
+                    //}
+                    //else
                     {
                         ll1.Add(new Segment() { Start = p0, End = p1 });
                     }
@@ -294,32 +340,45 @@ namespace LiteCAD.BRep.Faces
         {
             List<Contour> l1 = new List<Contour>();
 
+            float feps = 1e-5f;
             foreach (var edge in wire.Edges)
             {
                 var segs = getSegments(edge);
-                if (segs.Any())
+              
+                var zz2 = new Contour() { Wire = wire };
+                foreach (var sitem in segs)
                 {
-                    var zz = new Contour() { Wire = wire };
-                    var arr3 = segs.ToList();
-                    while (true)
+                    if (zz2.Elements.Any() && (zz2.End - sitem.Start).Length > feps)
                     {
-                        var nl = zz.ConnectNext(arr3.ToArray());
-                        if (nl == null)
-                        {
-                            if (arr3.Any())
-                            {
-                                l1.Add(zz);
-                                zz = new Contour() { Wire = wire };
-                                //throw new LiteCadException("wrong elems connect");
-                            }
-                            else
-                                break;
-                        }
-                        arr3.Remove(nl);
+                        throw new LiteCadException("wrong dist");
                     }
-
-                    l1.Add(zz);
+                    zz2.Elements.Add(sitem);
                 }
+                l1.Add(zz2);
+                //if (false)
+                //    if (segs.Any())
+                //    {
+                //        var zz = new Contour() { Wire = wire };
+                //        var arr3 = segs.ToList();
+                //        while (true)
+                //        {
+                //            var nl = zz.ConnectNext(arr3.ToArray());
+                //            if (nl == null)
+                //            {
+                //                if (arr3.Any())
+                //                {
+                //                    l1.Add(zz);
+                //                    zz = new Contour() { Wire = wire };
+                //                    //throw new LiteCadException("wrong elems connect");
+                //                }
+                //                else
+                //                    break;
+                //            }
+                //            arr3.Remove(nl);
+                //        }
+
+                //        l1.Add(zz);
+                //    }
             }
             return l1.ToArray();
         }
@@ -354,29 +413,91 @@ namespace LiteCAD.BRep.Faces
                 cntrs = new List<Contour>();
                 foreach (var item in ll)
                 {
-                    Contour ccn = new Contour();
-                    var ar = item.ToList();
-                    while (true)
+                    Contour ccnf = new Contour();
+                    ccnf.Wire = item[0].Wire;
+                    foreach (var sitem in item)
                     {
-                        var res = ccn.ConnectNext(ar.ToArray());
-
-                        if (res == null)
+                        var el = sitem.Elements;
+                        for (int i = 0; i < el.Count; i++)
                         {
-                            if (ar.Any())
+                            var df = Math.Abs(el[i].Start.X - el[i].End.X);
+
+                            if (df > Math.PI)
                             {
-                                //throw new LiteCadException("bad contour");
-                                ccn.Reduce();
-                                cntrs.Add(ccn);
-                                ccn = new Contour();
+                                if (el[i].End.X < Math.PI)
+                                {
+                                    el[i].End.X += Math.PI * 2;
+                                }
+                                else
+                                {
+                                    el[i].End.X = Math.PI * 2 - el[i].End.X;
+                                }
                             }
-                            else
-                                break;
                         }
-                        ar.Remove(res);
+
+                        foreach (var eitem in el)
+                        {
+                            if (Math.Abs(eitem.Start.X - eitem.End.X) > Math.PI)
+                            {
+                                throw new LiteCadException("big diff");
+                            }
+                            var st = eitem.Start;
+                            if (ccnf.Elements.Any())
+                            {
+                                var en = ccnf.Elements.Last().End;
+                                var diff = Math.Abs(en.X - st.X);
+                                if (diff > Math.PI)
+                                {
+                                    //fix
+                                    //fix each element further in this list
+                                    if (st.X < Math.PI)
+                                    {
+                                        eitem.Start.X += Math.PI * 2;
+                                        eitem.End.X += Math.PI * 2;
+                                    }
+                                    else
+                                    {
+                                        eitem.Start.X = Math.PI * 2 - st.X;
+                                        eitem.End.X = Math.PI * 2 - eitem.End.X;
+                                    }
+                                }
+                            }
+                            ccnf.Elements.Add(eitem);
+                        }
+
+                        //ccnf = ccnf.ConnectNext(new[] { sitem });
                     }
-                    ccn.Reduce();
-                    cntrs.Add(ccn);
+                    ccnf.Reduce();
+                    cntrs.Add(ccnf);
                 }
+
+
+                //if (false)
+                //    foreach (var item in ll)
+                //    {
+                //        Contour ccn = new Contour();
+                //        var ar = item.ToList();
+                //        while (true)
+                //        {
+                //            var res = ccn.ConnectNext(ar.ToArray());
+
+                //            if (res == null)
+                //            {
+                //                if (ar.Any())
+                //                {
+                //                    //throw new LiteCadException("bad contour");
+                //                    ccn.Reduce();
+                //                    cntrs.Add(ccn);
+                //                    ccn = new Contour();
+                //                }
+                //                else
+                //                    break;
+                //            }
+                //            ar.Remove(res);
+                //        }
+                //        ccn.Reduce();
+                //        cntrs.Add(ccn);
+                //    }
 
                 //search connect components and split
                 foreach (var item in cntrs)
@@ -879,8 +1000,10 @@ namespace LiteCAD.BRep.Faces
             return edge;
         }
 
+        public const int AngleResolution = 15;
+
         public BRepEdge ExtractCircleEdge(Vector3d start, Vector3d end1, Vector3d pos, Vector3d axis
-            , double radius)
+            , double radius, bool edgeOrientation = false)
         {
             var edge = new BRepEdge();
 
@@ -892,7 +1015,11 @@ namespace LiteCAD.BRep.Faces
             var dir1 = start - pos;
 
             var crs = Vector3d.Cross(dir2, dir1);
-            var ang2 = Vector3d.CalculateAngle(dir1, dir2);
+            var ang2 = Vector3d.CalculateAngle(dir1, dir2); 
+            if (!edgeOrientation)
+            {
+                axis *= -1;
+            }
             if (!(Vector3d.Dot(axis, crs) < 0))
             {
                 ang2 = (2 * Math.PI) - ang2;
@@ -903,9 +1030,7 @@ namespace LiteCAD.BRep.Faces
             {
                 sweep = Math.PI * 2;
             }
-
-
-
+          
             var cc = new BRepCircleCurve()
             {
                 Location = loc1,
@@ -917,10 +1042,20 @@ namespace LiteCAD.BRep.Faces
             edge.Curve = cc;
 
             List<Vector3d> pnts = new List<Vector3d>();
-            var step = Math.PI * 15 / 180f;
+            var len = cc.SweepAngle * radius;
+            double precision = 1;//1mm
+            len /= precision;
+
+            //var step = Math.PI * AngleResolution / 180f;
+            var step = ((Math.PI * 2) / (len / precision));
+            var axis1 = cc.Axis;
+            if (!edgeOrientation)
+            {
+                axis1 *= -1;
+            }
             for (double i = 0; i < cc.SweepAngle; i += step)
             {
-                var mtr4 = Matrix4d.CreateFromAxisAngle(cc.Axis, i);
+                var mtr4 = Matrix4d.CreateFromAxisAngle(axis1, i);
                 var res = Vector4d.Transform(new Vector4d(cc.Dir), mtr4);
                 pnts.Add(cc.Location + res.Xyz);
             }
@@ -946,6 +1081,11 @@ namespace LiteCAD.BRep.Faces
                 var crv = litem.Curve.EdgeGeometry;
                 var start = litem.Curve.Start.Point;
                 var end = litem.Curve.End.Point;
+                if (!litem.Orientation)
+                {
+                    start = litem.Curve.End.Point;
+                    end = litem.Curve.Start.Point;
+                }
                 if (crv is BSplineCurveWithKnots bsk)
                 {
 
@@ -1002,7 +1142,7 @@ namespace LiteCAD.BRep.Faces
                     if (sc.Geometry is Circle circ2)
                     {
                         wire.Edges.Add(ExtractCircleEdge(start, end, circ2.Axis.Location,
-                         circ2.Axis.Dir1, circ2.Radius));
+                         circ2.Axis.Dir1, circ2.Radius, litem.Orientation));
                     }
                     else
                     if (sc.Geometry is Ellipse elp2)
@@ -1116,7 +1256,16 @@ namespace LiteCAD.BRep.Faces
                     wire.Edges.Add(edge);
                     edge.Start = litem.Curve.Start.Point;
                     edge.End = litem.Curve.End.Point;
-                    Items.Add(new LineItem() { Start = edge.Start, End = edge.End });
+                    var es = edge.Start;
+                    var ee = edge.End;
+                    if (!litem.Orientation)
+                    {
+                        es = edge.End;
+                        ee = edge.Start;
+                        edge.End = litem.Curve.Start.Point;
+                        edge.Start = litem.Curve.End.Point;
+                    }
+                    Items.Add(new LineItem() { Start = es, End = ee });
                 }
                 else if (crv is Circle circ)
                 {

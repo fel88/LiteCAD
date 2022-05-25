@@ -1605,6 +1605,25 @@ namespace LiteCAD
             uncheckedAllToolButtons();
             toolStripButton18.Checked = true;
         }
+
+        private void extract3dContourToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listView2.SelectedItems.Count == 0) return;
+            var face = listView2.SelectedItems[0].Tag as BRepFace;
+            List<Line3D> ll = new List<Line3D>();
+            foreach (var item in face.Wires)
+            {
+                var cf = (face as BRep.Faces.BRepCylinderSurfaceFace);
+                if (cf != null)
+                {
+                    var ee = item.Edges.SelectMany(z => cf.get3DSegments(z)).ToArray();
+                    ll.AddRange(ee);
+                }
+            }
+            PolylineHelper p = new PolylineHelper(ll.ToArray());
+            Parts.Add(p);
+            updateList();
+        }
     }
 
     public enum EditModeEnum

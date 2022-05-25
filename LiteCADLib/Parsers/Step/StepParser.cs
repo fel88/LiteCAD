@@ -106,6 +106,7 @@ namespace LiteCAD.Parsers.Step
     public class FaceBound
     {
         public EdgeLoop Loop;
+        public bool Orientation;
     }
     public class FaceOuterBound : FaceBound
     {

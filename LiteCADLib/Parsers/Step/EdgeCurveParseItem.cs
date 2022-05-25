@@ -21,6 +21,7 @@ namespace LiteCAD.Parsers.Step
             ret.Start = objs[0] as VertexPoint;
             ret.End = objs[1] as VertexPoint;
             ret.EdgeGeometry = objs[2] as Curve;
+            ret.SameSense = spl.Last().Contains("T.");
             if (ret.EdgeGeometry == null)
             {
                 throw new StepParserException("empty geomtery");

@@ -43,7 +43,14 @@ namespace LiteCAD.BRep
             }
             foreach (var item in trianglesModifed)
             {
+                try
+                {
                 vv.AddRange(item.SplitByPlane(pl));
+                }
+                catch (Exception ex)
+                {
+
+                }
             }
             return vv.ToArray();
         }

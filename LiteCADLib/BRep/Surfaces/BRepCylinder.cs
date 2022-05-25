@@ -11,7 +11,7 @@ namespace LiteCAD.BRep.Surfaces
         public Vector3d Axis;
         public Vector3d RefDir;
 
-        public override bool IsOnSurface(Vector3d v, double eps = 1e-8)
+        public override bool IsOnSurface(Vector3d v, double eps = 1e-5)
         {
             BRepPlane plane = new BRepPlane() { Location = Location, Normal = Axis };
             var proj0 = plane.GetProjPoint(v);

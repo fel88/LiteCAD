@@ -22,6 +22,7 @@ namespace LiteCAD.Parsers.Step
             //spl.Last()=="T"
             var objs = refs.Select(z => ctx.GetRefObj(z)).ToArray();
             ret.Loop = objs[0] as EdgeLoop;
+            ret.Orientation = spl.Last().Contains("T.");
 
             return ret;
         }

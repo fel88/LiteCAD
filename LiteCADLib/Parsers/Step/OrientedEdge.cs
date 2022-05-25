@@ -3,5 +3,6 @@
     public class OrientedEdge
     {
         public EdgeCurve Curve;
+        public bool Orientation;
     }
 }

@@ -207,7 +207,7 @@ namespace LiteCAD
             CurrentTool.Draw();
             if (pick != null)
             {
-                float pickEps = 10;
+                float pickEps = 2;
 
                 var pp = new[] { pick.Target.V0,
                 pick.Target.V1,pick.Target.V2}.ToArray();
@@ -221,11 +221,12 @@ namespace LiteCAD
                     GL.Disable(EnableCap.Lighting);
                     //draw 3d rect
                     GL.Color3(Color.Red);
-
+                    GL.Disable(EnableCap.DepthTest);
                     GL.PointSize(10);
                     GL.Begin(PrimitiveType.Points);
                     GL.Vertex3(fr);
                     GL.End();
+                    GL.Enable(EnableCap.DepthTest);
                 }
                 //select plane
                 else if (pick.Model is IPartContainer part && pick.Target != null)
@@ -254,14 +255,25 @@ namespace LiteCAD
 
                         }
                         GL.Color3(Color.Orange);
-                        GL.Begin(PrimitiveType.Lines);
-                        foreach (var wire in face.Wires)
-                            foreach (var edge in wire.Edges)
-                            {
 
-                                GL.Vertex3(edge.Start);
-                                GL.Vertex3(edge.End);
-                            }
+
+                        //extract 3d contour
+
+                        List<Line3D> ll = new List<Line3D>();
+                        foreach (var item in face.Wires)
+                        {
+                            var ee = item.Edges.SelectMany(z => face.Get3DSegments(z)).ToArray();
+                            ll.AddRange(ee);
+                        }
+
+                        //end
+                        GL.Begin(PrimitiveType.Lines);
+
+                        foreach (var edge in ll)
+                        {
+                            GL.Vertex3(edge.Start);
+                            GL.Vertex3(edge.End);
+                        }
                         GL.End();
                         GL.LineWidth(1);
                         GL.Enable(EnableCap.Lighting);
@@ -280,22 +292,41 @@ namespace LiteCAD
                     var snap1 = SnapPoint(startMeasurePick);
                     if (snap1 != null && snap2 != null)
                     {
+                        GL.Disable(EnableCap.DepthTest);
                         GL.LineStipple(1, 0x3F07);
                         GL.LineWidth(3);
                         GL.Enable(EnableCap.LineStipple);
 
-                        GL.Color3(Color.Orange);
+                        GL.Color3(Color.White);
+                        GL.Begin(PrimitiveType.Lines);
+                        GL.Vertex3(snap1.Value);
+                        GL.Vertex3(snap2.Value);
+                        GL.End();
+                        GL.LineStipple(1, 0xf8);
+
+                        GL.Color3(Color.Blue);
                         GL.Begin(PrimitiveType.Lines);
                         GL.Vertex3(snap1.Value);
                         GL.Vertex3(snap2.Value);
                         GL.End();
                         hoverText.Text = $"dist: {(snap1.Value - snap2.Value).Length:N4}";
-                        GL.PointSize(10);
+
+                        GL.PointSize(15);
+                        GL.Color3(Color.Black);
                         GL.Begin(PrimitiveType.Points);
                         GL.Vertex3(snap1.Value);
                         GL.Vertex3(snap2.Value);
                         GL.End();
+
+                        GL.PointSize(10);
+                        GL.Color3(Color.White);
+                        GL.Begin(PrimitiveType.Points);
+                        GL.Vertex3(snap1.Value);
+                        GL.Vertex3(snap2.Value);
+                        GL.End();
+
                         GL.Disable(EnableCap.LineStipple);
+                        GL.Enable(EnableCap.DepthTest);
                     }
                 }
             }
@@ -1604,14 +1635,11 @@ namespace LiteCAD
             List<Line3D> ll = new List<Line3D>();
             foreach (var item in face.Wires)
             {
-                var cf = (face as BRep.Faces.BRepCylinderSurfaceFace);
-                if (cf != null)
-                {
-                    var ee = item.Edges.SelectMany(z => cf.get3DSegments(z)).ToArray();
-                    ll.AddRange(ee);
-                }
+                var ee = item.Edges.SelectMany(z => face.Get3DSegments(z)).ToArray();
+                ll.AddRange(ee);
             }
-            PolylineHelper p = new PolylineHelper(ll.ToArray());
+
+            PolylineHelper p = new PolylineHelper(ll.ToArray()) { Name = "polyline" };
             Parts.Add(p);
             updateList();
         }

@@ -60,16 +60,18 @@ namespace LiteCAD.BRep.Faces
                     }
                     else if (edge.Curve is BRepCircleCurve cc)
                     {
-                        List<Vector3d> pnts = new List<Vector3d>();
                         var step = Math.PI * 15 / 180f;
+                        var pnts = GeometryUtils.ExtractPoints(edge, cc, step);
+                        /*List<Vector3d> pnts = new List<Vector3d>();
+                        
                         for (double i = 0; i < cc.SweepAngle; i += step)
                         {
                             var mtr4 = Matrix4d.CreateFromAxisAngle(cc.Axis, i);
                             var res = Vector4d.Transform(new Vector4d(cc.Dir), mtr4);
                             pnts.Add(cc.Location + res.Xyz);
                         }
-                        pnts.Add(edge.End);
-                        for (int i = 1; i < pnts.Count; i++)
+                        pnts.Add(edge.End);*/
+                        for (int i = 1; i < pnts.Length; i++)
                         {
                             var pp0 = pnts[i - 1];
                             var pp1 = pnts[i];
@@ -217,6 +219,26 @@ namespace LiteCAD.BRep.Faces
             Node = ret;
             return ret;
         }
+
+        public override Line3D[] Get3DSegments(BRepEdge edge, double eps = 1E-08)
+        {
+            List<Line3D> ret = new List<Line3D>();
+            if (edge.Curve is BRep.Curves.BRepLineCurve ll)
+            {
+                ret.Add(new Line3D() { Start = edge.Start, End = edge.End });
+            }
+            if (edge.Curve is BRep.Curves.BRepCircleCurve cc)
+            {
+                var step = Math.PI * 15 / 180f;
+                var pnts = GeometryUtils.ExtractPoints(edge, cc, step);
+                for (int i = 1; i < pnts.Length; i++)
+                {
+                    ret.Add(new Line3D() { Start = pnts[i-1], End = pnts[i]});
+                }                
+            }
+            return ret.ToArray();
+        }
+
         public BRepEdge ExtractCircleEdge(Vector3d start, Vector3d end1, double radius,
             Vector3d axis, Vector3d location)
         {

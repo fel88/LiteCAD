@@ -17,7 +17,10 @@ namespace LiteCAD.BRep
         public Part Parent;
         public MeshNode Node;
         bool _selected;
-
+        public virtual Line3D[] Get3DSegments(BRepEdge edge, double eps = 1e-8)
+        {
+            return new Line3D[] { };
+        }
         public ProjectPolygon[] ProjectPolygons;
 
         public static bool SkipWireOnParseException = false;

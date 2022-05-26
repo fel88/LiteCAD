@@ -84,7 +84,7 @@ namespace LiteCAD.BRep.Faces
             }
             return ll1.ToArray();
         }
-        public Line3D[] get3DSegments(BRepEdge edge, double eps = 1e-8)
+        public override Line3D[] Get3DSegments(BRepEdge edge, double eps = 1e-8)
         {
             var cl = Cylinder;
             List<Line3D> ll1 = new List<Line3D>();
@@ -178,7 +178,8 @@ namespace LiteCAD.BRep.Faces
             }
             else if (edge.Curve is BRepSeamCurve seam)
             {
-                ll1.Add(new Line3D() { Start = edge.Start, End = edge.End });                
+                //skip?
+                //ll1.Add(new Line3D() { Start = edge.Start, End = edge.End });                
             }
             else if (edge.Curve is BRepSpline spl)
             {
@@ -410,7 +411,7 @@ namespace LiteCAD.BRep.Faces
                 //if (!wire.IsClosed()) continue;
                 foreach (var edge in wire.Edges)
                 {
-                    var l1 = get3DSegments(edge);
+                    var l1 = Get3DSegments(edge);
                     if (l1.Any())
                     {
                         ll.Add(l1.ToArray());

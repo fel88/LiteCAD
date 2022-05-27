@@ -278,6 +278,8 @@ namespace LiteCAD.Common
                 var ww = Elements.OfType<DraftLine>().Where(z => z.V0 == dp || z.V1 == dp).ToArray();
                 foreach (var item in ww)
                 {
+                    Constraints.RemoveAll(z => z.ContainsElement(item));
+                    Helpers.RemoveAll(z => z.Constraint.ContainsElement(item));
                     Elements.Remove(item);
                 }
             }

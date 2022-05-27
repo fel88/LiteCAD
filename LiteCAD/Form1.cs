@@ -207,7 +207,8 @@ namespace LiteCAD
             CurrentTool.Draw();
             if (pick != null)
             {
-                float pickEps = 2;
+                float pickEps = camera1.OrthoWidth * 0.02f;
+                //if (pickEps < 2) { pickEps = 2; }
 
                 var pp = new[] { pick.Target.V0,
                 pick.Target.V1,pick.Target.V2}.ToArray();
@@ -1165,6 +1166,10 @@ namespace LiteCAD
         private void toolStripButton8_Click(object sender, EventArgs e)
         {
             EditMode = EditModeEnum.Part;
+            if(editedDraft.Parent is ExtrudeModifier em)
+            {
+                em.CreatePart();
+            }
             updateList();
 
             de.Visible = false;

@@ -426,11 +426,8 @@ namespace LiteCAD.BRep.Faces
             double step = 5 * Math.PI / 180f;
             for (double i = 0; i < (Math.PI * 2 + step); i += step)
             {
-
                 try
                 {
-
-
                     if (i > Math.PI * 2) break;
                     var startAng = i;
                     var endAng = Math.Min(i + step, Math.PI * 2);

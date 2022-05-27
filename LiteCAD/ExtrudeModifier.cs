@@ -72,7 +72,7 @@ namespace LiteCAD
 
         }
 
-        private void CreatePart()
+        public void CreatePart()
         {
             //draft->brep
             _part = new Part();
@@ -280,7 +280,7 @@ namespace LiteCAD
                         {
                             Curve = new BRep.Curves.BRepCircleCurve()
                             {
-                                Dir = cc.Dir.Normalized(),
+                                Dir = cc.Dir,
                                 SweepAngle = cc.SweepAngle,
                                 Axis = cc.Axis,
                                 Location = cc.Location + shift,
@@ -305,7 +305,7 @@ namespace LiteCAD
                         {
                             Curve = new BRep.Curves.BRepCircleCurve()
                             {
-                                Dir = cc.Dir.Normalized(),
+                                Dir = cc.Dir,
                                 SweepAngle = cc.SweepAngle,
                                 Axis = cc.Axis,
                                 Location = cc.Location,

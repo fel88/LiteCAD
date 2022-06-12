@@ -9,7 +9,9 @@ namespace LiteCAD.Common
         public readonly DraftPoint Center;
         public double X { get => Center.Location.X; set => Center.SetLocation(new OpenTK.Vector2d(value, Center.Y)); }
         public double Y { get => Center.Location.Y; set => Center.SetLocation(new OpenTK.Vector2d(Center.X, value)); }
-        public decimal Radius { get; set; }
+        decimal _radius { get; set; }
+        public decimal Radius { get => _radius; set => _radius = value; }
+        public decimal Diameter { get => 2 * _radius; set => _radius = value / 2; }        
         public DraftEllipse(DraftPoint center, decimal radius, Draft parent)
             : base(parent)
         {

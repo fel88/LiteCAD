@@ -1665,6 +1665,11 @@ namespace LiteCAD
                 faces[0].Parent.Faces.Remove(item);
             }
         }
+
+        private void toolStripButton21_Click(object sender, EventArgs e)
+        {
+            SetTool(new EqualsConstraintTool(de));
+        }
     }
 
     public enum EditModeEnum

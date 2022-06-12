@@ -23,16 +23,7 @@ namespace LiteCAD.Common
         {
             return Math.Abs(Line.V0.Y - Line.V1.Y) < eps;
         }
-        public class ChangeCand
-        {
-            public DraftPoint Point;
-            public Vector2d Position;
-            public void Apply()
-            {
-                Point.SetLocation(Position);
-            }
-
-        }
+      
         ChangeCand[] GetCands()
         {
             List<ChangeCand> ret = new List<ChangeCand>();
@@ -63,6 +54,17 @@ namespace LiteCAD.Common
         {
             writer.WriteLine($"<horizontalConstraint targetId=\"{Line.Id}\"/>");
         }
+    }
+
+    public class ChangeCand
+    {
+        public DraftPoint Point;
+        public Vector2d Position;
+        public void Apply()
+        {
+            Point.SetLocation(Position);
+        }
+
     }
 
 }

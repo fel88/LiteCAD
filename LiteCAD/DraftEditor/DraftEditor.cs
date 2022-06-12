@@ -82,7 +82,6 @@ namespace LiteCAD.DraftEditor
         {
             return base.ProcessCmdKey(ref msg, keyData);
         }
-        DraftPoint lastDraftPoint = null;
         List<DraftElement> queue = new List<DraftElement>();
         private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
@@ -169,7 +168,7 @@ namespace LiteCAD.DraftEditor
 
                 }
             }*/
-            
+
             editor.CurrentTool.MouseDown(e);
 
             if (editor.CurrentTool is LinearConstraintTool && e.Button == MouseButtons.Left)
@@ -202,23 +201,31 @@ namespace LiteCAD.DraftEditor
                     }
                     else
                     {
-                    LinearConstraintLengthDialog lcd = new LinearConstraintLengthDialog();
-                    lcd.Init(dl.Length);
-                    lcd.ShowDialog();
-                    var cc = new LinearConstraint(dl.V0, dl.V1, lcd.Length);
-                    if (!_draft.Constraints.OfType<LinearConstraint>().Any(z => z.IsSame(cc)))
-                    {
-                        _draft.AddConstraint(cc);
-                        _draft.AddHelper(new LinearConstraintHelper(cc));
-                        _draft.Childs.Add(_draft.Helpers.Last());
+                      
+                        if (_draft.Constraints.OfType<EqualsConstraint>().Any(uu => uu.TargetLine == dl))
+                        {
+                            GUIHelpers.Warning("overconstrained", ParentForm.Text);
+                        }
+                        else
+                        {
+                            LinearConstraintLengthDialog lcd = new LinearConstraintLengthDialog();
+                            lcd.Init(dl.Length);
+                            lcd.ShowDialog();
+                            var cc = new LinearConstraint(dl.V0, dl.V1, lcd.Length);
+                            if (!_draft.Constraints.OfType<LinearConstraint>().Any(z => z.IsSame(cc)))
+                            {
+                                _draft.AddConstraint(cc);
+                                _draft.AddHelper(new LinearConstraintHelper(cc));
+                                _draft.Childs.Add(_draft.Helpers.Last());
+                            }
+                            else
+                            {
+                                GUIHelpers.Warning("such constraint already exist", ParentForm.Text);
+                            }
+                            queue.Clear();
+                            //editor.ResetTool();
+                        }
                     }
-                    else
-                    {
-                        GUIHelpers.Warning("such constraint already exist", ParentForm.Text);
-                    }
-                    queue.Clear();
-                    //editor.ResetTool();
-                }
                     return;
 
                 }
@@ -242,26 +249,7 @@ namespace LiteCAD.DraftEditor
                     //editor.ResetTool();
                 }
             }
-            if (editor.CurrentTool is DraftLineTool && e.Button == MouseButtons.Left)
-            {
-                var p = (ctx.GetCursor());
-                DraftPoint target = null;
-                if (nearest is DraftPoint dp)
-                {
-                    target = dp;
-                }
-                else
-                {
-                    target = new DraftPoint(_draft, p.X, p.Y);
-                    _draft.Elements.Add(target);
-                }
-
-                if (lastDraftPoint != null)
-                {
-                    _draft.Elements.Add(new DraftLine(lastDraftPoint, target, _draft));
-                }
-                lastDraftPoint = target;
-            }
+           
             if (editor.CurrentTool is RectDraftTool && e.Button == MouseButtons.Left)
             {
                 var p = (ctx.GetCursor());
@@ -653,6 +641,9 @@ namespace LiteCAD.DraftEditor
 
         Draft _draft;
         public Draft Draft => _draft;
+
+        public DrawingContext DrawingContext => ctx;
+
         public void SetDraft(Draft draft)
         {
             _draft = draft;
@@ -683,7 +674,7 @@ namespace LiteCAD.DraftEditor
 
         private void Editor_ToolChanged(ITool obj)
         {
-            lastDraftPoint = null;
+            //lastDraftPoint = null;
         }
 
         internal void Finish()
@@ -760,11 +751,5 @@ namespace LiteCAD.DraftEditor
 
             }
         }
-    }
-
-    public interface IDraftEditor
-    {
-        object nearest { get; }
-        Draft Draft { get; }
     }
 }

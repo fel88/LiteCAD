@@ -57,6 +57,7 @@
     <Compile Include="BRep\Editor\ProjectMapEditor.Designer.cs">
       <DependentUpon>ProjectMapEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Common\EqualsConstraint.cs" />
     <Compile Include="Common\FactoryHelper.cs" />
     <Compile Include="Common\Helpers.cs" />
     <Compile Include="BRep\ProjectPolygon.cs" />

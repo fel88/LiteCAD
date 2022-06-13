@@ -17,7 +17,8 @@ namespace LiteCAD.Common
         {
             get => _length; set
             {
-                _length = value;
+                BeforeChanged?.Invoke();
+                _length = value;                
                 Element1.Parent.RecalcConstraints();
             }
         }

@@ -39,6 +39,7 @@ namespace LiteCAD.Tools
 
                     if (!_draft.Constraints.OfType<EqualsConstraint>().Any(z => z.IsSame(cc)))
                     {
+                        Editor.Backup();
                         _draft.AddConstraint(cc);
                         _draft.AddHelper(new EqualsConstraintHelper(cc));
                         _draft.Childs.Add(_draft.Helpers.Last());

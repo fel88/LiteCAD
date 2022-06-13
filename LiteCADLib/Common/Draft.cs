@@ -2,6 +2,7 @@
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -23,10 +24,15 @@ namespace LiteCAD.Common
             Restore(el);
             _inited = true;
         }
-
-        public void Restore(XElement el)
+        public void Clear()
         {
             Elements.Clear();
+            Helpers.Clear();
+            Constraints.Clear();
+        }
+        public void Restore(XElement el)
+        {
+            Clear();
             Plane = new PlaneHelper(el.Element("plane"));
             Name = el.Attribute("name").Value;
             foreach (var item2 in el.Elements())
@@ -37,7 +43,7 @@ namespace LiteCAD.Common
                     AddElement(dl);
                 }
                 if (item2.Name == "line")
-                {                    
+                {
                     DraftLine dl = new DraftLine(item2, this);
                     AddElement(dl);
                 }
@@ -54,7 +60,8 @@ namespace LiteCAD.Common
                 Type[] types = new[] {
                 typeof(LinearConstraint),
                 typeof(VerticalConstraint),
-                typeof(HorizontalConstraint)
+                typeof(HorizontalConstraint),
+                typeof(EqualsConstraint),
             };
                 foreach (var item in constr.Elements())
                 {
@@ -160,23 +167,30 @@ namespace LiteCAD.Common
 
             var lc = Constraints.Where(z => z.Enabled).ToArray();
             int counter = 0;
-            int limit = 100;
+            int limit = 1000;
+            Stopwatch stw = Stopwatch.StartNew();
             StringWriter sw = new StringWriter();
             Store(sw);
+            int timeLimit = 5;
             var elem = XElement.Parse(sw.ToString());
 
             while (true)
             {
+                if (stw.Elapsed.TotalSeconds > timeLimit)
+                {
+                    DebugHelpers.Error("constraints satisfaction error");
+                    break;
+                }
                 counter++;
                 if (lc.All(z => z.IsSatisfied())) break;
                 //preserve Refs?
                 //Restore(elem);
 
-                if (counter > limit)
+                /*if (counter > limit)
                 {
                     DebugHelpers.Error("constraints satisfaction error");
                     break;
-                }
+                }*/
 
                 foreach (var item in lc)
                 {
@@ -198,8 +212,13 @@ namespace LiteCAD.Common
         }
 
         public Action<DraftConstraint> ConstraintAdded;
+        public Action<DraftConstraint> BeforeConstraintChanged;
         public void AddConstraint(DraftConstraint h)
         {
+            h.BeforeChanged = () =>
+            {
+                BeforeConstraintChanged?.Invoke(h);
+            };
             Constraints.Add(h);
             RecalcConstraints();
             ConstraintAdded?.Invoke(h);

@@ -28,6 +28,7 @@ namespace LiteCAD.DraftEditor
             pictureBox1.MouseDown += PictureBox1_MouseDown;
         }
 
+        public event Action UndosChanged;
         private void Ctx_MouseDown(float arg1, float arg2, MouseButtons e)
         {
             //var pos = ctx.PictureBox.Control.PointToClient(Cursor.Position);
@@ -146,110 +147,11 @@ namespace LiteCAD.DraftEditor
 
                 }
             }
-            /*if (editor.CurrentTool is HorizontalConstraintTool && e.Button == MouseButtons.Left)
-            {
-                if (nearest is DraftLine dl)
-               
-                {
-                    var cc = new HorizontalConstraint(dl);
-
-                    if (!_draft.Constraints.OfType<HorizontalConstraint>().Any(z => z.IsSame(cc)))
-                    {
-                        _draft.AddConstraint(cc);
-                        //_draft.AddHelper(new ParallelConstraintHelper(cc));
-                        //_draft.Childs.Add(_draft.Helpers.Last());
-                    }
-                    else
-                    {
-                        GUIHelpers.Warning("such constraint already exist", ParentForm.Text);
-                    }
-                    queue.Clear();
-                    editor.ResetTool();
-
-                }
-            }*/
 
             editor.CurrentTool.MouseDown(e);
 
-            if (editor.CurrentTool is LinearConstraintTool && e.Button == MouseButtons.Left)
-            {
-                if (nearest is DraftPoint)
-                {
-                    if (!queue.Contains(nearest))
-                        queue.Add(nearest as DraftPoint);
-                }
-                if (nearest is DraftLine dl)
-                {
-                    if (queue.Count > 0 && queue[0] is DraftPoint dp1)
-                    {
-                        LinearConstraintLengthDialog lcd = new LinearConstraintLengthDialog();
-                        lcd.Init(dl.Length);
-                        lcd.ShowDialog();
-                        var cc = new LinearConstraint(dl, dp1, lcd.Length);
-                        if (!_draft.Constraints.OfType<LinearConstraint>().Any(z => z.IsSame(cc)))
-                        {
-                            _draft.AddConstraint(cc);
-                            _draft.AddHelper(new LinearConstraintHelper(cc));
-                            _draft.Childs.Add(_draft.Helpers.Last());
-                        }
-                        else
-                        {
-                            GUIHelpers.Warning("such constraint already exist", ParentForm.Text);
-                        }
-                        queue.Clear();
-                        //editor.ResetTool();
-                    }
-                    else
-                    {
-                      
-                        if (_draft.Constraints.OfType<EqualsConstraint>().Any(uu => uu.TargetLine == dl))
-                        {
-                            GUIHelpers.Warning("overconstrained", ParentForm.Text);
-                        }
-                        else
-                        {
-                            LinearConstraintLengthDialog lcd = new LinearConstraintLengthDialog();
-                            lcd.Init(dl.Length);
-                            lcd.ShowDialog();
-                            var cc = new LinearConstraint(dl.V0, dl.V1, lcd.Length);
-                            if (!_draft.Constraints.OfType<LinearConstraint>().Any(z => z.IsSame(cc)))
-                            {
-                                _draft.AddConstraint(cc);
-                                _draft.AddHelper(new LinearConstraintHelper(cc));
-                                _draft.Childs.Add(_draft.Helpers.Last());
-                            }
-                            else
-                            {
-                                GUIHelpers.Warning("such constraint already exist", ParentForm.Text);
-                            }
-                            queue.Clear();
-                            //editor.ResetTool();
-                        }
-                    }
-                    return;
 
-                }
-                if (queue.Count > 1)
-                {
-                    LinearConstraintLengthDialog lcd = new LinearConstraintLengthDialog();
-                    lcd.Init(((queue[0] as DraftPoint).Location - (queue[1] as DraftPoint).Location).Length);
-                    lcd.ShowDialog();
-                    var cc = new LinearConstraint(queue[0], queue[1], lcd.Length);
-                    if (!_draft.Constraints.OfType<LinearConstraint>().Any(z => z.IsSame(cc)))
-                    {
-                        _draft.AddConstraint(cc);
-                        _draft.AddHelper(new LinearConstraintHelper(cc));
-                        _draft.Childs.Add(_draft.Helpers.Last());
-                    }
-                    else
-                    {
-                        GUIHelpers.Warning("such constraint already exist", ParentForm.Text);
-                    }
-                    queue.Clear();
-                    //editor.ResetTool();
-                }
-            }
-           
+
             if (editor.CurrentTool is RectDraftTool && e.Button == MouseButtons.Left)
             {
                 var p = (ctx.GetCursor());
@@ -367,6 +269,9 @@ namespace LiteCAD.DraftEditor
             var el = XElement.Parse(Undos.Last());
             _draft.Restore(el);
             Undos.RemoveAt(Undos.Count - 1);
+            SetDraft(_draft);
+            UndosChanged?.Invoke();
+
         }
 
         public void Backup()
@@ -374,6 +279,7 @@ namespace LiteCAD.DraftEditor
             StringWriter sw = new StringWriter();
             _draft.Store(sw);
             Undos.Add(sw.ToString());
+            UndosChanged?.Invoke();
         }
 
         public void FitAll()
@@ -516,11 +422,14 @@ namespace LiteCAD.DraftEditor
                     ctx.gr.DrawRectangle(Pens.Black, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
                 }
 
-                foreach (var item in _draft.Helpers)
+                if (ShowHelpers)
                 {
-                    if (!item.Visible) continue;
+                    foreach (var item in _draft.Helpers)
+                    {
+                        if (!item.Visible) continue;
 
-                    item.Draw(ctx);
+                        item.Draw(ctx);
+                    }
                 }
             }
             if (ctx.MiddleDrag)//measure tool
@@ -644,9 +553,17 @@ namespace LiteCAD.DraftEditor
 
         public DrawingContext DrawingContext => ctx;
 
+        public bool CanUndo => Undos.Any();
+
+        public bool ShowHelpers { get; set; } = true;
+
         public void SetDraft(Draft draft)
         {
             _draft = draft;
+            _draft.BeforeConstraintChanged = (c) =>
+            {
+                Backup();
+            };
 
             //restore helpers
             foreach (var citem in draft.Constraints)
@@ -663,6 +580,10 @@ namespace LiteCAD.DraftEditor
                 if (citem is HorizontalConstraint hc)
                 {
                     _draft.AddHelper(new HorizontalConstraintHelper(hc));
+                }
+                if (citem is EqualsConstraint ec)
+                {
+                    _draft.AddHelper(new EqualsConstraintHelper(ec));
                 }
             }
         }
@@ -684,9 +605,8 @@ namespace LiteCAD.DraftEditor
 
         internal void Clear()
         {
-            _draft.Elements.Clear();
-            _draft.Helpers.Clear();
-            _draft.Constraints.Clear();
+            Backup();
+            _draft.Clear();
         }
 
         internal void CloseLine()

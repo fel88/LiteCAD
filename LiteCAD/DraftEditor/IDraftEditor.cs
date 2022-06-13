@@ -8,6 +8,7 @@ namespace LiteCAD.DraftEditor
         object nearest { get; }
         Draft Draft { get; }
         DrawingContext DrawingContext { get; }
+        void Backup();
 
     }
 }

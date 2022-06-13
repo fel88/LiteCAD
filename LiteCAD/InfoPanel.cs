@@ -19,7 +19,7 @@ namespace LiteCAD
         private float olds = 150;
         string GetDate()
         {
-            return DateTime.Now.ToShortTimeString();
+            return DateTime.Now.ToLongTimeString();
         }
         public List<MessageInfo> Messages = new List<MessageInfo>();
         public class MessageInfo

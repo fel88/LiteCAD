@@ -450,6 +450,7 @@ namespace LiteCAD
             Load += Form1_Load;
             Form = this;
             de = new DraftEditorControl();
+            de.UndosChanged += De_UndosChanged;
             de.Init(this);
             de.Visible = false;
             de.Dock = DockStyle.Fill;
@@ -505,6 +506,11 @@ namespace LiteCAD
             };
 
             infoPanel.Switch();
+        }
+
+        private void De_UndosChanged()
+        {
+            toolStripButton16.Enabled = de.CanUndo;
         }
 
         private void C_MouseClick(object sender, MouseEventArgs e)
@@ -1581,7 +1587,7 @@ namespace LiteCAD
 
         private void toolStripButton16_Click(object sender, EventArgs e)
         {
-            de.Undo();
+            de.Undo();            
         }
 
         private void toolStripButton17_Click(object sender, EventArgs e)
@@ -1669,6 +1675,12 @@ namespace LiteCAD
         private void toolStripButton21_Click(object sender, EventArgs e)
         {
             SetTool(new EqualsConstraintTool(de));
+        }
+
+        
+        private void toolStripButton22_Click(object sender, EventArgs e)
+        {
+            de.ShowHelpers= toolStripButton22.Checked;            
         }
     }
 

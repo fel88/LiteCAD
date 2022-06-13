@@ -143,6 +143,7 @@
             this.toolStripButton18 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton6 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton17 = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton22 = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.treeListView1)).BeginInit();
@@ -999,7 +1000,7 @@
             this.toolStripButton21});
             this.toolStrip3.Location = new System.Drawing.Point(3, 0);
             this.toolStrip3.Name = "toolStrip3";
-            this.toolStrip3.Size = new System.Drawing.Size(753, 38);
+            this.toolStrip3.Size = new System.Drawing.Size(624, 38);
             this.toolStrip3.TabIndex = 4;
             // 
             // toolStripButton5
@@ -1087,10 +1088,11 @@
             this.toolStripButton7,
             this.toolStripSeparator3,
             this.toolStripButton8,
-            this.toolStripButton16});
+            this.toolStripButton16,
+            this.toolStripButton22});
             this.toolStrip2.Location = new System.Drawing.Point(3, 38);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(519, 38);
+            this.toolStrip2.Size = new System.Drawing.Size(637, 38);
             this.toolStrip2.TabIndex = 3;
             // 
             // toolStripButton9
@@ -1251,6 +1253,19 @@
             this.toolStripButton17.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.toolStripButton17.Click += new System.EventHandler(this.toolStripButton17_Click_1);
             // 
+            // toolStripButton22
+            // 
+            this.toolStripButton22.Checked = true;
+            this.toolStripButton22.CheckOnClick = true;
+            this.toolStripButton22.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.toolStripButton22.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton22.Image")));
+            this.toolStripButton22.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton22.Name = "toolStripButton22";
+            this.toolStripButton22.Size = new System.Drawing.Size(87, 35);
+            this.toolStripButton22.Text = "Helpers visible";
+            this.toolStripButton22.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.toolStripButton22.Click += new System.EventHandler(this.toolStripButton22_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1409,6 +1424,7 @@
         private System.Windows.Forms.ToolStripMenuItem extract3dContourToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem2;
         private System.Windows.Forms.ToolStripButton toolStripButton21;
+        private System.Windows.Forms.ToolStripButton toolStripButton22;
     }
 }
 

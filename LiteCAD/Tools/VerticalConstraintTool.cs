@@ -28,7 +28,7 @@ namespace LiteCAD.Tools
                 var _draft = Editor.Draft;
                 if (Editor.nearest is DraftLine dl)
                 {
-                    var cc = new VerticalConstraint(dl);
+                    var cc = new VerticalConstraint(dl, _draft);
 
                     if (!_draft.Constraints.OfType<VerticalConstraint>().Any(z => z.IsSame(cc)))
                     {

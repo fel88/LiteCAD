@@ -43,7 +43,7 @@ namespace LiteCAD.Tools
                         LinearConstraintLengthDialog lcd = new LinearConstraintLengthDialog();
                         lcd.Init(dl.Length);
                         lcd.ShowDialog();
-                        var cc = new LinearConstraint(dl, dp1, lcd.Length);
+                        var cc = new LinearConstraint(dl, dp1, lcd.Length, _draft);
                         if (!_draft.Constraints.OfType<LinearConstraint>().Any(z => z.IsSame(cc)))
                         {
                             Editor.Backup();
@@ -70,7 +70,7 @@ namespace LiteCAD.Tools
                             LinearConstraintLengthDialog lcd = new LinearConstraintLengthDialog();
                             lcd.Init(dl.Length);
                             lcd.ShowDialog();
-                            var cc = new LinearConstraint(dl.V0, dl.V1, lcd.Length);
+                            var cc = new LinearConstraint(dl.V0, dl.V1, lcd.Length, _draft);
                             if (!_draft.Constraints.OfType<LinearConstraint>().Any(z => z.IsSame(cc)))
                             {
                                 Editor.Backup();
@@ -95,7 +95,7 @@ namespace LiteCAD.Tools
                     LinearConstraintLengthDialog lcd = new LinearConstraintLengthDialog();
                     lcd.Init(((queue[0] as DraftPoint).Location - (queue[1] as DraftPoint).Location).Length);
                     lcd.ShowDialog();
-                    var cc = new LinearConstraint(queue[0], queue[1], lcd.Length);
+                    var cc = new LinearConstraint(queue[0], queue[1], lcd.Length, _draft);
                     if (!_draft.Constraints.OfType<LinearConstraint>().Any(z => z.IsSame(cc)))
                     {
                         Editor.Backup();

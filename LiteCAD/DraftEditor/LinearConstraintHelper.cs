@@ -5,9 +5,12 @@ using LiteCAD.BRep.Editor;
 using System.Drawing.Drawing2D;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using System.Xml.Linq;
 
 namespace LiteCAD.DraftEditor
 {
+    [XmlName(XmlName = "linearConstraintHelper")]
     public class LinearConstraintHelper : AbstractDrawable, IDraftHelper
     {
         public readonly LinearConstraint constraint;
@@ -15,38 +18,61 @@ namespace LiteCAD.DraftEditor
         {
             constraint = c;
         }
-
+        public LinearConstraintHelper(XElement el, Draft draft)
+        {
+            var cid = int.Parse(el.Attribute("constrId").Value);
+            constraint = draft.Constraints.OfType<LinearConstraint>().First(z => z.Id == cid);
+            Shift = int.Parse(el.Attribute("shift").Value);
+        }
         public decimal Length { get => constraint.Length; set => constraint.Length = value; }
         public Vector2d SnapPoint { get; set; }
         public DraftConstraint Constraint => constraint;
         public int Shift { get; set; } = 10;
         public bool Enabled { get => constraint.Enabled; set => constraint.Enabled = value; }
+        public override void Store(TextWriter writer)
+        {
+            writer.WriteLine($"<linearConstraintHelper constrId=\"{constraint.Id}\" shift=\"{Shift}\" enabled=\"{Enabled}\" snapPoint=\"{SnapPoint.X};{SnapPoint.Y}\"/>");
+        }
 
         public void Draw(DrawingContext ctx)
         {
+            var editor = ctx.Tag as IDraftEditor;
             var elems = new[] { constraint.Element1, constraint.Element2 };
             AdjustableArrowCap bigArrow = new AdjustableArrowCap(5, 5);
-            Pen p = new Pen(Color.Red, 1);
+            var hovered = editor.nearest == this;
+            Pen p = new Pen(hovered ? Color.Red : Color.Blue, 1);
             p.CustomEndCap = bigArrow;
             p.CustomStartCap = bigArrow;
             if (constraint.Element1 is DraftPoint dp0 && constraint.Element2 is DraftPoint dp1)
             {
-            //get perpencdicular
-            var diff = (dp1.Location - dp0.Location).Normalized();
-            var perp = new Vector2d(-diff.Y, diff.X);
-            var tr0 = ctx.Transform(dp0.Location + perp * Shift);
-            var tr1 = ctx.Transform(dp1.Location + perp * Shift);
-            var tr2 = ctx.Transform(dp0.Location);
-            var tr3 = ctx.Transform(dp1.Location);
-            var text = (dp0.Location + perp * Shift + dp1.Location + perp * Shift) / 2 + perp;
-            var trt = ctx.Transform(text);
-            ctx.gr.DrawString(constraint.Length.ToString(), SystemFonts.DefaultFont, Brushes.Black, trt);
-            SnapPoint = text;
+                //get perpencdicular
+                var diff = (dp1.Location - dp0.Location).Normalized();
+                var perp = new Vector2d(-diff.Y, diff.X);
+                var tr0 = ctx.Transform(dp0.Location + perp * Shift);
+                var tr1 = ctx.Transform(dp1.Location + perp * Shift);
+                var tr2 = ctx.Transform(dp0.Location);
+                var tr3 = ctx.Transform(dp1.Location);
+                var shiftX = 0;
+                var text = (dp0.Location + perp * Shift + dp1.Location + perp * Shift) / 2 + perp;
+                var trt = ctx.Transform(text);
+                trt = new PointF(trt.X + shiftX, trt.Y);
+                if (hovered)
+                    ctx.gr.DrawString(constraint.Length.ToString(), SystemFonts.DefaultFont, Brushes.Red, trt);
+
+                // ctx.gr.FillEllipse(Brushes.Black, trt.X - gaps, trt.Y - gaps, gaps * 2, gaps * 2);
+                else
+                    ctx.gr.DrawString(constraint.Length.ToString(), SystemFonts.DefaultFont, Brushes.Black, trt);
+                SnapPoint = text;
 
                 ctx.gr.DrawLine(p, tr0, tr1);
 
-                ctx.gr.DrawLine(Pens.Red, tr0, tr2);
-                ctx.gr.DrawLine(Pens.Red, tr1, tr3);
+                ctx.gr.DrawLine(hovered ? Pens.Red : Pens.Blue, tr0, tr2);
+                ctx.gr.DrawLine(hovered ? Pens.Red : Pens.Blue, tr1, tr3);
+                if (hovered)
+                {
+                    ctx.gr.FillEllipse(Brushes.Red, tr2.X - 5, tr2.Y - 5, 10, 10);
+                    ctx.gr.FillEllipse(Brushes.Red, tr3.X - 5, tr3.Y - 5, 10, 10);
+                }
             }
             if (elems.Any(z => z is DraftLine) && elems.Any(z => z is DraftPoint))
             {
@@ -64,13 +90,13 @@ namespace LiteCAD.DraftEditor
                 SnapPoint = text;
                 //get proj of point to line
                 //var diff = (pp - dp.Location).Length;
-            ctx.gr.DrawLine(p, tr0, tr1);
+                ctx.gr.DrawLine(p, tr0, tr1);
                 var tr2 = ctx.Transform(dp.Location);
                 var tr3 = ctx.Transform(pp);
 
-            ctx.gr.DrawLine(Pens.Red, tr0, tr2);
-            ctx.gr.DrawLine(Pens.Red, tr1, tr3);
-        }
+                ctx.gr.DrawLine(Pens.Red, tr0, tr2);
+                ctx.gr.DrawLine(Pens.Red, tr1, tr3);
+            }
         }
 
         public override void Draw()

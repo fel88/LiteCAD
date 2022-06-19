@@ -10,7 +10,7 @@ namespace LiteCAD.Common
         public DraftLine Element1;
         public DraftLine Element2;
 
-        public ParallelConstraint(DraftLine draftPoint1, DraftLine draftPoint2)
+        public ParallelConstraint(DraftLine draftPoint1, DraftLine draftPoint2, Draft parent) : base(parent)
         {
 
             var ar1 = new[] { draftPoint2.V0, draftPoint2.V1 };
@@ -66,8 +66,8 @@ namespace LiteCAD.Common
             }
             else if (!dp1.V0.Frozen && dp1.V1.Frozen)
             {
-                var cand1 = dp1.V1.Location + dir * len ;
-                var cand2 = dp1.V1.Location - dir * len ;
+                var cand1 = dp1.V1.Location + dir * len;
+                var cand2 = dp1.V1.Location - dir * len;
                 if ((dp1.V0.Location - cand1).Length < (dp1.V0.Location - cand2).Length)
                 {
                     dp1.V0.SetLocation(cand1);

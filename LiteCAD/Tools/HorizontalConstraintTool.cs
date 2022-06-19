@@ -7,8 +7,8 @@ namespace LiteCAD.Tools
 {
     public class HorizontalConstraintTool : AbstractDraftTool
     {
-        
-        public HorizontalConstraintTool(IDraftEditor e) : base(e) { }        
+
+        public HorizontalConstraintTool(IDraftEditor e) : base(e) { }
 
         public override void Deselect()
         {
@@ -23,10 +23,10 @@ namespace LiteCAD.Tools
         public override void MouseDown(MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left) return;
-
+            var draft = Editor.Draft;
             if (Editor.nearest is DraftLine dl)
             {
-                var cc = new HorizontalConstraint(dl);
+                var cc = new HorizontalConstraint(dl, draft);
 
                 if (!Editor.Draft.Constraints.OfType<HorizontalConstraint>().Any(z => z.IsSame(cc)))
                 {

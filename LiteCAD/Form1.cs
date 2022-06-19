@@ -1172,7 +1172,7 @@ namespace LiteCAD
         private void toolStripButton8_Click(object sender, EventArgs e)
         {
             EditMode = EditModeEnum.Part;
-            if(editedDraft.Parent is ExtrudeModifier em)
+            if (editedDraft.Parent is ExtrudeModifier em)
             {
                 em.CreatePart();
             }
@@ -1587,7 +1587,7 @@ namespace LiteCAD
 
         private void toolStripButton16_Click(object sender, EventArgs e)
         {
-            de.Undo();            
+            de.Undo();
         }
 
         private void toolStripButton17_Click(object sender, EventArgs e)
@@ -1677,10 +1677,31 @@ namespace LiteCAD
             SetTool(new EqualsConstraintTool(de));
         }
 
-        
+
         private void toolStripButton22_Click(object sender, EventArgs e)
         {
-            de.ShowHelpers= toolStripButton22.Checked;            
+            de.ShowHelpers = toolStripButton22.Checked;
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            var aa = de.Draft.Helpers.OfType<LinearConstraintHelper>();
+            foreach (var item in aa)
+            {
+                item.Shift = 0;
+            }
+        }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            var obj = propertyGrid1.SelectedObject as DraftPoint;
+            var ppc = new PointPositionConstraint(obj, de.Draft);
+            de.Draft.AddConstraint(ppc);
+        }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
+
         }
     }
 
@@ -1688,10 +1709,10 @@ namespace LiteCAD
     {
         Part, Draft, Assembly
     }
+
     public interface IPropEditor
     {
         void Init(object o);
         object ReturnValue { get; }
     }
-
 }

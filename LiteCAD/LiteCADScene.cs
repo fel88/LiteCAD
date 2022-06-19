@@ -22,7 +22,8 @@ namespace LiteCAD
         {
             FactoryHelper.NewId = 0;
             var doc = XDocument.Load(fileName);
-            var root = doc.Descendants("root");
+            var root = doc.Descendants("root").First();
+     
             int fId = 0;
 
             foreach (var item in root.Elements())
@@ -70,6 +71,10 @@ namespace LiteCAD
             }
 
             FactoryHelper.NewId = Math.Max(fId, GetAll(z => true).Max(z => z.Id) + 1);
+            if (root.Attribute("newId") != null)
+            {
+                FactoryHelper.NewId = int.Parse(root.Attribute("newId").Value);
+            }
         }
 
         public void SaveToXml(string fileName)
@@ -79,7 +84,7 @@ namespace LiteCAD
                 using (StreamWriter writer = new StreamWriter(stream))
                 {
                     writer.WriteLine("<?xml version=\"1.0\"?>");
-                    writer.WriteLine("<root>");
+                    writer.WriteLine($"<root newId=\"{FactoryHelper.NewId}\">");
                     foreach (var item in Parts)
                     {
                         item.Store(writer);

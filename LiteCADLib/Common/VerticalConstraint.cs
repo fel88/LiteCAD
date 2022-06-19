@@ -11,11 +11,11 @@ namespace LiteCAD.Common
     public class VerticalConstraint : DraftConstraint, IXmlStorable
     {
         public DraftLine Line;
-        public VerticalConstraint(DraftLine line)
+        public VerticalConstraint(DraftLine line, Draft parent) : base(parent)
         {
             Line = line;
         }
-        public VerticalConstraint(XElement el, Draft parent)
+        public VerticalConstraint(XElement el, Draft parent) : base(parent)
         {
             Line = parent.Elements.OfType<DraftLine>().First(z => z.Id == int.Parse(el.Attribute("targetId").Value));
         }
@@ -23,7 +23,7 @@ namespace LiteCAD.Common
         {
             return Math.Abs(Line.V0.X - Line.V1.X) < eps;
         }
-      
+
         ChangeCand[] GetCands()
         {
             List<ChangeCand> ret = new List<ChangeCand>();
@@ -62,8 +62,8 @@ namespace LiteCAD.Common
 
         public void RestoreXml(XElement elem)
         {
-         //   var targetId = int.Parse(elem.Attribute("targetId").Value);
-           // Line = Line.Parent.Elements.OfType<DraftLine>().First(z => z.Id == targetId);
-        }        
+            //   var targetId = int.Parse(elem.Attribute("targetId").Value);
+            // Line = Line.Parent.Elements.OfType<DraftLine>().First(z => z.Id == targetId);
+        }
     }
 }

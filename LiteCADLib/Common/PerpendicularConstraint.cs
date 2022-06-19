@@ -10,7 +10,7 @@ namespace LiteCAD.Common
         public DraftLine Element1;
         public DraftLine Element2;
         public DraftPoint CommonPoint;
-        public PerpendicularConstraint(DraftLine draftPoint1, DraftLine draftPoint2)
+        public PerpendicularConstraint(DraftLine draftPoint1, DraftLine draftPoint2, Draft parent):base(parent)
         {
             var ar1 = new[] { draftPoint2.V0, draftPoint2.V1 };
             var ar2 = new[] { draftPoint1.V0, draftPoint1.V1 };

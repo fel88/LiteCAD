@@ -12,13 +12,13 @@ namespace LiteCAD.Common
     {
         public DraftLine SourceLine;
         public DraftLine TargetLine;
-        public EqualsConstraint(DraftLine target, DraftLine source)
+        public EqualsConstraint(DraftLine target, DraftLine source, Draft parent) : base(parent)
         {
             SourceLine = source;
             TargetLine = target;
         }
 
-        public EqualsConstraint(XElement el, Draft parent)
+        public EqualsConstraint(XElement el, Draft parent) : base(parent)
         {
             TargetLine = parent.Elements.OfType<DraftLine>().First(z => z.Id == int.Parse(el.Attribute("targetId").Value));
             SourceLine = parent.Elements.OfType<DraftLine>().First(z => z.Id == int.Parse(el.Attribute("sourceId").Value));

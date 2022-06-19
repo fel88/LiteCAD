@@ -94,6 +94,7 @@
     <Compile Include="Common\ParallelConstraint.cs" />
     <Compile Include="Common\PerpendicularConstraint.cs" />
     <Compile Include="Common\PlaneDataTransferObject.cs" />
+    <Compile Include="Common\PointPositionConstraint.cs" />
     <Compile Include="Common\PolylineHelper.cs" />
     <Compile Include="Common\TransformationChain.cs" />
     <Compile Include="Common\VerticalConstraint.cs" />

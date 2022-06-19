@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
 
 namespace LiteCAD.Common
@@ -58,11 +59,12 @@ namespace LiteCAD.Common
             if (constr != null)
             {
                 Type[] types = new[] {
-                typeof(LinearConstraint),
-                typeof(VerticalConstraint),
-                typeof(HorizontalConstraint),
-                typeof(EqualsConstraint),
-            };
+                      typeof(LinearConstraint),
+                      typeof(VerticalConstraint),
+                     typeof(HorizontalConstraint),
+                     typeof(EqualsConstraint),
+                     typeof(PointPositionConstraint),
+                                  };
                 foreach (var item in constr.Elements())
                 {
                     var fr = types.FirstOrDefault(z => (z.GetCustomAttributes(typeof(XmlNameAttribute), true).First() as XmlNameAttribute).XmlName == item.Name);
@@ -73,6 +75,19 @@ namespace LiteCAD.Common
                     //    xx.RestoreXml(item);
                     //}
                     AddConstraint(v);
+                }
+            }
+
+            var helpers = el.Element("helpers");
+            if (helpers != null)
+            {
+                var types = Assembly.GetEntryAssembly().GetTypes().Where(z => z.GetCustomAttribute(typeof(XmlNameAttribute), true) != null).ToArray();                
+                foreach (var item in helpers.Elements())
+                {
+                    var fr = types.FirstOrDefault(z => (z.GetCustomAttributes(typeof(XmlNameAttribute), true).First() as XmlNameAttribute).XmlName == item.Name);
+                    if (fr == null) continue;
+                    var v = Activator.CreateInstance(fr, new object[] { item, this }) as IDraftHelper;                    
+                    AddHelper(v);
                 }
             }
 

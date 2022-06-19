@@ -11,6 +11,7 @@ namespace LiteCAD.BRep.Editor
         public Graphics gr;
         public float scale = 1;
 
+        public object Tag;
 
         public float startx, starty;
         public float origsx, origsy;

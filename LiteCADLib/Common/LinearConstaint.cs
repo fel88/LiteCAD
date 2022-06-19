@@ -1,5 +1,4 @@
-﻿using OpenTK;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -18,18 +17,21 @@ namespace LiteCAD.Common
             get => _length; set
             {
                 BeforeChanged?.Invoke();
-                _length = value;                
+                _length = value;
                 Element1.Parent.RecalcConstraints();
             }
         }
-        public LinearConstraint(XElement el, Draft parent)
+        public LinearConstraint(XElement el, Draft parent) : base(parent)
         {
+            if (el.Attribute("id") != null)
+                Id = int.Parse(el.Attribute("id").Value);
+
             Element1 = parent.Elements.First(z => z.Id == int.Parse(el.Attribute("p0").Value));
             Element2 = parent.Elements.First(z => z.Id == int.Parse(el.Attribute("p1").Value));
-            Length = Helpers.ParseDecimal(el.Attribute("length").Value);            
+            Length = Helpers.ParseDecimal(el.Attribute("length").Value);
         }
 
-        public LinearConstraint(DraftElement draftPoint1, DraftElement draftPoint2, decimal len)
+        public LinearConstraint(DraftElement draftPoint1, DraftElement draftPoint2, decimal len, Draft parent) : base(parent)
         {
             this.Element1 = draftPoint1;
             this.Element2 = draftPoint2;
@@ -41,9 +43,9 @@ namespace LiteCAD.Common
             var elems = new[] { Element1, Element2 };
             if (Element1 is DraftPoint dp0 && Element2 is DraftPoint dp1)
             {
-            var diff = (dp1.Location - dp0.Location).Length;
-            return Math.Abs(diff - (double)Length) < eps;
-        }
+                var diff = (dp1.Location - dp0.Location).Length;
+                return Math.Abs(diff - (double)Length) < eps;
+            }
             if (elems.Any(z => z is DraftLine) && elems.Any(z => z is DraftPoint))
             {
                 var dp = elems.OfType<DraftPoint>().First();
@@ -62,7 +64,7 @@ namespace LiteCAD.Common
             var dp0 = Element1 as DraftPoint;
             var dp1 = Element2 as DraftPoint;
             var diff = (dp1.Location - dp0.Location).Normalized();
-            dp1.SetLocation( dp0.Location + diff * (double)Length);
+            dp1.SetLocation(dp0.Location + diff * (double)Length);
         }
 
         public override void RandomUpdate()
@@ -71,22 +73,22 @@ namespace LiteCAD.Common
 
             if (Element1 is DraftPoint dp0 && Element2 is DraftPoint dp1)
             {
-            if (dp0.Frozen && dp1.Frozen)
-            {
-                throw new ConstraintsException("double frozen");
+                if (dp0.Frozen && dp1.Frozen)
+                {
+                    throw new ConstraintsException("double frozen");
+                }
+                var ar = new[] { dp0, dp1 }.OrderBy(z => GeometryUtils.Random.Next(100)).ToArray();
+                dp0 = ar[0];
+                dp1 = ar[1];
+                if (dp1.Frozen)
+                {
+                    var temp = dp1;
+                    dp1 = dp0;
+                    dp0 = temp;
+                }
+                var diff = (dp1.Location - dp0.Location).Normalized();
+                dp1.SetLocation(dp0.Location + diff * (double)Length);
             }
-            var ar = new[] { dp0, dp1 }.OrderBy(z => GeometryUtils.Random.Next(100)).ToArray();
-            dp0 = ar[0];
-            dp1 = ar[1];
-            if (dp1.Frozen)
-            {
-                var temp = dp1;
-                dp1 = dp0;
-                dp0 = temp;
-            }
-            var diff = (dp1.Location - dp0.Location).Normalized();
-            dp1.SetLocation(dp0.Location + diff * (double)Length);
-        }
             if (elems.Any(z => z is DraftLine) && elems.Any(z => z is DraftPoint))
             {
                 var dp = elems.OfType<DraftPoint>().First();
@@ -117,7 +119,7 @@ namespace LiteCAD.Common
 
         internal override void Store(TextWriter writer)
         {
-            writer.WriteLine($"<linearConstraint length=\"{Length}\" p0=\"{Element1.Id}\" p1=\"{Element2.Id}\"/>");
+            writer.WriteLine($"<linearConstraint id=\"{Id}\" length=\"{Length}\" p0=\"{Element1.Id}\" p1=\"{Element2.Id}\"/>");
         }
     }
 

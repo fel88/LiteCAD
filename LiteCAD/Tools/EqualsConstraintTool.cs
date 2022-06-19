@@ -35,7 +35,7 @@ namespace LiteCAD.Tools
                 var _draft = Editor.Draft;
                 if (Editor.nearest is DraftLine dl && queue.Count > 1)
                 {
-                    var cc = new EqualsConstraint(queue[0] as DraftLine, dl);
+                    var cc = new EqualsConstraint(queue[0] as DraftLine, dl,_draft);
 
                     if (!_draft.Constraints.OfType<EqualsConstraint>().Any(z => z.IsSame(cc)))
                     {

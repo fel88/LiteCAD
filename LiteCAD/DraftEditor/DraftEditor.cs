@@ -26,6 +26,7 @@ namespace LiteCAD.DraftEditor
             ctx.MouseDown += Ctx_MouseDown;
             pictureBox1.MouseUp += PictureBox1_MouseUp;
             pictureBox1.MouseDown += PictureBox1_MouseDown;
+            ctx.Tag = this;
         }
 
         public event Action UndosChanged;
@@ -106,7 +107,7 @@ namespace LiteCAD.DraftEditor
                 }
                 if (queue.Count > 1)
                 {
-                    var cc = new PerpendicularConstraint(queue[0] as DraftLine, queue[1] as DraftLine);
+                    var cc = new PerpendicularConstraint(queue[0] as DraftLine, queue[1] as DraftLine, _draft);
                     if (!_draft.Constraints.OfType<PerpendicularConstraint>().Any(z => z.IsSame(cc)))
                     {
                         _draft.AddConstraint(cc);
@@ -130,7 +131,7 @@ namespace LiteCAD.DraftEditor
                 }
                 if (queue.Count > 1)
                 {
-                    var cc = new ParallelConstraint(queue[0] as DraftLine, queue[1] as DraftLine);
+                    var cc = new ParallelConstraint(queue[0] as DraftLine, queue[1] as DraftLine, _draft);
 
                     if (!_draft.Constraints.OfType<ParallelConstraint>().Any(z => z.IsSame(cc)))
                     {
@@ -183,10 +184,10 @@ namespace LiteCAD.DraftEditor
                     _draft.AddElement(line3);
                     _draft.AddElement(line4);
 
-                    _draft.AddConstraint(new HorizontalConstraint(line1));
-                    _draft.AddConstraint(new VerticalConstraint(line2));
-                    _draft.AddConstraint(new HorizontalConstraint(line3));
-                    _draft.AddConstraint(new VerticalConstraint(line4));
+                    _draft.AddConstraint(new HorizontalConstraint(line1,_draft));
+                    _draft.AddConstraint(new VerticalConstraint(line2, _draft));
+                    _draft.AddConstraint(new HorizontalConstraint(line3, _draft));
+                    _draft.AddConstraint(new VerticalConstraint(line4, _draft));
 
                     foreach (var item in _draft.Constraints.OfType<VerticalConstraint>())
                     {

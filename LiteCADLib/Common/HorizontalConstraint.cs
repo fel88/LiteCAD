@@ -11,11 +11,11 @@ namespace LiteCAD.Common
     public class HorizontalConstraint : DraftConstraint
     {
         public DraftLine Line;
-        public HorizontalConstraint(DraftLine line)
+        public HorizontalConstraint(DraftLine line, Draft parent) : base(parent)
         {
             Line = line;
         }
-        public HorizontalConstraint(XElement el, Draft parent)
+        public HorizontalConstraint(XElement el, Draft parent) : base(parent)
         {
             Line = parent.Elements.OfType<DraftLine>().First(z => z.Id == int.Parse(el.Attribute("targetId").Value));
         }
@@ -23,7 +23,7 @@ namespace LiteCAD.Common
         {
             return Math.Abs(Line.V0.Y - Line.V1.Y) < eps;
         }
-      
+
         ChangeCand[] GetCands()
         {
             List<ChangeCand> ret = new List<ChangeCand>();

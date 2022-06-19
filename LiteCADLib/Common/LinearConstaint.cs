@@ -67,27 +67,55 @@ namespace LiteCAD.Common
             dp1.SetLocation(dp0.Location + diff * (double)Length);
         }
 
-        public override void RandomUpdate()
+        public override void RandomUpdate(ConstraintSolverContext ctx)
         {
             var elems = new[] { Element1, Element2 };
 
             if (Element1 is DraftPoint dp0 && Element2 is DraftPoint dp1)
             {
-                if (dp0.Frozen && dp1.Frozen)
+                if ((dp0.Frozen && dp1.Frozen) || (ctx.FreezedPoints.Contains(dp1) && ctx.FreezedPoints.Contains(dp0)))
                 {
                     throw new ConstraintsException("double frozen");
                 }
                 var ar = new[] { dp0, dp1 }.OrderBy(z => GeometryUtils.Random.Next(100)).ToArray();
                 dp0 = ar[0];
                 dp1 = ar[1];
-                if (dp1.Frozen)
+                if (dp1.Frozen || ctx.FreezedPoints.Contains(dp1))
                 {
                     var temp = dp1;
                     dp1 = dp0;
                     dp0 = temp;
                 }
                 var diff = (dp1.Location - dp0.Location).Normalized();
-                dp1.SetLocation(dp0.Location + diff * (double)Length);
+                //preserve location
+                bool good = false;
+                var fr = ctx.FreezedLinesDirs.FirstOrDefault(z => (z.Line.V0 == dp0 && z.Line.V1 == dp1) || (z.Line.V0 == dp1 && z.Line.V1 == dp0));
+                if (fr != null)
+                {
+                    var lns1 = dp0.Parent.DraftLines.FirstOrDefault(uu => (uu.V0 == dp0 && uu.V1 == dp1) || (uu.V0 == dp1 && uu.V1 == dp0));
+                    if (lns1 != null)
+                    {
+                        var fr2 = ctx.FreezedLinesDirs.FirstOrDefault(zz => zz.Line == lns1);
+                        if (fr2 != null)
+                        {
+                            diff = fr2.Dir;
+                            dp0 = Element1 as DraftPoint;
+                            dp1 = Element2 as DraftPoint;
+                            if (ctx.FreezedPoints.Contains(dp1) && !ctx.FreezedPoints.Contains(dp0))
+                            {
+                                dp0.SetLocation(dp1.Location - diff * (double)Length);
+                                good = true;
+                            }
+                            if (ctx.FreezedPoints.Contains(dp0) && !ctx.FreezedPoints.Contains(dp1))
+                            {
+                                dp1.SetLocation(dp0.Location + diff * (double)Length);
+                                good = true;
+                            }
+                        }
+                    }
+                }
+                if (!good)
+                    dp1.SetLocation(dp0.Location + diff * (double)Length);
             }
             if (elems.Any(z => z is DraftLine) && elems.Any(z => z is DraftPoint))
             {

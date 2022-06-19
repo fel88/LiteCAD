@@ -24,17 +24,19 @@ namespace LiteCAD.Common
             return Math.Abs(Line.V0.X - Line.V1.X) < eps;
         }
 
-        ChangeCand[] GetCands()
+        ChangeCand[] GetCands(ConstraintSolverContext ctx)
         {
             List<ChangeCand> ret = new List<ChangeCand>();
-            ret.Add(new ChangeCand() { Point = Line.V0, Position = new Vector2d(Line.V1.X, Line.V0.Y) });
-            ret.Add(new ChangeCand() { Point = Line.V1, Position = new Vector2d(Line.V0.X, Line.V1.Y) });
+            if (!ctx.FreezedPoints.Contains(Line.V0))
+                ret.Add(new ChangeCand() { Point = Line.V0, Position = new Vector2d(Line.V1.X, Line.V0.Y) });
+            if (!ctx.FreezedPoints.Contains(Line.V1))
+                ret.Add(new ChangeCand() { Point = Line.V1, Position = new Vector2d(Line.V0.X, Line.V1.Y) });
             return ret.Where(z => !z.Point.Frozen).ToArray();
         }
 
-        public override void RandomUpdate()
+        public override void RandomUpdate(ConstraintSolverContext ctx)
         {
-            var cc = GetCands();
+            var cc = GetCands(ctx);
             var ar = cc.OrderBy(z => GeometryUtils.Random.Next(100)).ToArray();
             var fr = ar.First();
             fr.Apply();
@@ -65,5 +67,12 @@ namespace LiteCAD.Common
             //   var targetId = int.Parse(elem.Attribute("targetId").Value);
             // Line = Line.Parent.Elements.OfType<DraftLine>().First(z => z.Id == targetId);
         }
+    }
+    public class ConstraintSolverContext
+    {
+        public ConstraintSolverContext Parent;
+        public List<ConstraintSolverContext> Childs = new List<ConstraintSolverContext>();
+        public List<DraftPoint> FreezedPoints = new List<DraftPoint>();
+        public List<TopologyDraftLineInfo> FreezedLinesDirs = new List<TopologyDraftLineInfo>();
     }
 }

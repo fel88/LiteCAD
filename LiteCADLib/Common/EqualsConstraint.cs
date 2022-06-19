@@ -38,7 +38,7 @@ namespace LiteCAD.Common
             return ret.Where(z => !z.Point.Frozen).ToArray();
         }
 
-        public override void RandomUpdate()
+        public override void RandomUpdate(ConstraintSolverContext ctx)
         {
             var cc = GetCands();
             var ar = cc.OrderBy(z => GeometryUtils.Random.Next(100)).ToArray();

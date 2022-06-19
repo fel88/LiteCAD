@@ -81,12 +81,12 @@ namespace LiteCAD.Common
             var helpers = el.Element("helpers");
             if (helpers != null)
             {
-                var types = Assembly.GetEntryAssembly().GetTypes().Where(z => z.GetCustomAttribute(typeof(XmlNameAttribute), true) != null).ToArray();                
+                var types = Assembly.GetEntryAssembly().GetTypes().Where(z => z.GetCustomAttribute(typeof(XmlNameAttribute), true) != null).ToArray();
                 foreach (var item in helpers.Elements())
                 {
                     var fr = types.FirstOrDefault(z => (z.GetCustomAttributes(typeof(XmlNameAttribute), true).First() as XmlNameAttribute).XmlName == item.Name);
                     if (fr == null) continue;
-                    var v = Activator.CreateInstance(fr, new object[] { item, this }) as IDraftHelper;                    
+                    var v = Activator.CreateInstance(fr, new object[] { item, this }) as IDraftHelper;
                     AddHelper(v);
                 }
             }
@@ -176,9 +176,68 @@ namespace LiteCAD.Common
         }
 
         bool _inited = false;
+
+        bool expandGraphSolver(ConstraintSolverContext ctx)
+        {
+            var start = Stopwatch.StartNew();
+            int cntr = 0;
+            while (true)
+            {
+                var unsat = Constraints.Where(z => !z.IsSatisfied()).ToArray();
+                if (unsat.Length == 0) return true;
+                cntr++;
+                if (start.Elapsed.TotalSeconds > 5 /*&& !Debugger.IsAttached*/)
+                {
+                    //throw new LiteCadException("time exceed");
+                    return false;
+                }
+                var cnctd = unsat.Where(z => ctx.FreezedPoints.Any(uu => z.ContainsElement(uu))).ToArray();
+                var top = Constraints.OfType<TopologyConstraint>().First();
+                var vv = cnctd.Where(zz => zz is VerticalConstraint || zz is HorizontalConstraint).ToArray();
+                List<DraftPoint> toFreeze = new List<DraftPoint>();
+                foreach (var item in vv)
+                {
+                    item.RandomUpdate(ctx);
+                    DraftLine line = null;
+                    if (item is VerticalConstraint vv2)
+                    {
+                        line = vv2.Line;
+                    }
+                    if (item is HorizontalConstraint hh)
+                    {
+                        line = hh.Line;
+                    }
+                    toFreeze.Add(line.V0);
+                    toFreeze.Add(line.V1);
+                }
+                var size = cnctd.OfType<LinearConstraint>().ToArray();
+                foreach (var ss in size)
+                {
+                    ss.RandomUpdate(ctx);
+                }
+                ctx.FreezedPoints.AddRange(toFreeze);
+            }
+        }
+
         public void RecalcConstraints()
         {
             if (!_inited) return;
+            ConstraintSolverContext ccc = new ConstraintSolverContext();
+            var ppc = Constraints.OfType<PointPositionConstraint>().ToArray();
+            foreach (var item in ppc)
+            {
+                item.Update();
+            }
+            ccc.FreezedPoints.AddRange(ppc.Select(z => z.Point).ToArray());
+
+            //expand graph solver
+            if (Constraints.Any(z => z is TopologyConstraint))
+            {
+                var top = Constraints.First(z => z is TopologyConstraint) as TopologyConstraint;
+                ccc.FreezedLinesDirs = top.Lines.ToList();
+                if (expandGraphSolver(ccc))
+                    return;
+            }
 
             var lc = Constraints.Where(z => z.Enabled).ToArray();
             int counter = 0;
@@ -212,7 +271,7 @@ namespace LiteCAD.Common
                     if (item.IsSatisfied())
                         continue;
 
-                    item.RandomUpdate();
+                    item.RandomUpdate(ccc);
                 }
             }
         }

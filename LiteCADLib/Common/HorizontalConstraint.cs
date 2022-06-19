@@ -32,7 +32,7 @@ namespace LiteCAD.Common
             return ret.Where(z => !z.Point.Frozen).ToArray();
         }
 
-        public override void RandomUpdate()
+        public override void RandomUpdate(ConstraintSolverContext ctx)
         {
             var cc = GetCands();
             var ar = cc.OrderBy(z => GeometryUtils.Random.Next(100)).ToArray();
@@ -47,24 +47,13 @@ namespace LiteCAD.Common
 
         public override bool ContainsElement(DraftElement de)
         {
-            return Line == de;
+            return Line == de || Line.V0 == de || Line.V1 == de;            
         }
 
         internal override void Store(TextWriter writer)
         {
             writer.WriteLine($"<horizontalConstraint targetId=\"{Line.Id}\"/>");
         }
-    }
-
-    public class ChangeCand
-    {
-        public DraftPoint Point;
-        public Vector2d Position;
-        public void Apply()
-        {
-            Point.SetLocation(Position);
-        }
-
     }
 
 }

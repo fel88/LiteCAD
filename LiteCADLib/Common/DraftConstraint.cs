@@ -13,7 +13,7 @@ namespace LiteCAD.Common
         }
         public int Id { get; set; }
         public abstract bool IsSatisfied(float eps = 1e-6f);
-        public abstract void RandomUpdate();
+        public abstract void RandomUpdate(ConstraintSolverContext ctx);
         public bool Enabled { get; set; } = true;
         public Action BeforeChanged;
         public abstract bool ContainsElement(DraftElement de);

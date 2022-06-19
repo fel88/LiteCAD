@@ -59,12 +59,25 @@ namespace LiteCAD.Common
 
         internal void Update()
         {
-            Point.SetLocation(Location);
+            //Point.SetLocation(Location);
+            var top = Point.Parent.Constraints.OfType<TopologyConstraint>().FirstOrDefault();
+            var dir = Location - Point.Location;
+            if (top != null)
+            {
+                //whole draft translate
+                var d = Point.Parent;
+                foreach (var item in d.DraftPoints)
+                {
+                    item.SetLocation(item.Location + dir);
+                }
+            }
+            else
+                Point.SetLocation(Location);
         }
 
-        public override void RandomUpdate()
+        public override void RandomUpdate(ConstraintSolverContext ctx)
         {
-            Point.SetLocation(Location);
+            Update();
         }
 
         public bool IsSame(PointPositionConstraint cc)

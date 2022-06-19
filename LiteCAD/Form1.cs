@@ -1695,13 +1695,18 @@ namespace LiteCAD
         private void button11_Click(object sender, EventArgs e)
         {
             var obj = propertyGrid1.SelectedObject as DraftPoint;
-            var ppc = new PointPositionConstraint(obj, de.Draft);
-            de.Draft.AddConstraint(ppc);
+            if (obj != null)
+            {
+                var ppc = new PointPositionConstraint(obj, de.Draft);
+                de.Draft.AddConstraint(ppc);
+            }
+            else { MessageBox.Show("empty obj"); }            
         }
 
         private void button12_Click(object sender, EventArgs e)
-        {
-
+        {                        
+            var ppc = new TopologyConstraint(de.Draft.DraftLines.ToArray(), de.Draft);
+            de.Draft.AddConstraint(ppc);
         }
     }
 

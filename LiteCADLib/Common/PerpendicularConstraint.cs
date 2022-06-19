@@ -35,7 +35,7 @@ namespace LiteCAD.Common
             /*var diff = (dp1.Location - dp0.Location).Normalized();
             dp1.Location = dp0.Location + diff * (double)Length;*/
         }
-        public override void RandomUpdate()
+        public override void RandomUpdate(ConstraintSolverContext ctx)
         {
             var dp0 = Element1 as DraftLine;
             var dp1 = Element2 as DraftLine;

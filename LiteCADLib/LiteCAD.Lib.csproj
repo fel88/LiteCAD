@@ -57,6 +57,7 @@
     <Compile Include="BRep\Editor\ProjectMapEditor.Designer.cs">
       <DependentUpon>ProjectMapEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Common\ChangeCand.cs" />
     <Compile Include="Common\EqualsConstraint.cs" />
     <Compile Include="Common\FactoryHelper.cs" />
     <Compile Include="Common\Helpers.cs" />
@@ -96,6 +97,8 @@
     <Compile Include="Common\PlaneDataTransferObject.cs" />
     <Compile Include="Common\PointPositionConstraint.cs" />
     <Compile Include="Common\PolylineHelper.cs" />
+    <Compile Include="Common\TopologyConstraint.cs" />
+    <Compile Include="Common\TopologyDraftLineInfo.cs" />
     <Compile Include="Common\TransformationChain.cs" />
     <Compile Include="Common\VerticalConstraint.cs" />
     <Compile Include="Common\XmlNameAttribute.cs" />

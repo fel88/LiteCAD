@@ -9,6 +9,7 @@ namespace LiteCAD.DraftEditor
         Draft Draft { get; }
         DrawingContext DrawingContext { get; }
         void Backup();
+        void ResetTool();
 
     }
 }

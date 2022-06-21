@@ -139,7 +139,11 @@ namespace LiteCAD.Common
         {
             return new[] { Element2, Element1 }.Except(new[] { cc.Element1, cc.Element2 }).Count() == 0;
         }
-
+        public bool IsLineConstraint(DraftLine line)
+        {
+            if (!(Element1 is DraftPoint dp0 && Element2 is DraftPoint dp1)) return false;
+            return new[] { line.V0, line.V1 }.Intersect(new[] { dp0, dp1 }).Count() == 2;
+        }
         public override bool ContainsElement(DraftElement de)
         {
             return Element1 == de || Element2 == de;

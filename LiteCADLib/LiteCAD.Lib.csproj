@@ -102,6 +102,15 @@
     <Compile Include="Common\TransformationChain.cs" />
     <Compile Include="Common\VerticalConstraint.cs" />
     <Compile Include="Common\XmlNameAttribute.cs" />
+    <Compile Include="CSP\CSPConstr.cs" />
+    <Compile Include="CSP\CSPConstrEqualExpression.cs" />
+    <Compile Include="CSP\CSPConstrEqualTwoVars.cs" />
+    <Compile Include="CSP\CSPConstrEqualVarValue.cs" />
+    <Compile Include="CSP\CSPTask.cs" />
+    <Compile Include="CSP\CSPVar.cs" />
+    <Compile Include="CSP\CSPVarContext.cs" />
+    <Compile Include="CSP\CSPVarInfo.cs" />
+    <Compile Include="CSP\Token.cs" />
     <Compile Include="MessageFilter.cs" />
     <Compile Include="Common\DebugHelpers.cs" />
     <Compile Include="BRep\DrawItem.cs" />

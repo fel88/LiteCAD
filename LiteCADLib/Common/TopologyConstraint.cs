@@ -1,5 +1,6 @@
 ﻿using OpenTK;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -16,8 +17,15 @@ namespace LiteCAD.Common
             if (el.Attribute("id") != null)
                 Id = int.Parse(el.Attribute("id").Value);
 
+            List<TopologyDraftLineInfo> infos = new List<TopologyDraftLineInfo>();
+            foreach (var line in el.Elements("item"))
+            {
+                var id = int.Parse(line.Attribute("id").Value);
+                var dirr = (line.Attribute("dir").Value).Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                infos.Add(new TopologyDraftLineInfo() { Line = parent.DraftLines.First(z => z.Id == id), Dir = new Vector2d(Helpers.ParseDouble(dirr[0]), Helpers.ParseDouble(dirr[1])) });
+            }
             //Point = parent.Elements.OfType<DraftPoint>().First(z => z.Id == int.Parse(el.Attribute("pointId").Value));
-
+            Lines = infos.ToArray();
         }
 
         public TopologyConstraint(DraftLine[] draftPoint1, Draft parent) : base(parent)

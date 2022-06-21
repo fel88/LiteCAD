@@ -1708,6 +1708,19 @@ namespace LiteCAD
             var ppc = new TopologyConstraint(de.Draft.DraftLines.ToArray(), de.Draft);
             de.Draft.AddConstraint(ppc);
         }
+
+        private void button13_Click(object sender, EventArgs e)
+        {
+            if (!de.Draft.Solve())
+            {
+                DebugHelpers.Error("constraints satisfaction error");
+            }
+        }
+
+        private void button14_Click(object sender, EventArgs e)
+        {
+            de.Draft.RandomSolve();
+        }
     }
 
     public enum EditModeEnum

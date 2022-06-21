@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using LiteCAD.CSP;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
@@ -64,6 +65,7 @@ namespace LiteCAD.Common
                      typeof(HorizontalConstraint),
                      typeof(EqualsConstraint),
                      typeof(PointPositionConstraint),
+                     typeof(TopologyConstraint),
                                   };
                 foreach (var item in constr.Elements())
                 {
@@ -219,31 +221,240 @@ namespace LiteCAD.Common
             }
         }
 
+        public bool Solve()
+        {
+            CSPTask task = new CSPTask();
+            int vcntr = 0;
+            foreach (var item in DraftPoints)
+            {
+                task.Vars.Add(new CSPVar() { Name = "x" + vcntr });
+                task.Vars.Add(new CSPVar() { Name = "y" + vcntr });
+                vcntr++;
+            }
+            var ppc2 = Constraints.OfType<PointPositionConstraint>().ToArray();
+            foreach (var item in ppc2)
+            {
+                var vind = DraftPoints.ToList().IndexOf(item.Point);
+                task.Constrs.Add(new CSPConstrEqualVarValue() { Var1 = task.Vars.First(zz => zz.Name == "x" + vind), Value = item.Location.X });
+                task.Constrs.Add(new CSPConstrEqualVarValue() { Var1 = task.Vars.First(zz => zz.Name == "y" + vind), Value = item.Location.Y });
+            }
+            var vert = Constraints.OfType<VerticalConstraint>().ToArray();
+            foreach (var item in vert)
+            {
+                var vind0 = DraftPoints.ToList().IndexOf(item.Line.V0);
+                var vind1 = DraftPoints.ToList().IndexOf(item.Line.V1);
+                task.Constrs.Add(new CSPConstrEqualTwoVars() { Var1 = task.Vars.First(zz => zz.Name == "x" + vind0), Var2 = task.Vars.First(uu => uu.Name == "x" + vind1) });
+            }
+            var horiz = Constraints.OfType<HorizontalConstraint>().ToArray();
+            foreach (var item in horiz)
+            {
+                var vind0 = DraftPoints.ToList().IndexOf(item.Line.V0);
+                var vind1 = DraftPoints.ToList().IndexOf(item.Line.V1);
+                task.Constrs.Add(new CSPConstrEqualTwoVars() { Var1 = task.Vars.First(zz => zz.Name == "y" + vind0), Var2 = task.Vars.First(uu => uu.Name == "y" + vind1) });
+            }
+            var linears = Constraints.OfType<LinearConstraint>().ToList();
+            var eqls = Constraints.OfType<EqualsConstraint>().ToArray();
+
+            if (Constraints.Any(z => z is TopologyConstraint))
+            {
+                var topo = Constraints.First(z => z is TopologyConstraint) as TopologyConstraint;
+                List<EqualsConstraint> notFoundEqs = new List<EqualsConstraint>();
+                foreach (var item in eqls)
+                {
+                    if (linears.Any(z => z.IsLineConstraint(item.SourceLine)))
+                    {
+                        var frr = linears.First(z => z.IsLineConstraint(item.SourceLine));
+                        linears.Add(new LinearConstraint(item.TargetLine.V0, item.TargetLine.V1, frr.Length, this));
+                    }
+                    else
+                    {
+                        notFoundEqs.Add(item);
+                    }
+                }
+
+                foreach (var item in notFoundEqs)
+                {
+                    //add something like this: x3-x2=x1-x0
+                    var vind0 = DraftPoints.ToList().IndexOf(item.TargetLine.V0);
+                    var vind1 = DraftPoints.ToList().IndexOf(item.TargetLine.V1);
+                    var tind0 = DraftPoints.ToList().IndexOf(item.SourceLine.V0);
+                    var tind1 = DraftPoints.ToList().IndexOf(item.SourceLine.V1);
+
+                    if (vert.Any(z => z.Line == item.TargetLine) && vert.Any(z => z.Line == item.SourceLine))
+                    {
+                        var vx1 = task.Vars.First(zz => zz.Name == "y" + vind0);
+                        var vx2 = task.Vars.First(zz => zz.Name == "y" + vind1);
+                        var vx3 = task.Vars.First(zz => zz.Name == "y" + tind0);
+                        var vx4 = task.Vars.First(zz => zz.Name == "y" + tind1);
+
+                        task.Constrs.Add(new CSPConstrEqualExpression()
+                        {
+                            Vars = new[] { vx1, vx2, vx3, vx4 },
+                            Expression = vx2.Name + "-" + vx1.Name + "=" + vx4.Name + "-" + vx3.Name
+                        });
+
+                    }
+                    if (horiz.Any(z => z.Line == item.TargetLine) && horiz.Any(z => z.Line == item.SourceLine))
+                    {
+                        var vx1 = task.Vars.First(zz => zz.Name == "x" + vind0);
+                        var vx2 = task.Vars.First(zz => zz.Name == "x" + vind1);
+                        var vx3 = task.Vars.First(zz => zz.Name == "x" + tind0);
+                        var vx4 = task.Vars.First(zz => zz.Name == "x" + tind1);
+
+                        task.Constrs.Add(new CSPConstrEqualExpression()
+                        {
+                            Vars = new[] { vx1, vx2, vx3, vx4 },
+                            Expression = vx2.Name + "-" + vx1.Name + "=" + vx4.Name + "-" + vx3.Name
+                        });
+
+                    }
+                }
+
+                foreach (var item in linears)
+                {
+                    if (!(item.Element1 is DraftPoint dp0 && item.Element2 is DraftPoint dp1)) continue;
+                    var vind0 = DraftPoints.ToList().IndexOf(dp0);
+                    var vind1 = DraftPoints.ToList().IndexOf(dp1);
+
+                    var fr = topo.Lines.FirstOrDefault(z => new[] { z.Line.V0, z.Line.V1 }.Intersect(new[] { dp0, dp1 }).Count() == 2);
+                    if (fr == null)
+                    {
+                        //add dist equation
+                        continue;
+                    }
+                    var dd = fr.Dir;
+                    vind0 = DraftPoints.ToList().IndexOf(fr.Line.V0);
+                    vind1 = DraftPoints.ToList().IndexOf(fr.Line.V1);
+                    var vx1 = task.Vars.First(zz => zz.Name == "x" + vind0);
+                    var vx2 = task.Vars.First(zz => zz.Name == "x" + vind1);
+                    var vy1 = task.Vars.First(zz => zz.Name == "y" + vind0);
+                    var vy2 = task.Vars.First(zz => zz.Name == "y" + vind1);
+                    if (Math.Abs(dd.X) == 1)
+                    {
+                        task.Constrs.Add(new CSPConstrEqualExpression() { Vars = new[] { vx1, vx2 }, Expression = vx2.Name + "=" + vx1.Name + (dd.X > 0 ? "+" : "-") + item.Length });
+                    }
+                    if (Math.Abs(dd.Y) == 1)
+                    {
+                        task.Constrs.Add(new CSPConstrEqualExpression() { Vars = new[] { vy1, vy2 }, Expression = vy2.Name + "=" + vy1.Name + (dd.Y > 0 ? "+" : "-") + item.Length });
+                    }
+                }
+            }
+            CSPVarContext ctx = new CSPVarContext() { Task = task };
+            bool res;
+            if (res = ctx.Solve())
+            {
+                vcntr = 0;
+                foreach (var item in DraftPoints)
+                {
+                    var xv = task.Vars.First(zz => zz.Name == "x" + vcntr);
+                    var yv = task.Vars.First(zz => zz.Name == "y" + vcntr);
+                    item.SetLocation(ctx.Infos.First(z => z.Var == xv).Value, ctx.Infos.First(z => z.Var == yv).Value);
+                    vcntr++;
+                }
+            }
+            return res;
+        }
         public void RecalcConstraints()
         {
             if (!_inited) return;
+            return;
             ConstraintSolverContext ccc = new ConstraintSolverContext();
-            var ppc = Constraints.OfType<PointPositionConstraint>().ToArray();
+            /*var ppc = Constraints.OfType<PointPositionConstraint>().ToArray();
             foreach (var item in ppc)
             {
                 item.Update();
-            }
-            ccc.FreezedPoints.AddRange(ppc.Select(z => z.Point).ToArray());
+            }*/
+            // ccc.FreezedPoints.AddRange(ppc.Select(z => z.Point).ToArray());
 
             //expand graph solver
             if (Constraints.Any(z => z is TopologyConstraint))
             {
-                var top = Constraints.First(z => z is TopologyConstraint) as TopologyConstraint;
-                ccc.FreezedLinesDirs = top.Lines.ToList();
-                if (expandGraphSolver(ccc))
-                    return;
-            }
+                CSPTask task = new CSPTask();
+                int vcntr = 0;
+                foreach (var item in DraftPoints)
+                {
+                    task.Vars.Add(new CSPVar() { Name = "x" + vcntr });
+                    task.Vars.Add(new CSPVar() { Name = "y" + vcntr });
+                    vcntr++;
+                }
+                var ppc2 = Constraints.OfType<PointPositionConstraint>().ToArray();
+                foreach (var item in ppc2)
+                {
+                    var vind = DraftPoints.ToList().IndexOf(item.Point);
+                    task.Constrs.Add(new CSPConstrEqualVarValue() { Var1 = task.Vars.First(zz => zz.Name == "x" + vind), Value = item.Location.X });
+                    task.Constrs.Add(new CSPConstrEqualVarValue() { Var1 = task.Vars.First(zz => zz.Name == "y" + vind), Value = item.Location.Y });
+                }
+                var vert = Constraints.OfType<VerticalConstraint>().ToArray();
+                foreach (var item in vert)
+                {
+                    var vind0 = DraftPoints.ToList().IndexOf(item.Line.V0);
+                    var vind1 = DraftPoints.ToList().IndexOf(item.Line.V1);
+                    task.Constrs.Add(new CSPConstrEqualTwoVars() { Var1 = task.Vars.First(zz => zz.Name == "x" + vind0), Var2 = task.Vars.First(uu => uu.Name == "x" + vind1) });
+                }
+                var horiz = Constraints.OfType<HorizontalConstraint>().ToArray();
+                foreach (var item in horiz)
+                {
+                    var vind0 = DraftPoints.ToList().IndexOf(item.Line.V0);
+                    var vind1 = DraftPoints.ToList().IndexOf(item.Line.V1);
+                    task.Constrs.Add(new CSPConstrEqualTwoVars() { Var1 = task.Vars.First(zz => zz.Name == "y" + vind0), Var2 = task.Vars.First(uu => uu.Name == "y" + vind1) });
+                }
+                var linears = Constraints.OfType<LinearConstraint>().ToArray();
+                var topo = Constraints.First(z => z is TopologyConstraint) as TopologyConstraint;
+                foreach (var item in linears)
+                {
+                    if (!(item.Element1 is DraftPoint dp0 && item.Element2 is DraftPoint dp1)) continue;
+                    var vind0 = DraftPoints.ToList().IndexOf(dp0);
+                    var vind1 = DraftPoints.ToList().IndexOf(dp1);
 
+                    var fr = topo.Lines.FirstOrDefault(z => new[] { z.Line.V0, z.Line.V1 }.Intersect(new[] { dp0, dp1 }).Count() == 2);
+                    if (fr == null) continue;
+                    var dd = fr.Dir;
+                    vind0 = DraftPoints.ToList().IndexOf(fr.Line.V0);
+                    vind1 = DraftPoints.ToList().IndexOf(fr.Line.V1);
+                    var vx1 = task.Vars.First(zz => zz.Name == "x" + vind0);
+                    var vx2 = task.Vars.First(zz => zz.Name == "x" + vind1);
+                    var vy1 = task.Vars.First(zz => zz.Name == "y" + vind0);
+                    var vy2 = task.Vars.First(zz => zz.Name == "y" + vind1);
+                    if (Math.Abs(dd.X) == 1)
+                    {
+                        task.Constrs.Add(new CSPConstrEqualExpression() { Vars = new[] { vx1, vx2 }, Expression = vx2.Name + "=" + vx1.Name + (dd.X > 0 ? "+" : "-") + item.Length });
+                    }
+                    if (Math.Abs(dd.Y) == 1)
+                    {
+                        task.Constrs.Add(new CSPConstrEqualExpression() { Vars = new[] { vy1, vy2 }, Expression = vy2.Name + "=" + vy1.Name + (dd.Y > 0 ? "+" : "-") + item.Length });
+                    }
+                }
+
+                CSPVarContext ctx = new CSPVarContext() { Task = task };
+                if (ctx.Solve())
+                {
+                    vcntr = 0;
+                    foreach (var item in DraftPoints)
+                    {
+                        var xv = task.Vars.First(zz => zz.Name == "x" + vcntr);
+                        var yv = task.Vars.First(zz => zz.Name == "y" + vcntr);
+                        item.SetLocation(ctx.Infos.First(z => z.Var == xv).Value, ctx.Infos.First(z => z.Var == yv).Value);
+                        vcntr++;
+                    }
+                    return;
+                }
+                /*   var top = Constraints.First(z => z is TopologyConstraint) as TopologyConstraint;
+                   ccc.FreezedLinesDirs = top.Lines.ToList();
+                   if (expandGraphSolver(ccc))
+                       return;*/
+            }
+            return;
+            RandomSolve();
+        }
+        public void RandomSolve()
+        {
+            ConstraintSolverContext ccc = new ConstraintSolverContext();
             var lc = Constraints.Where(z => z.Enabled).ToArray();
             int counter = 0;
             int limit = 1000;
             Stopwatch stw = Stopwatch.StartNew();
             StringWriter sw = new StringWriter();
+
             Store(sw);
             int timeLimit = 5;
             var elem = XElement.Parse(sw.ToString());
@@ -253,6 +464,7 @@ namespace LiteCAD.Common
                 if (stw.Elapsed.TotalSeconds > timeLimit)
                 {
                     DebugHelpers.Error("constraints satisfaction error");
+                    Restore(XElement.Parse(sw.ToString()));
                     break;
                 }
                 counter++;
@@ -275,7 +487,6 @@ namespace LiteCAD.Common
                 }
             }
         }
-
         public List<DraftElement> Elements = new List<DraftElement>();
         public List<IDraftHelper> Helpers = new List<IDraftHelper>();
         public List<DraftConstraint> Constraints = new List<DraftConstraint>();

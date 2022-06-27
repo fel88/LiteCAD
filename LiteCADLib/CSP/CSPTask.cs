@@ -19,17 +19,9 @@ namespace LiteCAD.CSP
 
             foreach (var item in Constrs)
             {
-                if (item is CSPConstrEqualTwoVars tv)
-                {
-                    sb.AppendLine(tv.Var1.Name + "=" + tv.Var2.Name);
-                }
                 if (item is CSPConstrEqualExpression expr)
                 {
                     sb.AppendLine(expr.Expression);
-                }
-                if (item is CSPConstrEqualVarValue vv)
-                {
-                    sb.AppendLine(vv.Var1.Name + "=" + vv.Value);
                 }
             }
             return sb.ToString();

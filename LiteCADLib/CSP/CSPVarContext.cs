@@ -87,12 +87,162 @@ namespace LiteCAD.CSP
                 var expr = sb.ToString();
                 var res = SolveOneVarEquation(expr);
                 Infos.Add(new CSPVarInfo(unres.First(z => z != tkns1[0].Tag) as CSPVar) { Value = res });
-
             }
             else
             {
-                throw new NotImplementedException();
+                double[,] input = new double[constrs.Length, constrs.Length + 1];
+                for (int i1 = 0; i1 < constrs.Length; i1++)
+                {
+                    CSPConstrEqualExpression cc = constrs[i1];
+                    var expr = cc.Expression;
+                    var left = expr.Substring(0, expr.IndexOf("="));
+                    var right = expr.Substring(expr.IndexOf("=") + 1);
+
+                    var lt = Tokenize(left);
+                    var rt = Tokenize(right);
+                    int sign = 1;
+
+
+                    for (int i = 0; i < lt.Length; i++)
+                    {
+                        if (lt[i].Text == "-")
+                        {
+                            sign = -1;
+                            continue;
+                        }
+                        if (lt[i].Text == "+")
+                        {
+                            sign = 1;
+                            continue;
+                        }
+                        if (lt[i].Tag is CSPVar vv)
+                        {
+                            var vind = Array.IndexOf(unres, vv);
+                            input[i1, vind] += sign;
+                            sign = 1;
+                        }
+                        else if (lt[i].Tag is CSPVarInfo vinf)
+                        {
+                            input[i1, input.GetLength(1) - 1] -= sign * vinf.Value;
+                            sign = 1;
+                        }
+                        else
+                        {
+                            input[i1, input.GetLength(1) - 1] -= sign * double.Parse(lt[i].Text);
+                            sign = 1;
+                        }
+                    }
+                    sign = 1;
+                    for (int i = 0; i < rt.Length; i++)
+                    {
+                        if (rt[i].Text == "-")
+                        {
+                            sign = -1;
+                            continue;
+                        }
+                        if (rt[i].Text == "+")
+                        {
+                            sign = 1;
+                            continue;
+                        }
+                        if (rt[i].Tag is CSPVar vv)
+                        {
+                            var vind = Array.IndexOf(unres, vv);
+                            input[i1, vind] -= sign;
+                            sign = 1;
+                        }
+                        else if (rt[i].Tag is CSPVarInfo vinf)
+                        {
+                            input[i1, input.GetLength(1) - 1] += sign * vinf.Value;
+                            sign = 1;
+                        }
+                        else
+                        {
+                            input[i1, input.GetLength(1) - 1] += sign * double.Parse(rt[i].Text);
+                            sign = 1;
+                        }
+                    }
+
+                }
+
+
+                try
+                {
+                    if (Solve(input))
+                    {
+                        for (int i = 0; i < input.GetLength(0); i++)
+                        {
+                            Infos.Add(new CSPVarInfo(unres[i]) { Value = input[i, unres.Length] });
+                        }
+
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
             }
+        }
+        /// <summary>Computes the solution of a linear equation system.
+        /// https://www.codeproject.com/Tips/388179/Linear-Equation-Solver-Gaussian-Elimination-Csharp
+        /// </summary>
+        /// <param name="M">
+        /// The system of linear equations as an augmented matrix[row, col] where (rows + 1 == cols).
+        /// It will contain the solution in "row canonical form" if the function returns "true".
+        /// </param>
+        /// <returns>Returns whether the matrix has a unique solution or not.</returns>
+
+
+        public static bool Solve(double[,] M)
+        {
+            // input checks
+            int rowCount = M.GetUpperBound(0) + 1;
+            if (M == null || M.Length != rowCount * (rowCount + 1))
+                throw new ArgumentException("The algorithm must be provided with a (n x n+1) matrix.");
+            if (rowCount < 1)
+                throw new ArgumentException("The matrix must at least have one row.");
+
+            // pivoting
+            for (int col = 0; col + 1 < rowCount; col++) if (M[col, col] == 0)
+                // check for zero coefficients
+                {
+                    // find non-zero coefficient
+                    int swapRow = col + 1;
+                    for (; swapRow < rowCount; swapRow++) if (M[swapRow, col] != 0) break;
+
+                    if (M[swapRow, col] != 0) // found a non-zero coefficient?
+                    {
+                        // yes, then swap it with the above
+                        double[] tmp = new double[rowCount + 1];
+                        for (int i = 0; i < rowCount + 1; i++)
+                        { tmp[i] = M[swapRow, i]; M[swapRow, i] = M[col, i]; M[col, i] = tmp[i]; }
+                    }
+                    else return false; // no, then the matrix has no unique solution
+                }
+
+            // elimination
+            for (int sourceRow = 0; sourceRow + 1 < rowCount; sourceRow++)
+            {
+                for (int destRow = sourceRow + 1; destRow < rowCount; destRow++)
+                {
+                    double df = M[sourceRow, sourceRow];
+                    double sf = M[destRow, sourceRow];
+                    for (int i = 0; i < rowCount + 1; i++)
+                        M[destRow, i] = M[destRow, i] * df - M[sourceRow, i] * sf;
+                }
+            }
+
+            // back-insertion
+            for (int row = rowCount - 1; row >= 0; row--)
+            {
+                double f = M[row, row];
+                if (f == 0) return false;
+
+                for (int i = 0; i < rowCount + 1; i++) M[row, i] /= f;
+                for (int destRow = 0; destRow < row; destRow++)
+                { M[destRow, rowCount] -= M[destRow, row] * M[row, rowCount]; M[destRow, row] = 0; }
+            }
+            return true;
         }
 
         public ASTTreeItem BuildAST(string expr)
@@ -114,7 +264,7 @@ namespace LiteCAD.CSP
         }
 
         public double SolveOneVarEquation(string expr)
-        {            
+        {
             var left = expr.Substring(0, expr.IndexOf("="));
             var right = expr.Substring(expr.IndexOf("=") + 1);
             double sumLeft = 0;
@@ -223,7 +373,7 @@ namespace LiteCAD.CSP
                     if (good)
                         remains.Remove(item);
                 }
-                
+
                 var exprs1 = remains.OfType<CSPConstrEqualExpression>().Where(z => z.Vars.Count(uu => !Resolved(uu)) == 1).ToArray();
 
                 foreach (var item in exprs1)
@@ -243,6 +393,9 @@ namespace LiteCAD.CSP
                 }
 
                 //search SOE (system of equations)
+
+
+
                 var pairs = remains.OfType<CSPConstrEqualExpression>().Where(z => z.Vars.Count(Unresolved) == 2).ToArray();
                 var grp = pairs.GroupBy(zz => string.Join(";", zz.Vars.Where(Unresolved).Select(t => t.Name).OrderBy(z => z).ToArray())).ToArray();
                 foreach (var group in grp)
@@ -250,12 +403,19 @@ namespace LiteCAD.CSP
                     SubtaskSolve(group.ToArray());
                 }
 
+                var unres2 = Task.Vars.Where(Unresolved).ToArray();
+                var constrs2unres = remains.OfType<CSPConstrEqualExpression>().Where(z => z.Vars.Any(uu => unres2.Contains(uu))).ToArray();
+                if (constrs2unres.SelectMany(z => z.Vars.Where(Unresolved)).Distinct().Count() == unres2.Length)
+                {
+                    SubtaskSolve(constrs2unres.ToArray());
+                }
                 var unsolved2 = Task.Vars.Count(zz => !Resolved(zz));
                 if (unsolved2 == unsolved && unsolved2 != 0)
                 {
                     //failed to satisfy
                     return false;
                 }
+
             }
         }
 

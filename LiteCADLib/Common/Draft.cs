@@ -235,22 +235,22 @@ namespace LiteCAD.Common
             foreach (var item in ppc2)
             {
                 var vind = DraftPoints.ToList().IndexOf(item.Point);
-                task.Constrs.Add(new CSPConstrEqualVarValue() { Var1 = task.Vars.First(zz => zz.Name == "x" + vind), Value = item.Location.X });
-                task.Constrs.Add(new CSPConstrEqualVarValue() { Var1 = task.Vars.First(zz => zz.Name == "y" + vind), Value = item.Location.Y });
+                task.Constrs.Add(new CSPConstrEqualVarValue(task.Vars.First(zz => zz.Name == "x" + vind),item.Location.X) );
+                task.Constrs.Add(new CSPConstrEqualVarValue(task.Vars.First(zz => zz.Name == "y" + vind),item.Location.Y) );
             }
             var vert = Constraints.OfType<VerticalConstraint>().ToArray();
             foreach (var item in vert)
             {
                 var vind0 = DraftPoints.ToList().IndexOf(item.Line.V0);
                 var vind1 = DraftPoints.ToList().IndexOf(item.Line.V1);
-                task.Constrs.Add(new CSPConstrEqualTwoVars() { Var1 = task.Vars.First(zz => zz.Name == "x" + vind0), Var2 = task.Vars.First(uu => uu.Name == "x" + vind1) });
+                task.Constrs.Add(new CSPConstrEqualTwoVars(task.Vars.First(zz => zz.Name == "x" + vind0), task.Vars.First(uu => uu.Name == "x" + vind1)) );
             }
             var horiz = Constraints.OfType<HorizontalConstraint>().ToArray();
             foreach (var item in horiz)
             {
                 var vind0 = DraftPoints.ToList().IndexOf(item.Line.V0);
                 var vind1 = DraftPoints.ToList().IndexOf(item.Line.V1);
-                task.Constrs.Add(new CSPConstrEqualTwoVars() { Var1 = task.Vars.First(zz => zz.Name == "y" + vind0), Var2 = task.Vars.First(uu => uu.Name == "y" + vind1) });
+                task.Constrs.Add(new CSPConstrEqualTwoVars(task.Vars.First(zz => zz.Name == "y" + vind0), task.Vars.First(uu => uu.Name == "y" + vind1)) );
             }
             var linears = Constraints.OfType<LinearConstraint>().ToList();
             var eqls = Constraints.OfType<EqualsConstraint>().ToArray();
@@ -381,22 +381,22 @@ namespace LiteCAD.Common
                 foreach (var item in ppc2)
                 {
                     var vind = DraftPoints.ToList().IndexOf(item.Point);
-                    task.Constrs.Add(new CSPConstrEqualVarValue() { Var1 = task.Vars.First(zz => zz.Name == "x" + vind), Value = item.Location.X });
-                    task.Constrs.Add(new CSPConstrEqualVarValue() { Var1 = task.Vars.First(zz => zz.Name == "y" + vind), Value = item.Location.Y });
+                    task.Constrs.Add(new CSPConstrEqualVarValue(task.Vars.First(zz => zz.Name == "x" + vind),item.Location.X));
+                    task.Constrs.Add(new CSPConstrEqualVarValue(task.Vars.First(zz => zz.Name == "y" + vind),item.Location.Y));
                 }
                 var vert = Constraints.OfType<VerticalConstraint>().ToArray();
                 foreach (var item in vert)
                 {
                     var vind0 = DraftPoints.ToList().IndexOf(item.Line.V0);
                     var vind1 = DraftPoints.ToList().IndexOf(item.Line.V1);
-                    task.Constrs.Add(new CSPConstrEqualTwoVars() { Var1 = task.Vars.First(zz => zz.Name == "x" + vind0), Var2 = task.Vars.First(uu => uu.Name == "x" + vind1) });
+                    task.Constrs.Add(new CSPConstrEqualTwoVars(task.Vars.First(zz => zz.Name == "x" + vind0), task.Vars.First(uu => uu.Name == "x" + vind1)) { });
                 }
                 var horiz = Constraints.OfType<HorizontalConstraint>().ToArray();
                 foreach (var item in horiz)
                 {
                     var vind0 = DraftPoints.ToList().IndexOf(item.Line.V0);
                     var vind1 = DraftPoints.ToList().IndexOf(item.Line.V1);
-                    task.Constrs.Add(new CSPConstrEqualTwoVars() { Var1 = task.Vars.First(zz => zz.Name == "y" + vind0), Var2 = task.Vars.First(uu => uu.Name == "y" + vind1) });
+                    task.Constrs.Add(new CSPConstrEqualTwoVars(task.Vars.First(zz => zz.Name == "y" + vind0), task.Vars.First(uu => uu.Name == "y" + vind1)) {  });
                 }
                 var linears = Constraints.OfType<LinearConstraint>().ToArray();
                 var topo = Constraints.First(z => z is TopologyConstraint) as TopologyConstraint;

@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -354,7 +355,8 @@ namespace LiteCAD
         Label hoverText;
         public Form1()
         {
-            InitializeComponent();
+            InitializeComponent();            
+           
             _currentTool = new SelectionTool(this);
             foreach (Control c in propertyGrid1.Controls)
             {
@@ -1700,11 +1702,11 @@ namespace LiteCAD
                 var ppc = new PointPositionConstraint(obj, de.Draft);
                 de.Draft.AddConstraint(ppc);
             }
-            else { MessageBox.Show("empty obj"); }            
+            else { MessageBox.Show("empty obj"); }
         }
 
         private void button12_Click(object sender, EventArgs e)
-        {                        
+        {
             var ppc = new TopologyConstraint(de.Draft.DraftLines.ToArray(), de.Draft);
             de.Draft.AddConstraint(ppc);
         }

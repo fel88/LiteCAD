@@ -235,22 +235,22 @@ namespace LiteCAD.Common
             foreach (var item in ppc2)
             {
                 var vind = DraftPoints.ToList().IndexOf(item.Point);
-                task.Constrs.Add(new CSPConstrEqualVarValue(task.Vars.First(zz => zz.Name == "x" + vind),item.Location.X) );
-                task.Constrs.Add(new CSPConstrEqualVarValue(task.Vars.First(zz => zz.Name == "y" + vind),item.Location.Y) );
+                task.Constrs.Add(new CSPConstrEqualVarValue(task.Vars.First(zz => zz.Name == "x" + vind), item.Location.X));
+                task.Constrs.Add(new CSPConstrEqualVarValue(task.Vars.First(zz => zz.Name == "y" + vind), item.Location.Y));
             }
             var vert = Constraints.OfType<VerticalConstraint>().ToArray();
             foreach (var item in vert)
             {
                 var vind0 = DraftPoints.ToList().IndexOf(item.Line.V0);
                 var vind1 = DraftPoints.ToList().IndexOf(item.Line.V1);
-                task.Constrs.Add(new CSPConstrEqualTwoVars(task.Vars.First(zz => zz.Name == "x" + vind0), task.Vars.First(uu => uu.Name == "x" + vind1)) );
+                task.Constrs.Add(new CSPConstrEqualTwoVars(task.Vars.First(zz => zz.Name == "x" + vind0), task.Vars.First(uu => uu.Name == "x" + vind1)));
             }
             var horiz = Constraints.OfType<HorizontalConstraint>().ToArray();
             foreach (var item in horiz)
             {
                 var vind0 = DraftPoints.ToList().IndexOf(item.Line.V0);
                 var vind1 = DraftPoints.ToList().IndexOf(item.Line.V1);
-                task.Constrs.Add(new CSPConstrEqualTwoVars(task.Vars.First(zz => zz.Name == "y" + vind0), task.Vars.First(uu => uu.Name == "y" + vind1)) );
+                task.Constrs.Add(new CSPConstrEqualTwoVars(task.Vars.First(zz => zz.Name == "y" + vind0), task.Vars.First(uu => uu.Name == "y" + vind1)));
             }
             var linears = Constraints.OfType<LinearConstraint>().ToList();
             var eqls = Constraints.OfType<EqualsConstraint>().ToArray();
@@ -280,18 +280,31 @@ namespace LiteCAD.Common
                     var tind0 = DraftPoints.ToList().IndexOf(item.SourceLine.V0);
                     var tind1 = DraftPoints.ToList().IndexOf(item.SourceLine.V1);
 
+                    var t1 = topo.Lines.First(z => z.Line == item.TargetLine);
+                    var t2 = topo.Lines.First(z => z.Line == item.SourceLine);
+
                     if (vert.Any(z => z.Line == item.TargetLine) && vert.Any(z => z.Line == item.SourceLine))
                     {
                         var vx1 = task.Vars.First(zz => zz.Name == "y" + vind0);
                         var vx2 = task.Vars.First(zz => zz.Name == "y" + vind1);
                         var vx3 = task.Vars.First(zz => zz.Name == "y" + tind0);
                         var vx4 = task.Vars.First(zz => zz.Name == "y" + tind1);
-
-                        task.Constrs.Add(new CSPConstrEqualExpression()
+                        if (Math.Abs(t1.Dir.Y - t2.Dir.Y) > 1)
                         {
-                            Vars = new[] { vx1, vx2, vx3, vx4 },
-                            Expression = vx2.Name + "-" + vx1.Name + "=" + vx4.Name + "-" + vx3.Name
-                        });
+                            task.Constrs.Add(new CSPConstrEqualExpression()
+                            {
+                                Vars = new[] { vx1, vx2, vx3, vx4 },
+                                Expression = vx1.Name + "-" + vx2.Name + "=" + vx4.Name + "-" + vx3.Name
+                            });
+                        }
+                        else
+                        {
+                            task.Constrs.Add(new CSPConstrEqualExpression()
+                            {
+                                Vars = new[] { vx1, vx2, vx3, vx4 },
+                                Expression = vx2.Name + "-" + vx1.Name + "=" + vx4.Name + "-" + vx3.Name
+                            });
+                        }
 
                     }
                     if (horiz.Any(z => z.Line == item.TargetLine) && horiz.Any(z => z.Line == item.SourceLine))
@@ -300,12 +313,22 @@ namespace LiteCAD.Common
                         var vx2 = task.Vars.First(zz => zz.Name == "x" + vind1);
                         var vx3 = task.Vars.First(zz => zz.Name == "x" + tind0);
                         var vx4 = task.Vars.First(zz => zz.Name == "x" + tind1);
-
-                        task.Constrs.Add(new CSPConstrEqualExpression()
+                        if (Math.Abs(t1.Dir.X - t2.Dir.X) > 1)
                         {
-                            Vars = new[] { vx1, vx2, vx3, vx4 },
-                            Expression = vx2.Name + "-" + vx1.Name + "=" + vx4.Name + "-" + vx3.Name
-                        });
+                            task.Constrs.Add(new CSPConstrEqualExpression()
+                            {
+                                Vars = new[] { vx1, vx2, vx3, vx4 },
+                                Expression = vx1.Name + "-" + vx2.Name + "=" + vx4.Name + "-" + vx3.Name
+                            });
+                        }
+                        else
+                        {
+                            task.Constrs.Add(new CSPConstrEqualExpression()
+                            {
+                                Vars = new[] { vx1, vx2, vx3, vx4 },
+                                Expression = vx2.Name + "-" + vx1.Name + "=" + vx4.Name + "-" + vx3.Name
+                            });
+                        }
 
                     }
                 }
@@ -381,8 +404,8 @@ namespace LiteCAD.Common
                 foreach (var item in ppc2)
                 {
                     var vind = DraftPoints.ToList().IndexOf(item.Point);
-                    task.Constrs.Add(new CSPConstrEqualVarValue(task.Vars.First(zz => zz.Name == "x" + vind),item.Location.X));
-                    task.Constrs.Add(new CSPConstrEqualVarValue(task.Vars.First(zz => zz.Name == "y" + vind),item.Location.Y));
+                    task.Constrs.Add(new CSPConstrEqualVarValue(task.Vars.First(zz => zz.Name == "x" + vind), item.Location.X));
+                    task.Constrs.Add(new CSPConstrEqualVarValue(task.Vars.First(zz => zz.Name == "y" + vind), item.Location.Y));
                 }
                 var vert = Constraints.OfType<VerticalConstraint>().ToArray();
                 foreach (var item in vert)
@@ -396,7 +419,7 @@ namespace LiteCAD.Common
                 {
                     var vind0 = DraftPoints.ToList().IndexOf(item.Line.V0);
                     var vind1 = DraftPoints.ToList().IndexOf(item.Line.V1);
-                    task.Constrs.Add(new CSPConstrEqualTwoVars(task.Vars.First(zz => zz.Name == "y" + vind0), task.Vars.First(uu => uu.Name == "y" + vind1)) {  });
+                    task.Constrs.Add(new CSPConstrEqualTwoVars(task.Vars.First(zz => zz.Name == "y" + vind0), task.Vars.First(uu => uu.Name == "y" + vind1)) { });
                 }
                 var linears = Constraints.OfType<LinearConstraint>().ToArray();
                 var topo = Constraints.First(z => z is TopologyConstraint) as TopologyConstraint;

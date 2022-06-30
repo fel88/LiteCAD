@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MathNet.Numerics.LinearAlgebra;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -165,17 +166,19 @@ namespace LiteCAD.CSP
 
                 }
 
-
                 try
                 {
-                    if (Solve(input))
+                    Matrix<double> T = Matrix<double>.Build.DenseOfArray(input);
+                    Matrix<double> A = T.SubMatrix(0, T.RowCount, 0, T.ColumnCount - 1);
+                    Vector<double> B = T.Column(T.ColumnCount - 1);
+                    if (A.Rank() == T.Rank())
                     {
-                        for (int i = 0; i < input.GetLength(0); i++)
+                        var res = A.LU().Solve(B);
+                        for (int i = 0; i < res.Count; i++)
                         {
-                            Infos.Add(new CSPVarInfo(unres[i]) { Value = input[i, unres.Length] });
+                            Infos.Add(new CSPVarInfo(unres[i]) { Value = res[i] });
                         }
-
-                    }
+                    }                    
                 }
                 catch (Exception ex)
                 {
@@ -183,66 +186,19 @@ namespace LiteCAD.CSP
                 }
             }
         }
-        /// <summary>Computes the solution of a linear equation system.
-        /// https://www.codeproject.com/Tips/388179/Linear-Equation-Solver-Gaussian-Elimination-Csharp
-        /// </summary>
-        /// <param name="M">
-        /// The system of linear equations as an augmented matrix[row, col] where (rows + 1 == cols).
-        /// It will contain the solution in "row canonical form" if the function returns "true".
-        /// </param>
-        /// <returns>Returns whether the matrix has a unique solution or not.</returns>
 
-
-        public static bool Solve(double[,] M)
+        public static void Print(double[,] M)
         {
-            // input checks
-            int rowCount = M.GetUpperBound(0) + 1;
-            if (M == null || M.Length != rowCount * (rowCount + 1))
-                throw new ArgumentException("The algorithm must be provided with a (n x n+1) matrix.");
-            if (rowCount < 1)
-                throw new ArgumentException("The matrix must at least have one row.");
-
-            // pivoting
-            for (int col = 0; col + 1 < rowCount; col++) if (M[col, col] == 0)
-                // check for zero coefficients
-                {
-                    // find non-zero coefficient
-                    int swapRow = col + 1;
-                    for (; swapRow < rowCount; swapRow++) if (M[swapRow, col] != 0) break;
-
-                    if (M[swapRow, col] != 0) // found a non-zero coefficient?
-                    {
-                        // yes, then swap it with the above
-                        double[] tmp = new double[rowCount + 1];
-                        for (int i = 0; i < rowCount + 1; i++)
-                        { tmp[i] = M[swapRow, i]; M[swapRow, i] = M[col, i]; M[col, i] = tmp[i]; }
-                    }
-                    else return false; // no, then the matrix has no unique solution
-                }
-
-            // elimination
-            for (int sourceRow = 0; sourceRow + 1 < rowCount; sourceRow++)
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < M.GetLength(0); i++)
             {
-                for (int destRow = sourceRow + 1; destRow < rowCount; destRow++)
+                for (int j = 0; j < M.GetLength(1); j++)
                 {
-                    double df = M[sourceRow, sourceRow];
-                    double sf = M[destRow, sourceRow];
-                    for (int i = 0; i < rowCount + 1; i++)
-                        M[destRow, i] = M[destRow, i] * df - M[sourceRow, i] * sf;
+                    sb.Append(M[i, j] + " ");
                 }
+                sb.AppendLine();
             }
-
-            // back-insertion
-            for (int row = rowCount - 1; row >= 0; row--)
-            {
-                double f = M[row, row];
-                if (f == 0) return false;
-
-                for (int i = 0; i < rowCount + 1; i++) M[row, i] /= f;
-                for (int destRow = 0; destRow < row; destRow++)
-                { M[destRow, rowCount] -= M[destRow, row] * M[row, rowCount]; M[destRow, row] = 0; }
-            }
-            return true;
+            Clipboard.SetText(sb.ToString());
         }
 
         public ASTTreeItem BuildAST(string expr)

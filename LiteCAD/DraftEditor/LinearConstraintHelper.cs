@@ -33,7 +33,37 @@ namespace LiteCAD.DraftEditor
         {
             writer.WriteLine($"<linearConstraintHelper constrId=\"{constraint.Id}\" shift=\"{Shift}\" enabled=\"{Enabled}\" snapPoint=\"{SnapPoint.X};{SnapPoint.Y}\"/>");
         }
+        public static GraphicsPath RoundedRect(RectangleF bounds, int radius)
+        {
+            int diameter = radius * 2;
+            Size size = new Size(diameter, diameter);
+            RectangleF arc = new RectangleF(bounds.Location, size);
+            GraphicsPath path = new GraphicsPath();
 
+            if (radius == 0)
+            {
+                path.AddRectangle(bounds);
+                return path;
+            }
+
+            // top left arc  
+            path.AddArc(arc, 180, 90);
+
+            // top right arc  
+            arc.X = bounds.Right - diameter;
+            path.AddArc(arc, 270, 90);
+
+            // bottom right arc  
+            arc.Y = bounds.Bottom - diameter;
+            path.AddArc(arc, 0, 90);
+
+            // bottom left arc 
+            arc.X = bounds.Left;
+            path.AddArc(arc, 90, 90);
+
+            path.CloseFigure();
+            return path;
+        }
         public void Draw(DrawingContext ctx)
         {
             var editor = ctx.Tag as IDraftEditor;
@@ -56,12 +86,20 @@ namespace LiteCAD.DraftEditor
                 var text = (dp0.Location + perp * Shift + dp1.Location + perp * Shift) / 2 + perp;
                 var trt = ctx.Transform(text);
                 trt = new PointF(trt.X + shiftX, trt.Y);
-                if (hovered)
-                    ctx.gr.DrawString(constraint.Length.ToString(), SystemFonts.DefaultFont, Brushes.Red, trt);
+                var ms = ctx.gr.MeasureString(constraint.Length.ToString(), SystemFonts.DefaultFont);
 
-                // ctx.gr.FillEllipse(Brushes.Black, trt.X - gaps, trt.Y - gaps, gaps * 2, gaps * 2);
-                else
-                    ctx.gr.DrawString(constraint.Length.ToString(), SystemFonts.DefaultFont, Brushes.Black, trt);
+                var fontBrush = Brushes.Black;
+                if (hovered)
+                    fontBrush = Brushes.Red;
+                if (!constraint.IsSatisfied())
+                {
+                    ctx.gr.FillPath(Brushes.Red, RoundedRect(new RectangleF(trt, ms), 5));
+                    ctx.gr.DrawPath(Pens.Black, RoundedRect(new RectangleF(trt, ms), 5));
+                    fontBrush = Brushes.White;
+                }               
+
+                ctx.gr.DrawString(constraint.Length.ToString(), SystemFonts.DefaultFont, fontBrush, trt);
+
                 SnapPoint = text;
 
                 ctx.gr.DrawLine(p, tr0, tr1);

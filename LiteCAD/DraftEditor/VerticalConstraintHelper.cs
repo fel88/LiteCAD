@@ -18,7 +18,7 @@ namespace LiteCAD.DraftEditor
 
         public bool Enabled { get => constraint.Enabled; set => constraint.Enabled = value; }
 
-        public void Draw(DrawingContext ctx)
+        public void Draw(IDrawingContext ctx)
         {
             var dp0 = constraint.Line.Center;
             var perp = new Vector2d(-constraint.Line.Dir.Y, constraint.Line.Dir.X);
@@ -28,11 +28,9 @@ namespace LiteCAD.DraftEditor
 
             var gap = 10;
             //create bezier here
-            ctx.gr.FillEllipse(Brushes.Green, tr0.X - gap, tr0.Y - gap, gap * 2, gap * 2);
-            ctx.gr.DrawLine(new Pen(Brushes.Orange, 3), tr0.X , tr0.Y+5, tr0.X , tr0.Y-5);
+            ctx.FillCircle(Brushes.Green, tr0.X , tr0.Y , gap);
+            ctx.DrawLine(new Pen(Brushes.Orange, 3), tr0.X, tr0.Y + 5, tr0.X, tr0.Y - 5);
         }
-
-
 
         public override void Draw()
         {

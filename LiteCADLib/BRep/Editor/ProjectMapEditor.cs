@@ -119,7 +119,7 @@ namespace LiteCAD.BRep.Editor
         }
 
         MessageFilter mf = null;
-        DrawingContext dc = new DrawingContext();
+        IDrawingContext dc = new GdiDrawingContext();
 
         BRepFace face;
         public void Init(BRepFace tr)
@@ -150,10 +150,10 @@ namespace LiteCAD.BRep.Editor
         Graphics gr;
         void Recreate()
         {
-            bmp = new Bitmap(Width, Height);
+            /*bmp = new Bitmap(Width, Height);
             gr = Graphics.FromImage(bmp);
             dc.gr = gr;
-            gr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            gr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;*/
         }
         double xxScale = 20;
         double yyScale = 100;

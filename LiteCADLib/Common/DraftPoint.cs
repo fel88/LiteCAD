@@ -18,7 +18,7 @@ namespace LiteCAD.Common
         {
             get => Location.X;
             set
-            {
+            {                
                 _location.X = value;
                 Parent.RecalcConstraints();
             }

@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Data;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenTK;
 using LiteCAD.Common;
@@ -13,6 +10,8 @@ using System.Linq;
 using LiteCAD.BRep.Editor;
 using System.IO;
 using System.Xml.Linq;
+using SkiaSharp;
+using System.Diagnostics;
 
 namespace LiteCAD.DraftEditor
 {
@@ -21,13 +20,228 @@ namespace LiteCAD.DraftEditor
         public DraftEditorControl()
         {
             InitializeComponent();
-            ctx.Init(pictureBox1);
+            ctx = Activator.CreateInstance(DrawerType) as IDrawingContext;
+            ctx.DragButton = MouseButtons.Right;
+            //new SkiaGLDrawingContext() { DragButton = MouseButtons.Right };
+            RenderControl = ctx.GenerateRenderControl();
+            Controls.Add(RenderControl);
+            RenderControl.Dock = DockStyle.Fill;
+            ctx.Init(RenderControl);
+            ctx.PaintAction = () => { Render(); };
+
             ctx.InitGraphics();
             ctx.MouseDown += Ctx_MouseDown;
-            pictureBox1.MouseUp += PictureBox1_MouseUp;
-            pictureBox1.MouseDown += PictureBox1_MouseDown;
+            RenderControl.MouseUp += PictureBox1_MouseUp;
+            RenderControl.MouseDown += PictureBox1_MouseDown;
             ctx.Tag = this;
+            InitPaints();
         }
+        Control RenderControl;
+
+        SKPaint PointPaint;
+        public void InitPaints()
+        {
+            PointPaint = new SKPaint();
+            var clr = Pens.Black.Color;
+            PointPaint.Color = new SKColor(clr.R, clr.G, clr.B);
+            PointPaint.IsAntialias = true;
+            PointPaint.StrokeWidth = Pens.Black.Width;
+            PointPaint.Style = SKPaintStyle.Stroke;
+        }
+
+
+        void Render()
+        {
+            var sw = Stopwatch.StartNew();
+
+            ctx.Clear(Color.White); //same thing but also erases anything else on the canvas first
+
+            //   ctx.gr.Clear(Color.White);
+            ctx.UpdateDrag();
+            subSnapType = SubSnapTypeEnum.None;
+            updateNearest();
+
+            ctx.DrawLineTransformed(Pens.Blue, new PointF(0, 0), new PointF(0, 100));
+            ctx.DrawLineTransformed(Pens.Red, new PointF(0, 0), new PointF(100, 0));
+
+            if (_draft != null)
+            {
+                for (int i = 0; i < _draft.DraftPoints.Length; i++)
+                {
+                    var item = _draft.DraftPoints[i];
+                    float gp = 5;
+                    var tr = ctx.Transform(item.X, item.Y);
+
+                    if (nearest == item || selected.Contains(item))
+                    {
+                        ctx.FillRectangle(Brushes.Blue, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
+                    }
+                    ctx.DrawRectangle(Pens.Black, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
+                }
+
+                for (int i = 0; i < _draft.DraftLines.Length; i++)
+                {
+                    var el = _draft.DraftLines[i];
+
+                    Vector2d item0 = _draft.DraftLines[i].V0.Location;
+                    Vector2d item = _draft.DraftLines[i].V1.Location;
+                    var tr = ctx.Transform(item0.X, item0.Y);
+                    var tr11 = ctx.Transform(item.X, item.Y);
+                    Pen p = new Pen(selected.Contains(el) ? Color.Blue : Color.Black);
+
+                    if (el.Dummy)
+                        p.DashPattern = new float[] { 10, 10 };
+
+                    //ctx.gr.DrawLine(p, tr, tr11);
+                    ctx.DrawLine(p, tr, tr11);
+                }
+
+                for (int i = 0; i < _draft.DraftEllipses.Length; i++)
+                {
+                    var el = _draft.DraftEllipses[i];
+                    Vector2d item0 = _draft.DraftEllipses[i].Center.Location;
+                    var rad = (float)el.Radius * ctx.zoom;
+                    var tr = ctx.Transform(item0.X, item0.Y);
+
+                    ctx.DrawCircle(selected.Contains(el) ? Pens.Blue : Pens.Black, tr.X, tr.Y, rad);
+
+                    float gp = 5;
+                    tr = ctx.Transform(el.Center.X, el.Center.Y);
+
+                    if (nearest == el.Center)
+                    {
+                        ctx.FillRectangle(Brushes.Blue, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
+                    }
+                    ctx.DrawRectangle(Pens.Black, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
+                }
+
+                if (ShowHelpers)
+                {
+                    foreach (var item in _draft.Helpers)
+                    {
+                        if (!item.Visible) continue;
+
+                        item.Draw(ctx);
+                    }
+                }
+            }
+            if (ctx.MiddleDrag)//measure tool
+            {
+                Pen pen = new Pen(Color.Blue, 2);
+                pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+                pen.DashPattern = new float[] { 4.0F, 2.0F, 1.0F, 3.0F };
+
+                var gcur = ctx.GetCursor();
+                var curp = ctx.Transform(gcur);
+                double maxSnapDist = 10 / ctx.zoom;
+
+                //check perpendicular of lines?
+                foreach (var item in Draft.DraftLines)
+                {
+                    //get projpoint                     
+                    var proj = GeometryUtils.GetProjPoint(gcur.ToVector2d(), item.V0.Location, item.Dir);
+                    var sx = ctx.BackTransform(ctx.startx, ctx.starty);
+                    var proj2 = GeometryUtils.GetProjPoint(new Vector2d(sx.X, sx.Y), item.V0.Location, item.Dir);
+                    if (!item.ContainsPoint(proj))
+                        continue;
+
+                    var len = (proj - gcur.ToVector2d()).Length;
+                    var len2 = (proj2 - gcur.ToVector2d()).Length;
+                    if (len < maxSnapDist)
+                    {
+                        //sub nearest = projpoint
+                        curp = ctx.Transform(proj);
+                        gcur = proj.ToPointF();
+                        subSnapType = SubSnapTypeEnum.PointOnLine;
+                    }
+                    if (len2 < maxSnapDist)
+                    {
+                        //sub nearest = projpoint
+                        curp = ctx.Transform(proj2);
+                        gcur = proj2.ToPointF();
+                        subSnapType = SubSnapTypeEnum.Perpendicular;
+                    }
+                }
+
+                if (nearest is DraftPoint dp)
+                {
+                    curp = ctx.Transform(dp.Location);
+                    gcur = dp.Location.ToPointF();
+                }
+                if (nearest is DraftLine dl)
+                {
+                    var len = (dl.Center - gcur.ToVector2d()).Length;
+                    if (len < maxSnapDist)
+                    {
+                        curp = ctx.Transform(dl.Center);
+                        gcur = dl.Center.ToPointF();
+                        subSnapType = SubSnapTypeEnum.CenterLine;
+                    }
+                }
+                if (nearest is DraftEllipse de)
+                {
+                    var diff = (de.Center.Location - new Vector2d(gcur.X, gcur.Y)).Normalized();
+                    var onEl = de.Center.Location - diff * (double)de.Radius;
+                    //get point on ellipse
+                    curp = ctx.Transform(onEl);
+                    gcur = onEl.ToPointF();
+                }
+                var t = ctx.Transform(new PointF(ctx.startx, ctx.starty));
+
+                //snap starto
+                if (startMiddleDragNearest is DraftPoint sdp)
+                {
+
+                }
+                ctx.DrawLine(pen, ctx.startx, ctx.starty, curp.X, curp.Y);
+                //ctx.gr.DrawLine(pen, ctx.startx, ctx.starty, curp.X, curp.Y);
+                var pp = ctx.BackTransform(new PointF(ctx.startx, ctx.starty));
+                Vector2 v1 = new Vector2(pp.X, pp.Y);
+                Vector2 v2 = new Vector2(gcur.X, gcur.Y);
+                var dist = (v2 - v1).Length;
+                var hintText = dist.ToString("N2");
+                if (subSnapType == SubSnapTypeEnum.PointOnLine)
+                {
+                    hintText = "[point on line] : " + hintText;
+                }
+                if (subSnapType == SubSnapTypeEnum.CenterLine)
+                {
+                    hintText = "[line center] : " + hintText;
+                }
+                if (subSnapType == SubSnapTypeEnum.Perpendicular)
+                {
+                    hintText = "[perpendicular] : " + hintText;
+                }
+                ctx.DrawString(hintText, SystemFonts.DefaultFont, Brushes.Black, curp.X + 10, curp.Y);
+            }
+            if (ctx.isLeftDrag)//rect tool
+            {
+                Pen pen = new Pen(Color.Blue, 2);
+                pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+
+                pen.DashPattern = new float[] { 4.0F, 2.0F, 1.0F, 3.0F };
+                var gcur = ctx.GetCursor();
+
+                var curp = ctx.Transform(gcur);
+
+                var t = ctx.Transform(new PointF(ctx.startx, ctx.starty));
+                var rxm = Math.Min(ctx.startx, curp.X);
+                var rym = Math.Min(ctx.starty, curp.Y);
+                var rdx = Math.Abs(ctx.startx - curp.X);
+                var rdy = Math.Abs(ctx.starty - curp.Y);
+                ctx.DrawRectangle(pen, rxm, rym, rdx, rdy);
+                var pp = ctx.BackTransform(new PointF(ctx.startx, ctx.starty));
+                Vector2 v1 = new Vector2(pp.X, pp.Y);
+                Vector2 v2 = new Vector2(gcur.X, gcur.Y);
+                var dist = (v2 - v1).Length;
+                ctx.DrawString(dist.ToString("N2"), SystemFonts.DefaultFont, Brushes.Black, curp.X + 10, curp.Y);
+            }
+            //pictureBox1.Image = ctx.Bmp;
+            sw.Stop();
+            var ms = sw.ElapsedMilliseconds;
+            LastRenderTime = ms;
+        }
+        public long LastRenderTime;
 
         public event Action UndosChanged;
         private void Ctx_MouseDown(float arg1, float arg2, MouseButtons e)
@@ -242,8 +456,8 @@ namespace LiteCAD.DraftEditor
             var t = _draft.DraftPoints.Select(z => z.Location).ToArray();
             ctx.FitToPoints(t.Select(z => z.ToPointF()).ToArray(), 5);
         }
-
-        DrawingContext ctx = new DrawingContext() { DragButton = MouseButtons.Right };
+        public static Type DrawerType = typeof(SkiaGLDrawingContext);
+        IDrawingContext ctx;
         public object nearest { get; private set; }
         public object startMiddleDragNearest;
         object[] selected = new object[] { };
@@ -316,187 +530,9 @@ namespace LiteCAD.DraftEditor
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (!Visible) return;
-            ctx.gr.Clear(Color.White);
-            ctx.UpdateDrag();
-            subSnapType = SubSnapTypeEnum.None;
-            updateNearest();
+            RenderControl.Refresh();
+            return;
 
-            ctx.DrawLine(Pens.Blue, new PointF(0, 0), new PointF(0, 100));
-            ctx.DrawLine(Pens.Red, new PointF(0, 0), new PointF(100, 0));
-
-            if (_draft != null)
-            {
-                for (int i = 0; i < _draft.DraftPoints.Length; i++)
-                {
-                    var item = _draft.DraftPoints[i];
-                    float gp = 5;
-                    var tr = ctx.Transform(item.X, item.Y);
-
-                    if (nearest == item || selected.Contains(item))
-                    {
-                        ctx.gr.FillRectangle(Brushes.Blue, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
-                    }
-                    ctx.gr.DrawRectangle(Pens.Black, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
-
-                }
-
-                for (int i = 0; i < _draft.DraftLines.Length; i++)
-                {
-                    var el = _draft.DraftLines[i];
-
-                    Vector2d item0 = _draft.DraftLines[i].V0.Location;
-                    Vector2d item = _draft.DraftLines[i].V1.Location;
-                    var tr = ctx.Transform(item0.X, item0.Y);
-                    var tr11 = ctx.Transform(item.X, item.Y);
-                    Pen p = new Pen(selected.Contains(el) ? Color.Blue : Color.Black);
-
-                    if (el.Dummy)
-                        p.DashPattern = new float[] { 10, 10 };
-
-                    ctx.gr.DrawLine(p, tr, tr11);
-                }
-
-                for (int i = 0; i < _draft.DraftEllipses.Length; i++)
-                {
-                    var el = _draft.DraftEllipses[i];
-                    Vector2d item0 = _draft.DraftEllipses[i].Center.Location;
-                    var rad = (float)el.Radius * ctx.zoom;
-                    var tr = ctx.Transform(item0.X, item0.Y);
-
-                    ctx.gr.DrawEllipse(selected.Contains(el) ? Pens.Blue : Pens.Black, tr.X - rad, tr.Y - rad, rad * 2, rad * 2);
-
-                    float gp = 5;
-                    tr = ctx.Transform(el.Center.X, el.Center.Y);
-
-                    if (nearest == el.Center)
-                    {
-                        ctx.gr.FillRectangle(Brushes.Blue, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
-                    }
-                    ctx.gr.DrawRectangle(Pens.Black, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
-                }
-
-                if (ShowHelpers)
-                {
-                    foreach (var item in _draft.Helpers)
-                    {
-                        if (!item.Visible) continue;
-
-                        item.Draw(ctx);
-                    }
-                }
-            }
-            if (ctx.MiddleDrag)//measure tool
-            {
-                Pen pen = new Pen(Color.Blue, 2);
-                pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-                pen.DashPattern = new float[] { 4.0F, 2.0F, 1.0F, 3.0F };
-
-                var gcur = ctx.GetCursor();
-                var curp = ctx.Transform(gcur);
-                double maxSnapDist = 10 / ctx.zoom;
-
-                //check perpendicular of lines?
-                foreach (var item in Draft.DraftLines)
-                {
-                    //get projpoint                     
-                    var proj = GeometryUtils.GetProjPoint(gcur.ToVector2d(), item.V0.Location, item.Dir);
-                    var sx = ctx.BackTransform(ctx.startx, ctx.starty);
-                    var proj2 = GeometryUtils.GetProjPoint(new Vector2d(sx.X, sx.Y), item.V0.Location, item.Dir);
-                    if (!item.ContainsPoint(proj))
-                        continue;
-
-                    var len = (proj - gcur.ToVector2d()).Length;
-                    var len2 = (proj2 - gcur.ToVector2d()).Length;
-                    if (len < maxSnapDist)
-                    {
-                        //sub nearest = projpoint
-                        curp = ctx.Transform(proj);
-                        gcur = proj.ToPointF();
-                        subSnapType = SubSnapTypeEnum.PointOnLine;
-                    }
-                    if (len2 < maxSnapDist)
-                    {
-                        //sub nearest = projpoint
-                        curp = ctx.Transform(proj2);
-                        gcur = proj2.ToPointF();
-                        subSnapType = SubSnapTypeEnum.Perpendicular;
-                    }
-                }
-
-                if (nearest is DraftPoint dp)
-                {
-                    curp = ctx.Transform(dp.Location);
-                    gcur = dp.Location.ToPointF();
-                }
-                if (nearest is DraftLine dl)
-                {
-                    var len = (dl.Center - gcur.ToVector2d()).Length;
-                    if (len < maxSnapDist)
-                    {
-                        curp = ctx.Transform(dl.Center);
-                        gcur = dl.Center.ToPointF();
-                        subSnapType = SubSnapTypeEnum.CenterLine;
-                    }
-                }
-                if (nearest is DraftEllipse de)
-                {
-                    var diff = (de.Center.Location - new Vector2d(gcur.X, gcur.Y)).Normalized();
-                    var onEl = de.Center.Location - diff * (double)de.Radius;
-                    //get point on ellipse
-                    curp = ctx.Transform(onEl);
-                    gcur = onEl.ToPointF();
-                }
-                var t = ctx.Transform(new PointF(ctx.startx, ctx.starty));
-
-                //snap starto
-                if (startMiddleDragNearest is DraftPoint sdp)
-                {
-
-                }
-
-                ctx.gr.DrawLine(pen, ctx.startx, ctx.starty, curp.X, curp.Y);
-                var pp = ctx.BackTransform(new PointF(ctx.startx, ctx.starty));
-                Vector2 v1 = new Vector2(pp.X, pp.Y);
-                Vector2 v2 = new Vector2(gcur.X, gcur.Y);
-                var dist = (v2 - v1).Length;
-                var hintText = dist.ToString("N2");
-                if (subSnapType == SubSnapTypeEnum.PointOnLine)
-                {
-                    hintText = "[point on line] : " + hintText;
-                }
-                if (subSnapType == SubSnapTypeEnum.CenterLine)
-                {
-                    hintText = "[line center] : " + hintText;
-                }
-                if (subSnapType == SubSnapTypeEnum.Perpendicular)
-                {
-                    hintText = "[perpendicular] : " + hintText;
-                }
-                ctx.gr.DrawString(hintText, SystemFonts.DefaultFont, Brushes.Black, curp.X + 10, curp.Y);
-            }
-            if (ctx.isLeftDrag)//rect tool
-            {
-                Pen pen = new Pen(Color.Blue, 2);
-                pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-
-                pen.DashPattern = new float[] { 4.0F, 2.0F, 1.0F, 3.0F };
-                var gcur = ctx.GetCursor();
-
-                var curp = ctx.Transform(gcur);
-
-                var t = ctx.Transform(new PointF(ctx.startx, ctx.starty));
-                var rxm = Math.Min(ctx.startx, curp.X);
-                var rym = Math.Min(ctx.starty, curp.Y);
-                var rdx = Math.Abs(ctx.startx - curp.X);
-                var rdy = Math.Abs(ctx.starty - curp.Y);
-                ctx.gr.DrawRectangle(pen, rxm, rym, rdx, rdy);
-                var pp = ctx.BackTransform(new PointF(ctx.startx, ctx.starty));
-                Vector2 v1 = new Vector2(pp.X, pp.Y);
-                Vector2 v2 = new Vector2(gcur.X, gcur.Y);
-                var dist = (v2 - v1).Length;
-                ctx.gr.DrawString(dist.ToString("N2"), SystemFonts.DefaultFont, Brushes.Black, curp.X + 10, curp.Y);
-            }
-            pictureBox1.Image = ctx.Bmp;
         }
 
         public void ResetTool()
@@ -508,7 +544,7 @@ namespace LiteCAD.DraftEditor
         Draft _draft;
         public Draft Draft => _draft;
 
-        public DrawingContext DrawingContext => ctx;
+        public IDrawingContext DrawingContext => ctx;
 
         public bool CanUndo => Undos.Any();
 

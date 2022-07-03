@@ -18,6 +18,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace LiteCAD
 {
@@ -102,7 +103,7 @@ namespace LiteCAD
         bool drawAxes = true;
         Vector3d lastHovered;
         void Redraw()
-        {
+        {            
             UpdatePickTriangle();
 
             CurrentTool.Update();
@@ -353,11 +354,32 @@ namespace LiteCAD
 
         DraftEditorControl de;
         Label hoverText;
+        public void LoadSettings()
+        {
+            if (!File.Exists("settings.xml")) return;
+            var doc = XDocument.Load("settings.xml");
+            foreach (var item in doc.Descendants("setting"))
+            {
+                var nm = item.Attribute("name").Value;
+                var vl = item.Attribute("value").Value;
+                switch (nm)
+                {
+                    case "drawer":
+                        if (vl == "gdi")
+                        {
+                            DraftEditorControl.DrawerType = typeof(GdiDrawingContext);
+                        }
+                        break;
+                }
+            }
+        }
+
         public Form1()
         {
-            InitializeComponent();            
-           
-            _currentTool = new SelectionTool(this);
+            InitializeComponent();
+            LoadSettings();
+
+             _currentTool = new SelectionTool(this);
             foreach (Control c in propertyGrid1.Controls)
             {
                 c.MouseDoubleClick += C_MouseClick;
@@ -456,14 +478,13 @@ namespace LiteCAD
             de.Init(this);
             de.Visible = false;
             de.Dock = DockStyle.Fill;
-
+            
             glControl = new OpenTK.GLControl(new OpenTK.Graphics.GraphicsMode(32, 24, 0, 8));
 
             if (glControl.Context.GraphicsMode.Samples == 0)
             {
                 glControl = new OpenTK.GLControl(new OpenTK.Graphics.GraphicsMode(32, 24, 0, 8));
-            }
-
+            }      
             hoverText = new Label();
             glControl.Controls.Add(hoverText);
             hoverText.Text = "dist:";
@@ -653,8 +674,9 @@ namespace LiteCAD
         InfoPanel infoPanel = new InfoPanel();
 
         private void timer1_Tick(object sender, EventArgs e)
-        {
+        {            
             glControl.Invalidate();
+            toolStripStatusLabel4.Text = de.LastRenderTime + "ms";
             label1.Text = "camera len: " + camera1.DirLen;
         }
 
@@ -682,7 +704,7 @@ namespace LiteCAD
 
         public bool AllowPartLoadTimeout = true;
         public int PartLoadTimeout = 15000;
-        bool loaded = false;
+        bool loaded = false;    
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {

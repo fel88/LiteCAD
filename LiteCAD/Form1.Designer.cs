@@ -104,6 +104,9 @@
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.button5 = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.button14 = new System.Windows.Forms.Button();
+            this.checkBox4 = new System.Windows.Forms.CheckBox();
+            this.button13 = new System.Windows.Forms.Button();
             this.button12 = new System.Windows.Forms.Button();
             this.button11 = new System.Windows.Forms.Button();
             this.button10 = new System.Windows.Forms.Button();
@@ -148,9 +151,7 @@
             this.toolStripButton18 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton6 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton17 = new System.Windows.Forms.ToolStripButton();
-            this.button13 = new System.Windows.Forms.Button();
-            this.checkBox4 = new System.Windows.Forms.CheckBox();
-            this.button14 = new System.Windows.Forms.Button();
+            this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.treeListView1)).BeginInit();
@@ -874,6 +875,36 @@
             this.tabPage2.Text = "Draft";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // button14
+            // 
+            this.button14.Location = new System.Drawing.Point(6, 176);
+            this.button14.Name = "button14";
+            this.button14.Size = new System.Drawing.Size(136, 23);
+            this.button14.TabIndex = 5;
+            this.button14.Text = "random solve";
+            this.button14.UseVisualStyleBackColor = true;
+            this.button14.Click += new System.EventHandler(this.button14_Click);
+            // 
+            // checkBox4
+            // 
+            this.checkBox4.AutoSize = true;
+            this.checkBox4.Location = new System.Drawing.Point(26, 153);
+            this.checkBox4.Name = "checkBox4";
+            this.checkBox4.Size = new System.Drawing.Size(75, 17);
+            this.checkBox4.TabIndex = 4;
+            this.checkBox4.Text = "auto solve";
+            this.checkBox4.UseVisualStyleBackColor = true;
+            // 
+            // button13
+            // 
+            this.button13.Location = new System.Drawing.Point(6, 111);
+            this.button13.Name = "button13";
+            this.button13.Size = new System.Drawing.Size(136, 23);
+            this.button13.TabIndex = 3;
+            this.button13.Text = "solve csp";
+            this.button13.UseVisualStyleBackColor = true;
+            this.button13.Click += new System.EventHandler(this.button13_Click);
+            // 
             // button12
             // 
             this.button12.Location = new System.Drawing.Point(6, 82);
@@ -991,7 +1022,8 @@
             this.toolStripStatusLabel1,
             this.toolStripProgressBar1,
             this.toolStripStatusLabel2,
-            this.toolStripStatusLabel3});
+            this.toolStripStatusLabel3,
+            this.toolStripStatusLabel4});
             this.statusStrip1.Location = new System.Drawing.Point(0, 739);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(1264, 22);
@@ -1321,35 +1353,10 @@
             this.toolStripButton17.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.toolStripButton17.Click += new System.EventHandler(this.toolStripButton17_Click_1);
             // 
-            // button13
+            // toolStripStatusLabel4
             // 
-            this.button13.Location = new System.Drawing.Point(6, 111);
-            this.button13.Name = "button13";
-            this.button13.Size = new System.Drawing.Size(136, 23);
-            this.button13.TabIndex = 3;
-            this.button13.Text = "solve csp";
-            this.button13.UseVisualStyleBackColor = true;
-            this.button13.Click += new System.EventHandler(this.button13_Click);
-            // 
-            // checkBox4
-            // 
-            this.checkBox4.AutoSize = true;
-            this.checkBox4.Location = new System.Drawing.Point(26, 153);
-            this.checkBox4.Name = "checkBox4";
-            this.checkBox4.Size = new System.Drawing.Size(75, 17);
-            this.checkBox4.TabIndex = 4;
-            this.checkBox4.Text = "auto solve";
-            this.checkBox4.UseVisualStyleBackColor = true;
-            // 
-            // button14
-            // 
-            this.button14.Location = new System.Drawing.Point(6, 176);
-            this.button14.Name = "button14";
-            this.button14.Size = new System.Drawing.Size(136, 23);
-            this.button14.TabIndex = 5;
-            this.button14.Text = "random solve";
-            this.button14.UseVisualStyleBackColor = true;
-            this.button14.Click += new System.EventHandler(this.button14_Click);
+            this.toolStripStatusLabel4.Name = "toolStripStatusLabel4";
+            this.toolStripStatusLabel4.Size = new System.Drawing.Size(0, 17);
             // 
             // Form1
             // 
@@ -1519,6 +1526,7 @@
         private System.Windows.Forms.Button button13;
         private System.Windows.Forms.CheckBox checkBox4;
         private System.Windows.Forms.Button button14;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;
     }
 }
 

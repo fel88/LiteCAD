@@ -6,8 +6,8 @@ namespace LiteCAD.BRep.Editor
 {
     public class EventWrapperPictureBox
     {
-        public PictureBox Control;
-        public EventWrapperPictureBox(PictureBox control)
+        public Control Control;
+        public EventWrapperPictureBox(Control control)
         {
             Control = control;
             control.MouseUp += WrapGlControl_MouseUp;
@@ -64,11 +64,11 @@ namespace LiteCAD.BRep.Editor
         public Action<object, KeyEventArgs> KeyUpUpAction;
         public Action<object, KeyEventArgs> KeyDownAction;
 
-        public Bitmap Image
+        /*public Bitmap Image
         {
             get { return (Bitmap)Control.Image; }
             set { Control.Image = value; }
-        }
+        }*/
 
         public Point PointToClient(Point position)
         {

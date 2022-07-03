@@ -10,7 +10,7 @@ namespace LiteCAD.Common
 
         bool Enabled { get; set; }
 
-        void Draw(DrawingContext ctx);
+        void Draw(IDrawingContext ctx);
     }
 
 }

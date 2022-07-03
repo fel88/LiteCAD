@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Xml.Linq;
+using SkiaSharp;
 
 namespace LiteCAD.DraftEditor
 {
@@ -33,38 +34,40 @@ namespace LiteCAD.DraftEditor
         {
             writer.WriteLine($"<linearConstraintHelper constrId=\"{constraint.Id}\" shift=\"{Shift}\" enabled=\"{Enabled}\" snapPoint=\"{SnapPoint.X};{SnapPoint.Y}\"/>");
         }
-        public static GraphicsPath RoundedRect(RectangleF bounds, int radius)
+        public static SKPath RoundedRect(SKRect bounds, int radius)
         {
             int diameter = radius * 2;
             Size size = new Size(diameter, diameter);
-            RectangleF arc = new RectangleF(bounds.Location, size);
-            GraphicsPath path = new GraphicsPath();
+            SKRect arc = new SKRect(bounds.Location.X, bounds.Location.Y, bounds.Location.X + size.Width, bounds.Location.Y + size.Height);
+            SKPath path = new SKPath();
 
-            if (radius == 0)
+
+             if (radius == 0)
             {
-                path.AddRectangle(bounds);
+                path.AddRect(bounds);
                 return path;
             }
 
             // top left arc  
             path.AddArc(arc, 180, 90);
-
+            
             // top right arc  
-            arc.X = bounds.Right - diameter;
+            arc.Left = bounds.Right - diameter;
             path.AddArc(arc, 270, 90);
 
             // bottom right arc  
-            arc.Y = bounds.Bottom - diameter;
+            arc.Top = bounds.Bottom - diameter;
             path.AddArc(arc, 0, 90);
 
             // bottom left arc 
-            arc.X = bounds.Left;
+            arc.Left = bounds.Left;
             path.AddArc(arc, 90, 90);
 
-            path.CloseFigure();
+            path.Close();
             return path;
         }
-        public void Draw(DrawingContext ctx)
+
+        public void Draw(IDrawingContext ctx)
         {
             var editor = ctx.Tag as IDraftEditor;
             var elems = new[] { constraint.Element1, constraint.Element2 };
@@ -86,30 +89,35 @@ namespace LiteCAD.DraftEditor
                 var text = (dp0.Location + perp * Shift + dp1.Location + perp * Shift) / 2 + perp;
                 var trt = ctx.Transform(text);
                 trt = new PointF(trt.X + shiftX, trt.Y);
-                var ms = ctx.gr.MeasureString(constraint.Length.ToString(), SystemFonts.DefaultFont);
+                var ms = ctx.MeasureString(constraint.Length.ToString(), SystemFonts.DefaultFont);
 
                 var fontBrush = Brushes.Black;
                 if (hovered)
                     fontBrush = Brushes.Red;
+
                 if (!constraint.IsSatisfied())
                 {
-                    ctx.gr.FillPath(Brushes.Red, RoundedRect(new RectangleF(trt, ms), 5));
-                    ctx.gr.DrawPath(Pens.Black, RoundedRect(new RectangleF(trt, ms), 5));
+                    var rect = new SKRect(trt.X, trt.Y, trt.X + ms.Width, trt.Y + ms.Height);
+                    rect.Inflate(1.3f, 1.3f);                    
+                    var rr = new SKRoundRect(rect, 5);
+                    ctx.FillRoundRectangle(Brushes.Red, rr);                    
+                    ctx.DrawRoundRectangle(Pens.Black, rr);                    
                     fontBrush = Brushes.White;
-                }               
+                }
 
-                ctx.gr.DrawString(constraint.Length.ToString(), SystemFonts.DefaultFont, fontBrush, trt);
+                ctx.DrawString(constraint.Length.ToString(), SystemFonts.DefaultFont, fontBrush, trt);
 
                 SnapPoint = text;
 
-                ctx.gr.DrawLine(p, tr0, tr1);
+                //ctx.DrawLine(p, tr0, tr1);
+                ctx.DrawArrowedLine(p, tr0, tr1, 5);
 
-                ctx.gr.DrawLine(hovered ? Pens.Red : Pens.Blue, tr0, tr2);
-                ctx.gr.DrawLine(hovered ? Pens.Red : Pens.Blue, tr1, tr3);
+                ctx.DrawLine(hovered ? Pens.Red : Pens.Blue, tr0, tr2);
+                ctx.DrawLine(hovered ? Pens.Red : Pens.Blue, tr1, tr3);
                 if (hovered)
                 {
-                    ctx.gr.FillEllipse(Brushes.Red, tr2.X - 5, tr2.Y - 5, 10, 10);
-                    ctx.gr.FillEllipse(Brushes.Red, tr3.X - 5, tr3.Y - 5, 10, 10);
+                    ctx.FillCircle(Brushes.Red, tr2.X, tr2.Y, 5);
+                    ctx.FillCircle(Brushes.Red, tr3.X, tr3.Y, 5);
                 }
             }
             if (elems.Any(z => z is DraftLine) && elems.Any(z => z is DraftPoint))
@@ -124,16 +132,16 @@ namespace LiteCAD.DraftEditor
                 var tr1 = ctx.Transform(pp + perp * Shift);
                 var text = (dp.Location + perp * Shift + pp + perp * Shift) / 2 + perp;
                 var trt = ctx.Transform(text);
-                ctx.gr.DrawString(constraint.Length.ToString(), SystemFonts.DefaultFont, Brushes.Black, trt);
+                ctx.DrawString(constraint.Length.ToString(), SystemFonts.DefaultFont, Brushes.Black, trt);
                 SnapPoint = text;
                 //get proj of point to line
                 //var diff = (pp - dp.Location).Length;
-                ctx.gr.DrawLine(p, tr0, tr1);
+                ctx.DrawLine(p, tr0, tr1);
                 var tr2 = ctx.Transform(dp.Location);
                 var tr3 = ctx.Transform(pp);
 
-                ctx.gr.DrawLine(Pens.Red, tr0, tr2);
-                ctx.gr.DrawLine(Pens.Red, tr1, tr3);
+                ctx.DrawLine(Pens.Red, tr0, tr2);
+                ctx.DrawLine(Pens.Red, tr1, tr3);
             }
         }
 

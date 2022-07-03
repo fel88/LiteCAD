@@ -18,7 +18,7 @@ namespace LiteCAD.DraftEditor
 
         public bool Enabled { get => constraint.Enabled; set => constraint.Enabled = value; }
 
-        public void Draw(DrawingContext ctx)
+        public void Draw(IDrawingContext ctx)
         {
             var editor = ctx.Tag as IDraftEditor;
 
@@ -38,9 +38,9 @@ namespace LiteCAD.DraftEditor
             var shiftX = (int)(constraint.TargetLine.Dir.X * offset);
             var shiftY = (int)(constraint.TargetLine.Dir.Y * offset);
 
-            ctx.gr.FillEllipse(hovered ? Brushes.Blue : Brushes.Green, tr0.X - gap + shiftX, tr0.Y - gap + shiftY, gap * 2, gap * 2);
-            ctx.gr.DrawLine(new Pen(Brushes.Violet, 3), tr0.X - gap2 + shiftX, tr0.Y - 4 + shiftY, tr0.X + gap2 + shiftX, tr0.Y - 4 + shiftY);
-            ctx.gr.DrawLine(new Pen(Brushes.Violet, 3), tr0.X - gap2 + shiftX, tr0.Y + 4 + shiftY, tr0.X + gap2 + shiftX, tr0.Y + 4 + shiftY);
+            ctx.FillCircle(hovered ? Brushes.Blue : Brushes.Green, tr0.X  + shiftX, tr0.Y  + shiftY, gap);
+            ctx.DrawLine(new Pen(Brushes.Violet, 3), tr0.X - gap2 + shiftX, tr0.Y - 4 + shiftY, tr0.X + gap2 + shiftX, tr0.Y - 4 + shiftY);
+            ctx.DrawLine(new Pen(Brushes.Violet, 3), tr0.X - gap2 + shiftX, tr0.Y + 4 + shiftY, tr0.X + gap2 + shiftX, tr0.Y + 4 + shiftY);
 
             if (hovered)
             {
@@ -48,11 +48,11 @@ namespace LiteCAD.DraftEditor
                 var tr1 = ctx.Transform(constraint.SourceLine.V1.Location);
                 var tr2 = ctx.Transform(constraint.TargetLine.V0.Location);
                 var tr3 = ctx.Transform(constraint.TargetLine.V1.Location);
-                ctx.gr.FillEllipse(Brushes.Red, tr2.X - 5, tr2.Y - 5, 10, 10);
-                ctx.gr.FillEllipse(Brushes.Red, tr3.X - 5, tr3.Y - 5, 10, 10);
+                ctx.FillCircle(Brushes.Red, tr2.X , tr2.Y , 5);
+                ctx.FillCircle(Brushes.Red, tr3.X , tr3.Y , 5);
 
-                ctx.gr.FillEllipse(Brushes.Red, tr00.X - 5, tr00.Y - 5, 10, 10);
-                ctx.gr.FillEllipse(Brushes.Red, tr1.X - 5, tr1.Y - 5, 10, 10);
+                ctx.FillCircle(Brushes.Red, tr00.X , tr00.Y , 5);
+                ctx.FillCircle(Brushes.Red, tr1.X , tr1.Y , 5);
             }
         }
 

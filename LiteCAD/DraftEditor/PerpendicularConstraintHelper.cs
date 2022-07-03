@@ -19,7 +19,7 @@ namespace LiteCAD.DraftEditor
 
         public bool Enabled { get => constraint.Enabled; set => constraint.Enabled = value; }
 
-        public void Draw(DrawingContext ctx)
+        public void Draw(IDrawingContext ctx)
         {
             var dp0 = constraint.Element1.Center;
             var dp1 = constraint.Element2.Center;
@@ -27,7 +27,7 @@ namespace LiteCAD.DraftEditor
             var tr1 = ctx.Transform(dp1);
             var text = ctx.Transform((dp0 + dp1) / 2);
 
-            ctx.gr.DrawString("P-|", SystemFonts.DefaultFont, Brushes.Black, text);
+            ctx.DrawString("P-|", SystemFonts.DefaultFont, Brushes.Black, text);
             SnapPoint = (dp0 + dp1) / 2;
             AdjustableArrowCap bigArrow = new AdjustableArrowCap(5, 5);
             Pen p = new Pen(Color.Red, 1);
@@ -36,11 +36,8 @@ namespace LiteCAD.DraftEditor
 
 
             //create bezier here
-            ctx.gr.DrawPolygon(p, new PointF[] { tr0, tr1 });
-
+            ctx.DrawPolygon(p, new PointF[] { tr0, tr1 });
         }
-
-
 
         public override void Draw()
         {

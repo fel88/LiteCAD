@@ -13,6 +13,8 @@ namespace LiteCAD.BRep.Editor
         void DrawPolygon(Pen p, PointF[] pointFs);
         bool MiddleDrag { get; }
         Action PaintAction { get; set; }
+        void SetPen(Pen pen);
+
         MouseButtons DragButton { get; set; }
         PointF GetCursor();
         void Init(Control pb);
@@ -36,7 +38,7 @@ namespace LiteCAD.BRep.Editor
 
         void FitToPoints(PointF[] points, int gap = 0);
 
-        void DrawLineTransformed(Pen black, PointF point, PointF point2);
+        void DrawLineTransformed( PointF point, PointF point2);
 
         PointF BackTransform(PointF p1);
         PointF BackTransform(float x, float y);
@@ -46,13 +48,13 @@ namespace LiteCAD.BRep.Editor
         SizeF MeasureString(string text, Font font);
         void DrawString(string text, Font font, Brush brush, PointF position);
         void DrawString(string text, Font font, Brush brush, float x, float y);
-        void DrawLine(Pen black, float x0, float y0, float x1, float y1);
+        void DrawLine(float x0, float y0, float x1, float y1);
         void Clear(Color white);
-        void DrawLine(Pen black, PointF pp, PointF pp2);
+        void DrawLine(PointF pp, PointF pp2);
         void FillRoundRectangle(Brush blue, SKRoundRect rr);
         void DrawArrowedLine(Pen p, PointF tr0, PointF tr1, int v);
         void DrawRoundRectangle(Pen pen, SKRoundRect rect);
-        void DrawRectangle(Pen pen, float rxm, float rym, float rdx, float rdy);
+        void DrawRectangle( float rxm, float rym, float rdx, float rdy);
 
         void FillRectangle(Brush blue, float v1, float v2, float v3, float v4);
 

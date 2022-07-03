@@ -39,8 +39,9 @@ namespace LiteCAD.DraftEditor
             var shiftY = (int)(constraint.TargetLine.Dir.Y * offset);
 
             ctx.FillCircle(hovered ? Brushes.Blue : Brushes.Green, tr0.X  + shiftX, tr0.Y  + shiftY, gap);
-            ctx.DrawLine(new Pen(Brushes.Violet, 3), tr0.X - gap2 + shiftX, tr0.Y - 4 + shiftY, tr0.X + gap2 + shiftX, tr0.Y - 4 + shiftY);
-            ctx.DrawLine(new Pen(Brushes.Violet, 3), tr0.X - gap2 + shiftX, tr0.Y + 4 + shiftY, tr0.X + gap2 + shiftX, tr0.Y + 4 + shiftY);
+            ctx.SetPen(new Pen(Brushes.Violet, 3));
+            ctx.DrawLine(tr0.X - gap2 + shiftX, tr0.Y - 4 + shiftY, tr0.X + gap2 + shiftX, tr0.Y - 4 + shiftY);
+            ctx.DrawLine( tr0.X - gap2 + shiftX, tr0.Y + 4 + shiftY, tr0.X + gap2 + shiftX, tr0.Y + 4 + shiftY);
 
             if (hovered)
             {

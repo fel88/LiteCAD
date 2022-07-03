@@ -19,6 +19,8 @@ namespace LiteCAD.BRep.Editor
                 sy = origsy + (-(p.Y - starty) / zoom);
             }
         }
+        public abstract void SetPen(Pen pen);
+
         public void FitToPoints(PointF[] points, int gap = 0)
         {
             var maxx = points.Max(z => z.X) + gap;
@@ -57,7 +59,7 @@ namespace LiteCAD.BRep.Editor
         public float starty { get; set; }
         public float sx { get; set; }
         public float sy { get; set; }
-        public abstract void DrawLineTransformed(Pen black, PointF point, PointF point2);
+        public abstract void DrawLineTransformed(PointF point, PointF point2);
 
         public float origsx, origsy;
         public bool isDrag = false;
@@ -228,10 +230,10 @@ namespace LiteCAD.BRep.Editor
         public abstract void DrawString(string text, Font font, Brush brush, float x, float y);
 
 
-        public abstract void DrawLine(Pen black, float x0, float y0, float x1, float y1);
+        public abstract void DrawLine( float x0, float y0, float x1, float y1);
 
 
-        public abstract void DrawLine(Pen black, PointF pp, PointF pp2);
+        public abstract void DrawLine(  PointF pp, PointF pp2);
 
 
         public abstract void FillRoundRectangle(Brush blue, SKRoundRect rr);
@@ -243,7 +245,7 @@ namespace LiteCAD.BRep.Editor
         public abstract void DrawRoundRectangle(Pen pen, SKRoundRect rect);
 
 
-        public abstract void DrawRectangle(Pen pen, float rxm, float rym, float rdx, float rdy);
+        public abstract void DrawRectangle(float rxm, float rym, float rdx, float rdy);
 
 
         

@@ -20,11 +20,11 @@ namespace LiteCAD.BRep.Editor
             gr.FillEllipse(brush, v1 - rad, v2 - rad, rad * 2, rad * 2);
         }
 
-        public override void DrawLineTransformed(Pen black, PointF point, PointF point2)
+        public override void DrawLineTransformed( PointF point, PointF point2)
         {
             var tr0 = Transform(point);
             var tr1 = Transform(point2);
-            gr.DrawLine(black, tr0, tr1);
+            gr.DrawLine(currentPen, tr0, tr1);
         }
 
         public override void DrawPolygon(Pen p, PointF[] pointFs)
@@ -52,14 +52,14 @@ namespace LiteCAD.BRep.Editor
 
         }
 
-        public override void DrawLine(Pen black, float x0, float y0, float x1, float y1)
+        public override void DrawLine(float x0, float y0, float x1, float y1)
         {
-            gr.DrawLine(black, x0, y0, x1, y1);
+            gr.DrawLine(currentPen, x0, y0, x1, y1);
         }
 
-        public override void DrawLine(Pen black, PointF pp, PointF pp2)
+        public override void DrawLine(PointF pp, PointF pp2)
         {
-            gr.DrawLine(black, pp, pp2);
+            gr.DrawLine(currentPen, pp, pp2);
         }
 
         public override void FillRoundRectangle(Brush blue, SKRoundRect rr)
@@ -77,9 +77,15 @@ namespace LiteCAD.BRep.Editor
 
         }
 
-        public override void DrawRectangle(Pen pen, float rxm, float rym, float rdx, float rdy)
+        Pen currentPen = Pens.Black;
+
+        public override void SetPen( Pen p)
         {
-            gr.DrawRectangle(pen, rxm, rym, rdx, rdy);
+            currentPen = p;
+        }
+        public override void DrawRectangle( float rxm, float rym, float rdx, float rdy)
+        {
+            gr.DrawRectangle(currentPen, rxm, rym, rdx, rdy);
         }
 
         

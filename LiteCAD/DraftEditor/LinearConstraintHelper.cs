@@ -111,9 +111,9 @@ namespace LiteCAD.DraftEditor
 
                 //ctx.DrawLine(p, tr0, tr1);
                 ctx.DrawArrowedLine(p, tr0, tr1, 5);
-
-                ctx.DrawLine(hovered ? Pens.Red : Pens.Blue, tr0, tr2);
-                ctx.DrawLine(hovered ? Pens.Red : Pens.Blue, tr1, tr3);
+                ctx.SetPen(hovered ? Pens.Red : Pens.Blue);
+                ctx.DrawLine( tr0, tr2);
+                ctx.DrawLine( tr1, tr3);
                 if (hovered)
                 {
                     ctx.FillCircle(Brushes.Red, tr2.X, tr2.Y, 5);
@@ -136,12 +136,13 @@ namespace LiteCAD.DraftEditor
                 SnapPoint = text;
                 //get proj of point to line
                 //var diff = (pp - dp.Location).Length;
-                ctx.DrawLine(p, tr0, tr1);
+                ctx.SetPen(p);
+                ctx.DrawLine( tr0, tr1);
                 var tr2 = ctx.Transform(dp.Location);
                 var tr3 = ctx.Transform(pp);
-
-                ctx.DrawLine(Pens.Red, tr0, tr2);
-                ctx.DrawLine(Pens.Red, tr1, tr3);
+                ctx.SetPen(Pens.Red);
+                ctx.DrawLine(tr0, tr2);
+                ctx.DrawLine( tr1, tr3);
             }
         }
 

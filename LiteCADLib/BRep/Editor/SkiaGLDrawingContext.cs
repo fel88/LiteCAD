@@ -31,12 +31,12 @@ namespace LiteCAD.BRep.Editor
 
 
 
-        public override void DrawLineTransformed(Pen black, PointF point, PointF point2)
+        public override void DrawLineTransformed(PointF point, PointF point2)
         {
             var canvas = Surface.Canvas;
             var pp = Transform(point);
             var pp2 = Transform(point2);
-            DrawLine(black, pp, pp2);
+            DrawLine(pp, pp2);
         }
 
         public override void DrawCircle(Pen pen, float v1, float v2, float rad)
@@ -68,7 +68,7 @@ namespace LiteCAD.BRep.Editor
 
         public override void DrawArrowedLine(Pen p, PointF tr0, PointF tr1, int v)
         {
-            DrawLine(p, tr0, tr1);
+            DrawLine(tr0, tr1);
             var canvas = Surface.Canvas;
             var sk0 = new OpenTK.Vector2d(tr0.X, tr0.Y);
             var sk1 = new OpenTK.Vector2d(tr1.X, tr1.Y);
@@ -130,22 +130,10 @@ namespace LiteCAD.BRep.Editor
             }
         }
 
-        public override void DrawLine(Pen black, PointF pp, PointF pp2)
+        public override void DrawLine(PointF pp, PointF pp2)
         {
             var canvas = Surface.Canvas;
-            using (SKPaint paint = new SKPaint())
-            {
-                var clr = black.Color;
-                paint.Color = new SKColor(clr.R, clr.G, clr.B);
-                paint.IsAntialias = true;
-                paint.StrokeWidth = black.Width;
-                if (black.DashStyle != DashStyle.Solid)
-                {
-                    paint.PathEffect = SKPathEffect.CreateDash(black.DashPattern, 0);
-                }
-                paint.Style = SKPaintStyle.Stroke;
-                canvas.DrawLine(pp.X, pp.Y, pp2.X, pp2.Y, paint);
-            }
+            canvas.DrawLine(pp.X, pp.Y, pp2.X, pp2.Y, CurrentPaint);
         }
 
         public override void DrawString(string text, Font font, Brush brush, PointF position)
@@ -195,16 +183,10 @@ namespace LiteCAD.BRep.Editor
             }
         }
 
-        public override void DrawLine(Pen black, float x0, float y0, float x1, float y1)
+        public override void DrawLine(float x0, float y0, float x1, float y1)
         {
-            var canvas = Surface.Canvas;
-            DrawLine(black, new PointF(x0, y0), new PointF(x1, y1));
+            DrawLine(new PointF(x0, y0), new PointF(x1, y1));
         }
-
-
-
-
-
 
         /*internal void FillEllipse(Brush black, float v1, float v2, float v3, float v4)
         {
@@ -237,18 +219,24 @@ namespace LiteCAD.BRep.Editor
             var canvas = Surface.Canvas;
             canvas.DrawRect(rxm, rym, rdx, rdy, paint);
         }*/
-        public override void DrawRectangle(Pen pen, float rxm, float rym, float rdx, float rdy)
+        SKPaint CurrentPaint = new SKPaint();
+        public override void SetPen(Pen pen)
+        {
+            CurrentPaint.Color = pen.Color.ToSKColor();
+            CurrentPaint.IsAntialias = true;
+            CurrentPaint.StrokeWidth = pen.Width;
+            CurrentPaint.Style = SKPaintStyle.Stroke;
+            CurrentPaint.PathEffect = null;
+            if (pen.DashStyle != DashStyle.Solid)
+            {
+                CurrentPaint.PathEffect = SKPathEffect.CreateDash(pen.DashPattern, 0);
+            }
+        }
+
+        public override void DrawRectangle(float rxm, float rym, float rdx, float rdy)
         {
             var canvas = Surface.Canvas;
-            using (SKPaint paint = new SKPaint())
-            {
-                var clr = pen.Color;
-                paint.Color = clr.ToSKColor();
-                paint.IsAntialias = true;
-                paint.StrokeWidth = pen.Width;
-                paint.Style = SKPaintStyle.Stroke;
-                canvas.DrawRect(rxm, rym, rdx, rdy, paint);
-            }
+            canvas.DrawRect(rxm, rym, rdx, rdy, CurrentPaint);
         }
 
         public override void InitGraphics()
@@ -291,4 +279,6 @@ namespace LiteCAD.BRep.Editor
             PaintAction?.Invoke();
         }
     }
+
+
 }

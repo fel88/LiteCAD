@@ -29,7 +29,8 @@ namespace LiteCAD.DraftEditor
             var gap = 10;
             //create bezier here
             ctx.FillCircle(Brushes.Green, tr0.X, tr0.Y, gap);
-            ctx.DrawLine(new Pen(Brushes.Orange, 3), tr0.X - 5, tr0.Y, tr0.X + 5, tr0.Y);
+            ctx.SetPen(new Pen(Brushes.Orange, 3));
+            ctx.DrawLine(tr0.X - 5, tr0.Y, tr0.X + 5, tr0.Y);
         }
 
         public override void Draw()

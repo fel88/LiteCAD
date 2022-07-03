@@ -48,8 +48,7 @@ namespace LiteCAD.DraftEditor
             PointPaint.StrokeWidth = Pens.Black.Width;
             PointPaint.Style = SKPaintStyle.Stroke;
         }
-
-
+        
         void Render()
         {
             var sw = Stopwatch.StartNew();
@@ -60,15 +59,19 @@ namespace LiteCAD.DraftEditor
             ctx.UpdateDrag();
             subSnapType = SubSnapTypeEnum.None;
             updateNearest();
-
-            ctx.DrawLineTransformed(Pens.Blue, new PointF(0, 0), new PointF(0, 100));
-            ctx.DrawLineTransformed(Pens.Red, new PointF(0, 0), new PointF(100, 0));
+            ctx.SetPen(Pens.Blue);
+            ctx.DrawLineTransformed( new PointF(0, 0), new PointF(0, 100));
+            ctx.SetPen(Pens.Red);
+            ctx.DrawLineTransformed(new PointF(0, 0), new PointF(100, 0));
 
             if (_draft != null)
             {
-                for (int i = 0; i < _draft.DraftPoints.Length; i++)
+                var dpnts = _draft.DraftPoints.ToArray();
+
+                ctx.SetPen(Pens.Black);
+                for (int i = 0; i < dpnts.Length; i++)
                 {
-                    var item = _draft.DraftPoints[i];
+                    var item = dpnts[i];
                     float gp = 5;
                     var tr = ctx.Transform(item.X, item.Y);
 
@@ -76,15 +79,16 @@ namespace LiteCAD.DraftEditor
                     {
                         ctx.FillRectangle(Brushes.Blue, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
                     }
-                    ctx.DrawRectangle(Pens.Black, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
+                    ctx.DrawRectangle(tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
                 }
 
-                for (int i = 0; i < _draft.DraftLines.Length; i++)
+                var dlns = _draft.DraftLines.ToArray();
+                for (int i = 0; i < dlns.Length; i++)
                 {
-                    var el = _draft.DraftLines[i];
+                    var el = dlns[i];
 
-                    Vector2d item0 = _draft.DraftLines[i].V0.Location;
-                    Vector2d item = _draft.DraftLines[i].V1.Location;
+                    Vector2d item0 = dlns[i].V0.Location;
+                    Vector2d item = dlns[i].V1.Location;
                     var tr = ctx.Transform(item0.X, item0.Y);
                     var tr11 = ctx.Transform(item.X, item.Y);
                     Pen p = new Pen(selected.Contains(el) ? Color.Blue : Color.Black);
@@ -93,13 +97,15 @@ namespace LiteCAD.DraftEditor
                         p.DashPattern = new float[] { 10, 10 };
 
                     //ctx.gr.DrawLine(p, tr, tr11);
-                    ctx.DrawLine(p, tr, tr11);
+                    ctx.SetPen(p);
+                    ctx.DrawLine( tr, tr11);
                 }
 
-                for (int i = 0; i < _draft.DraftEllipses.Length; i++)
+                var elps = _draft.DraftEllipses.ToArray(); 
+                for (int i = 0; i < elps.Length; i++)
                 {
-                    var el = _draft.DraftEllipses[i];
-                    Vector2d item0 = _draft.DraftEllipses[i].Center.Location;
+                    var el = elps[i];
+                    Vector2d item0 = elps[i].Center.Location;
                     var rad = (float)el.Radius * ctx.zoom;
                     var tr = ctx.Transform(item0.X, item0.Y);
 
@@ -112,7 +118,7 @@ namespace LiteCAD.DraftEditor
                     {
                         ctx.FillRectangle(Brushes.Blue, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
                     }
-                    ctx.DrawRectangle(Pens.Black, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
+                    ctx.DrawRectangle(tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
                 }
 
                 if (ShowHelpers)
@@ -130,7 +136,7 @@ namespace LiteCAD.DraftEditor
                 Pen pen = new Pen(Color.Blue, 2);
                 pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
                 pen.DashPattern = new float[] { 4.0F, 2.0F, 1.0F, 3.0F };
-
+                ctx.SetPen(pen);
                 var gcur = ctx.GetCursor();
                 var curp = ctx.Transform(gcur);
                 double maxSnapDist = 10 / ctx.zoom;
@@ -193,7 +199,7 @@ namespace LiteCAD.DraftEditor
                 {
 
                 }
-                ctx.DrawLine(pen, ctx.startx, ctx.starty, curp.X, curp.Y);
+                ctx.DrawLine(ctx.startx, ctx.starty, curp.X, curp.Y);
                 //ctx.gr.DrawLine(pen, ctx.startx, ctx.starty, curp.X, curp.Y);
                 var pp = ctx.BackTransform(new PointF(ctx.startx, ctx.starty));
                 Vector2 v1 = new Vector2(pp.X, pp.Y);
@@ -229,14 +235,15 @@ namespace LiteCAD.DraftEditor
                 var rym = Math.Min(ctx.starty, curp.Y);
                 var rdx = Math.Abs(ctx.startx - curp.X);
                 var rdy = Math.Abs(ctx.starty - curp.Y);
-                ctx.DrawRectangle(pen, rxm, rym, rdx, rdy);
+                ctx.SetPen(pen);
+                ctx.DrawRectangle(rxm, rym, rdx, rdy);
                 var pp = ctx.BackTransform(new PointF(ctx.startx, ctx.starty));
                 Vector2 v1 = new Vector2(pp.X, pp.Y);
                 Vector2 v2 = new Vector2(gcur.X, gcur.Y);
                 var dist = (v2 - v1).Length;
                 ctx.DrawString(dist.ToString("N2"), SystemFonts.DefaultFont, Brushes.Black, curp.X + 10, curp.Y);
             }
-            //pictureBox1.Image = ctx.Bmp;
+
             sw.Stop();
             var ms = sw.ElapsedMilliseconds;
             LastRenderTime = ms;

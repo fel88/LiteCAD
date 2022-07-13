@@ -13,8 +13,8 @@ namespace LiteCAD.Common
     public static class DebugHelpers
     {
 
-        public static Action<string> Error;        
-        public static Action<Exception> Exception;        
+        public static Action<string> Error;
+        public static Action<Exception> Exception;
         public static Action<string> Warning;
         public static Action<bool, float> Progress;
         public static void ToBitmap(Contour[] cntrs, Vector2d[][] triangls, float mult = 1, bool withTriang = false)
@@ -75,8 +75,11 @@ namespace LiteCAD.Common
             thread.Join();
         }
 
+        public static bool DebugBitmapExportAllowed = false;
+
         public static void ToBitmap(Contour[] cntrs, float mult = 1)
         {
+            if (!DebugBitmapExportAllowed) return;
             if (!Debugger.IsAttached) return;
 
 

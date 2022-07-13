@@ -24,12 +24,18 @@ namespace LiteCAD
         }
 
         public PartInstance[] Parts => Childs.OfType<PartInstance>().ToArray();
+        public GroupInstance[] Groups => Childs.OfType<GroupInstance>().ToArray();
 
         public override IDrawable[] GetAll(Predicate<IDrawable> p)
         {
             List<IDrawable> ret = new List<IDrawable>();
             ret.Add(this);
             foreach (var item in Parts)
+            {
+                var rr1 = item.GetAll(p);
+                ret.AddRange(rr1);
+            }
+            foreach (var item in Groups)
             {
                 var rr1 = item.GetAll(p);
                 ret.AddRange(rr1);
@@ -54,12 +60,21 @@ namespace LiteCAD
             {
                 item.Draw();
             }
+            foreach (var item in Groups)
+            {
+                item.Draw();
+            }
         }
 
         internal void AddPart(PartInstance partInstance)
         {
             Childs.Add(partInstance);
             partInstance.Parent = this;
+        }
+        internal void AddGroup(GroupInstance d)
+        {
+            Childs.Add(d);
+            d.Parent = this;
         }
     }
 }

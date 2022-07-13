@@ -17,20 +17,53 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Windows.Controls.Ribbon;
 using System.Windows.Forms;
+using System.Windows.Forms.Integration;
 using System.Xml.Linq;
 
 namespace LiteCAD
 {
     public partial class Form1 : Form, IEditor
     {
+        RibbonMenu menu;
         public static Form1 Form;
         private void Form1_Load(object sender, EventArgs e)
         {
+            menu = new RibbonMenu();
+            Controls.Add(menu);
+            menu.AutoSize = true;
+            menu.Dock = DockStyle.Top;
+
+            menu.Ribbon.AdjointButtonClicked += Ribbon_AdjointButtonClicked;
+            menu.Ribbon.LoadButtonClicked += Ribbon_LoadButtonClicked;
+            menu.Ribbon.SelectionButtonClicked += Ribbon_SelectionButtonClicked;
+            menu.Ribbon.FiltAllButtonClicked += Ribbon_FiltAllButtonClicked;
+
             mf = new MessageFilter();
             Application.AddMessageFilter(mf);
         }
 
+        private void Ribbon_FiltAllButtonClicked()
+        {
+            fitAll();
+        }
+
+        private void Ribbon_SelectionButtonClicked()
+        {
+            selectorUI();
+        }
+
+        private void Ribbon_LoadButtonClicked()
+        {
+            openUI();
+        }
+
+        private void Ribbon_AdjointButtonClicked()
+        {
+            adjointUI();
+        }
+                        
         MessageFilter mf = null;
         GLControl glControl;
         public EventWrapperGlControl evwrapper;
@@ -103,7 +136,7 @@ namespace LiteCAD
         bool drawAxes = true;
         Vector3d lastHovered;
         void Redraw()
-        {            
+        {
             UpdatePickTriangle();
 
             CurrentTool.Update();
@@ -379,7 +412,7 @@ namespace LiteCAD
             InitializeComponent();
             LoadSettings();
 
-             _currentTool = new SelectionTool(this);
+            _currentTool = new SelectionTool(this);
             foreach (Control c in propertyGrid1.Controls)
             {
                 c.MouseDoubleClick += C_MouseClick;
@@ -418,7 +451,7 @@ namespace LiteCAD
                 return new object[] { };
             if (x is PartAssembly p)
             {
-                return p.Parts.ToArray();
+                return p.Childs.Where(z => z is PartInstance || z is GroupInstance);
             }
             if (x is IDrawable d)
             {
@@ -443,7 +476,7 @@ namespace LiteCAD
 
                 if (x is PartAssembly p)
                 {
-                    return p.Parts.Any();
+                    return p.Parts.Any() || p.Groups.Any();
                 }
                 if (x is IDrawable d)
                 {
@@ -477,14 +510,15 @@ namespace LiteCAD
             de.UndosChanged += De_UndosChanged;
             de.Init(this);
             de.Visible = false;
-            de.Dock = DockStyle.Fill;
             
+            de.Dock = DockStyle.Fill;
+
             glControl = new OpenTK.GLControl(new OpenTK.Graphics.GraphicsMode(32, 24, 0, 8));
 
             if (glControl.Context.GraphicsMode.Samples == 0)
             {
                 glControl = new OpenTK.GLControl(new OpenTK.Graphics.GraphicsMode(32, 24, 0, 8));
-            }      
+            }
             hoverText = new Label();
             glControl.Controls.Add(hoverText);
             hoverText.Text = "dist:";
@@ -623,6 +657,8 @@ namespace LiteCAD
                         pas.AddPart(new PartInstance(pc));
                     if (dr is Part p)
                         pas.AddPart(new PartInstance(p));//create LinkReference to part instance
+                    if (dr is Group g)
+                        pas.AddGroup(new GroupInstance(g));
                 }
                 if (targetNode is Group gr)
                 {
@@ -674,7 +710,7 @@ namespace LiteCAD
         InfoPanel infoPanel = new InfoPanel();
 
         private void timer1_Tick(object sender, EventArgs e)
-        {            
+        {
             glControl.Invalidate();
             toolStripStatusLabel4.Text = de.LastRenderTime + "ms";
             label1.Text = "camera len: " + camera1.DirLen;
@@ -704,9 +740,13 @@ namespace LiteCAD
 
         public bool AllowPartLoadTimeout = true;
         public int PartLoadTimeout = 15000;
-        bool loaded = false;    
+        bool loaded = false;
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            openUI();
+        }
+        void openUI()
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "LiteCAD scene (*.lcs)|*.lcs";
@@ -715,7 +755,6 @@ namespace LiteCAD
             Scene.FromXml(ofd.FileName);
             updateList();
         }
-
         private void planeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             PlaneHelper ph = new PlaneHelper() { Normal = Vector3d.UnitZ };
@@ -1141,6 +1180,8 @@ namespace LiteCAD
             {
                 glControl.Visible = false;
                 de.Visible = true;
+                menu.DraftTab.IsEnabled = true;
+                menu.SetTab(menu.DraftTab);
                 de.SetDraft(d);
                 de.FitAll();
 
@@ -1203,6 +1244,8 @@ namespace LiteCAD
             updateList();
 
             de.Visible = false;
+            menu.SetTab(menu.ProjectTab);
+            menu.DraftTab.IsEnabled = false;
             de.Finish();
             glControl.Visible = true;
             SetTool(new SelectionTool(this));
@@ -1308,6 +1351,8 @@ namespace LiteCAD
             }
             foreach (var item in draft.DraftEllipses)
             {
+                if (item.Dummy)
+                    continue;
                 //file.Entities.Add(new DxfEllipse(new DxfPoint(item.Center.X, item.Center.Y, 0), new DxfVector((double)item.Radius, 0, 0), 360));
                 file.Entities.Add(new DxfCircle(new DxfPoint(item.Center.X, item.Center.Y, 0), (double)item.Radius));
                 //file.Entities.Add(new DxfArc(new DxfPoint(item.Center.X, item.Center.Y, 0), (double)item.Radius, 0, 360));
@@ -1316,8 +1361,26 @@ namespace LiteCAD
             sfd.Filter = "DXF files (*.dxf)|*.dxf";
 
             if (sfd.ShowDialog() != DialogResult.OK) return;
+            ExportDxfDialog ed = new ExportDxfDialog();
+            ed.ShowDialog();
+
+            if (ed.MmUnitEnabled)
+            {
+                file.Header.DefaultDrawingUnits = DxfUnits.Millimeters;
+                file.Header.Version = DxfAcadVersion.R2013; // default version does not support units
+                file.Header.DrawingUnits = DxfDrawingUnits.Metric;
+
+                file.Header.UnitFormat = DxfUnitFormat.Decimal;
+                file.Header.UnitPrecision = 3;
+                file.Header.DimensionUnitFormat = DxfUnitFormat.Decimal;
+                file.Header.DimensionUnitToleranceDecimalPlaces = 3;
+                file.Header.AlternateDimensioningScaleFactor = 0.0394;
+            }
+
             file.Save(sfd.FileName);
+            SetStatus($"{sfd.FileName} saved.");
         }
+
         private void toolStripButton7_Click(object sender, EventArgs e)
         {
             exportDxf(editedDraft);
@@ -1651,18 +1714,24 @@ namespace LiteCAD
 
         private void toolStripButton17_Click_1(object sender, EventArgs e)
         {
+            adjointUI();
+        }
+        void adjointUI()
+        {
             SetTool(new AdjoinTool(this));
             uncheckedAllToolButtons();
             toolStripButton17.Checked = true;
         }
-
         private void toolStripButton18_Click_1(object sender, EventArgs e)
+        {
+            selectorUI();
+        }
+        void selectorUI()
         {
             SetTool(new SelectionTool(this));
             uncheckedAllToolButtons();
             toolStripButton18.Checked = true;
         }
-
         private void extract3dContourToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (listView2.SelectedItems.Count == 0) return;

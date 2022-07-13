@@ -50,6 +50,8 @@
     <Reference Include="OpenTK.GLControl, Version=3.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenTK.GLControl.3.1.0\lib\net20\OpenTK.GLControl.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="SkiaSharp, Version=2.88.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\SkiaSharp.2.88.0\lib\net462\SkiaSharp.dll</HintPath>
     </Reference>
@@ -89,6 +91,8 @@
     <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.ValueTuple.4.4.0\lib\net47\System.ValueTuple.dll</HintPath>
     </Reference>
+    <Reference Include="System.Windows.Controls.Ribbon" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -98,6 +102,9 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="UIAutomationProvider" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractDraftTool.cs" />
@@ -125,8 +132,15 @@
     <Compile Include="DraftEditor\ParallelConstraintHelper.cs" />
     <Compile Include="DraftEditor\PerpendicularConstraintHelper.cs" />
     <Compile Include="DraftEditor\VerticalConstraintHelper.cs" />
+    <Compile Include="ExportDxfDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ExportDxfDialog.Designer.cs">
+      <DependentUpon>ExportDxfDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="ExtrudeModifier.cs" />
     <Compile Include="Group.cs" />
+    <Compile Include="GroupInstance.cs" />
     <Compile Include="IEconomicsDetail.cs" />
     <Compile Include="IEditor.cs" />
     <Compile Include="Info.cs">
@@ -154,6 +168,15 @@
     </Compile>
     <Compile Include="PropEditors\Vector3dPropEditor.Designer.cs">
       <DependentUpon>Vector3dPropEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RibbonMenu.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="RibbonMenu.Designer.cs">
+      <DependentUpon>RibbonMenu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RibbonMenuWpf.xaml.cs">
+      <DependentUpon>RibbonMenuWpf.xaml</DependentUpon>
     </Compile>
     <Compile Include="Tools\AdjoinTool.cs" />
     <Compile Include="Tools\DraftEllipseTool.cs" />
@@ -189,6 +212,9 @@
     <EmbeddedResource Include="DraftEditor\LinearConstraintLengthDialog.resx">
       <DependentUpon>LinearConstraintLengthDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="ExportDxfDialog.resx">
+      <DependentUpon>ExportDxfDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -214,6 +240,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="RibbonMenu.resx">
+      <DependentUpon>RibbonMenu.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -245,7 +274,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\cursor.ico" />
+    <Resource Include="Icons\magnet.ico" />
+    <Resource Include="Icons\arrow-skip-090.ico" />
+    <Resource Include="Icons\cursor.ico" />
+    <Resource Include="Icons\disk.ico" />
+    <Resource Include="Icons\magnifier.ico" />
+    <Resource Include="Icons\arrow-curve-180-left.ico" />
+    <Resource Include="Icons\arrow-resize.ico" />
     <Content Include="ruler-triangle.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="RibbonMenuWpf.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\SkiaSharp.NativeAssets.macOS.2.88.0\build\net462\SkiaSharp.NativeAssets.macOS.targets" Condition="Exists('..\packages\SkiaSharp.NativeAssets.macOS.2.88.0\build\net462\SkiaSharp.NativeAssets.macOS.targets')" />

@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="LiteCAD.RibbonMenuWpf"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:LiteCAD"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Ribbon x:Name="RibbonWin"  SelectedIndex="0">
+            <Ribbon.ApplicationMenu>
+                <RibbonApplicationMenu Visibility="Collapsed">
+                    
+                </RibbonApplicationMenu>
+            </Ribbon.ApplicationMenu>
+            <Ribbon.QuickAccessToolBar>
+                <RibbonQuickAccessToolBar Visibility="Collapsed">
+
+                </RibbonQuickAccessToolBar>
+            </Ribbon.QuickAccessToolBar>
+            <RibbonTab x:Name="projectTab" Header="Project" KeyTip="H" >
+                <!-- Home  group-->
+                <RibbonGroup x:Name="General" Header="General">
+                    <RibbonToggleButton  Label="Selection" Click="RibbonButton_Click_1" KeyTip="X" SmallImageSource="Icons/cursor.ico"/>
+                    <RibbonButton  Label="Fit all" Click="RibbonButton_Click_2" KeyTip="F" SmallImageSource="Icons/magnifier.ico"/>
+                    <RibbonButton  Label="Undo" SmallImageSource="Icons/arrow-curve-180-left.ico" />
+
+
+                    <!--<RibbonMenuButton  Label="Employee" KeyTip="V">
+                        <RibbonMenuItem  Header="Keep Text Only" KeyTip="T"/>
+                        <RibbonMenuItem Header="Paste Special..." KeyTip="S"/>
+                    </RibbonMenuButton>
+                    <RibbonButton  Label="Save" KeyTip="X" />
+                    <RibbonButton  Label="Add" KeyTip="C" />-->
+                </RibbonGroup>
+                <RibbonGroup x:Name="ClipboardGroup" Header="File">
+                    <RibbonButton  Label="Load" KeyTip="C" Click="RibbonButton_Click" />
+                    <RibbonButton  Label="Save as" KeyTip="X"  SmallImageSource="Icons/disk.ico" />
+                    <RibbonMenuButton Label="Export as" KeyTip="V">
+                        <RibbonMenuItem  Header="Step" KeyTip="T"/>
+                    </RibbonMenuButton>
+                    <!--<RibbonButton  Label="Format Painter" KeyTip="FP" />-->
+                </RibbonGroup>
+                <!-- Employee And Payroll group-->
+             
+              
+                <RibbonGroup x:Name="operators" Header="Operators ">
+                    <RibbonButton  Label="Extrude" KeyTip="X"  SmallImageSource="Icons/arrow-skip-090.ico"/>
+                    <RibbonToggleButton x:Name="adjointButton"  Label="Adjoint" KeyTip="X" SmallImageSource="Icons/magnet.ico" Click="adjointButton_Click" />
+                </RibbonGroup>
+            </RibbonTab>
+            <!-- Ribbon Tab #2: -->
+            <RibbonTab x:Name="draftTab" IsEnabled="false" Header="Draft" KeyTip="I">
+                <RibbonGroup x:Name="constr" Header="Constraints ">                    
+                    <RibbonToggleButton x:Name="linearConstrBtn"  Label="Size" KeyTip="X" SmallImageSource="Icons/arrow-resize.ico" />
+                </RibbonGroup>
+            </RibbonTab>            
+        </Ribbon>
+    </Grid>    
+</UserControl>

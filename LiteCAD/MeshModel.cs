@@ -14,7 +14,25 @@ namespace LiteCAD
     public class MeshModel : AbstractDrawable, IPlaneSplittable, IMesh, IMeshNodesContainer
     {
         public List<MeshNode> Nodes = new List<MeshNode>();
-        MeshNode[] IMeshNodesContainer.Nodes => Nodes.ToArray();
+        
+        MeshNode[] IMeshNodesContainer.Nodes
+        {
+            get
+            {
+                var mtr = Matrix.Calc();
+                List<MeshNode> ret = new List<MeshNode>();
+                foreach (var item in Nodes)
+                {
+                    var mn = new MeshNode();
+                    foreach (var titem in item.Triangles)
+                    {
+                        mn.Triangles.Add(titem.Multiply(mtr));
+                    }
+                    ret.Add(mn);
+                }
+                return ret.ToArray();
+            }
+        }
 
         public void RestoreXml(XElement elem)
         {
@@ -162,8 +180,4 @@ namespace LiteCAD
             }
         }
     }
-
-
-
-
 }

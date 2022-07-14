@@ -228,9 +228,9 @@ namespace LiteCAD.Common
                     GL.Color3(Color.LightGreen);
                 }
                 GL.Begin(PrimitiveType.Triangles);
-
+                
                 foreach (var zitem in item.Triangles)
-                {
+                {                    
                     foreach (var vv in zitem.Vertices)
                     {                                    
                         GL.Normal3(vv.Normal);

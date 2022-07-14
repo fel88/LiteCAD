@@ -16,6 +16,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Windows.Controls.Ribbon;
 using System.Windows.Forms;
@@ -63,7 +64,7 @@ namespace LiteCAD
         {
             adjointUI();
         }
-                        
+
         MessageFilter mf = null;
         GLControl glControl;
         public EventWrapperGlControl evwrapper;
@@ -510,7 +511,7 @@ namespace LiteCAD
             de.UndosChanged += De_UndosChanged;
             de.Init(this);
             de.Visible = false;
-            
+
             de.Dock = DockStyle.Fill;
 
             glControl = new OpenTK.GLControl(new OpenTK.Graphics.GraphicsMode(32, 24, 0, 8));
@@ -576,7 +577,7 @@ namespace LiteCAD
             var obj = propertyGrid1.SelectedObject;
             if (gi.PropertyDescriptor.PropertyType == typeof(TransformationChain))
             {
-                var ret = editorStart(gi.Value, gi.PropertyDescriptor.Name, typeof(Matrix4dPropEditor), false);
+                var ret = GUIHelpers.EditorStart(gi.Value, gi.PropertyDescriptor.Name, typeof(Matrix4dPropEditor), false);
                 gi.PropertyDescriptor.SetValue(obj, (TransformationChain)ret);
                 //gi.PropertyDescriptor.Name
             }
@@ -584,7 +585,7 @@ namespace LiteCAD
             {
                 //editor call here
                 //sert bacvk
-                var ret = editorStart(gi.Value, gi.PropertyDescriptor.Name, typeof(Vector3dPropEditor));
+                var ret = GUIHelpers.EditorStart(gi.Value, gi.PropertyDescriptor.Name, typeof(Vector3dPropEditor));
                 gi.PropertyDescriptor.SetValue(obj, (Vector3d)ret);
                 //gi.PropertyDescriptor.Name
             }
@@ -592,30 +593,10 @@ namespace LiteCAD
 
         internal void SetStatus(string v)
         {
-            toolStripStatusLabel1.Text = v;
+            toolStripStatusLabel1.Text = v;            
         }
+      
 
-        object editorStart(object init, string nm, Type control, bool dialog = true)
-        {
-            Form f = new Form() { Text = nm };
-            f.FormBorderStyle = FormBorderStyle.FixedToolWindow;
-            f.StartPosition = FormStartPosition.CenterScreen;
-            var cc = Activator.CreateInstance(control) as UserControl;
-            (cc as IPropEditor).Init(init);
-            f.Controls.Add(cc);
-            f.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            f.AutoSize = true;
-            if (dialog)
-            {
-                f.ShowDialog();
-            }
-            else
-            {
-                f.TopMost = true;
-                f.Show();
-            }
-            return (cc as IPropEditor).ReturnValue;
-        }
 
         private void TreeListView1_DragOver(object sender, DragEventArgs e)
         {
@@ -947,7 +928,18 @@ namespace LiteCAD
                     {
                         Parts.Add(pp);
                     }
-                    updateList();
+                }
+                if (item is ExtrudeModifier ex)
+                {
+                    StringWriter sw = new StringWriter();
+                    ex.Store(sw);
+                    var elem = XElement.Parse(sw.ToString());
+                    ExtrudeModifier pp = new ExtrudeModifier(elem);
+                    pp.Name = ex.Name + "_cloned";
+                    pp.Matrix = ex.Matrix.Clone();
+
+                    Parts.Add(pp);
+
                 }
 
             }

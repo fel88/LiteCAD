@@ -7,7 +7,7 @@ using System.Linq;
 namespace LiteCAD.Common
 {
     public static class Helpers
-    {
+    {        
         public static double ParseDouble(string v)
         {
             return double.Parse(v.Replace(",", "."), CultureInfo.InvariantCulture);

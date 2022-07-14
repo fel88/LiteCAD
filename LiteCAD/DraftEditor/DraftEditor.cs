@@ -12,6 +12,7 @@ using System.IO;
 using System.Xml.Linq;
 using SkiaSharp;
 using System.Diagnostics;
+using LiteCAD.PropEditors;
 
 namespace LiteCAD.DraftEditor
 {
@@ -48,7 +49,7 @@ namespace LiteCAD.DraftEditor
             PointPaint.StrokeWidth = Pens.Black.Width;
             PointPaint.Style = SKPaintStyle.Stroke;
         }
-        
+
         void Render()
         {
             var sw = Stopwatch.StartNew();
@@ -60,7 +61,7 @@ namespace LiteCAD.DraftEditor
             subSnapType = SubSnapTypeEnum.None;
             updateNearest();
             ctx.SetPen(Pens.Blue);
-            ctx.DrawLineTransformed( new PointF(0, 0), new PointF(0, 100));
+            ctx.DrawLineTransformed(new PointF(0, 0), new PointF(0, 100));
             ctx.SetPen(Pens.Red);
             ctx.DrawLineTransformed(new PointF(0, 0), new PointF(100, 0));
 
@@ -98,10 +99,10 @@ namespace LiteCAD.DraftEditor
 
                     //ctx.gr.DrawLine(p, tr, tr11);
                     ctx.SetPen(p);
-                    ctx.DrawLine( tr, tr11);
+                    ctx.DrawLine(tr, tr11);
                 }
 
-                var elps = _draft.DraftEllipses.ToArray(); 
+                var elps = _draft.DraftEllipses.ToArray();
                 for (int i = 0; i < elps.Length; i++)
                 {
                     var el = elps[i];
@@ -114,7 +115,7 @@ namespace LiteCAD.DraftEditor
                     float gp = 5;
                     tr = ctx.Transform(el.Center.X, el.Center.Y);
 
-                    if (nearest == el.Center)
+                    if (nearest == el.Center || selected.Contains(el.Center))
                     {
                         ctx.FillRectangle(Brushes.Blue, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
                     }
@@ -255,19 +256,23 @@ namespace LiteCAD.DraftEditor
         {
             //var pos = ctx.PictureBox.Control.PointToClient(Cursor.Position);
 
-
-
-
             if (e == MouseButtons.Left)
             {
-                foreach (var item in selected)
+                if ((Control.ModifierKeys & Keys.Shift) != 0)
                 {
-                    if (item is IDrawable dd)
-                    {
-                        dd.Selected = false;
-                    }
+                    
                 }
-                selected = new[] { nearest };
+                else
+                {
+                    foreach (var item in selected)
+                    {
+                        if (item is IDrawable dd)
+                        {
+                            dd.Selected = false;
+                        }
+                    }
+                    selected = new[] { nearest };
+                }
                 Form1.Form.SetStatus($"selected: {selected.Count()} objects");
                 foreach (var item in selected)
                 {
@@ -420,6 +425,7 @@ namespace LiteCAD.DraftEditor
             }
             if (e.Button == MouseButtons.Left)
             {
+
                 var gcur = ctx.GetCursor();
                 var t = ctx.BackTransform(new PointF(ctx.startx, ctx.starty));
                 var rxm = Math.Min(t.X, gcur.X);
@@ -430,7 +436,13 @@ namespace LiteCAD.DraftEditor
                 if (rect.Width > 1 && rect.Height > 1)
                 {
                     var tt = _draft.DraftPoints.Where(z => rect.Contains((float)z.Location.X, (float)z.Location.Y)).ToArray();
-                    selected = tt;
+                    tt = tt.Union(_draft.DraftEllipses.Select(z => z.Center).Where(z => rect.Contains((float)z.Location.X, (float)z.Location.Y))).ToArray();
+                    if ((Control.ModifierKeys & Keys.Shift) != 0)
+                    {
+                        selected = selected.Except(tt).ToArray();
+                    }
+                    else
+                        selected = tt;
                     Form1.Form.SetStatus($"selected: {tt.Count()} points");
                 }
             }
@@ -669,6 +681,21 @@ namespace LiteCAD.DraftEditor
             {
                 _draft.DraftPoints[i].SetLocation(_draft.DraftPoints[i].X, 2 * my - _draft.DraftPoints[i].Location.Y);
 
+            }
+        }
+
+        private void translateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var points = selected.OfType<DraftPoint>().ToArray();
+            if (points.Length == 0) return;
+
+            var ret = GUIHelpers.EditorStart(Vector3d.Zero, "Translate", typeof(Vector2dPropEditor));
+            var r = (Vector2d)ret;
+
+            Backup();
+            foreach (var item in points)
+            {
+                item.SetLocation(item.Location + r);
             }
         }
     }

@@ -163,6 +163,12 @@
     <Compile Include="PropEditors\Matrix4dPropEditor.Designer.cs">
       <DependentUpon>Matrix4dPropEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="PropEditors\Vector2dPropEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PropEditors\Vector2dPropEditor.Designer.cs">
+      <DependentUpon>Vector2dPropEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="PropEditors\Vector3dPropEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -226,6 +232,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PropEditors\Matrix4dPropEditor.resx">
       <DependentUpon>Matrix4dPropEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PropEditors\Vector2dPropEditor.resx">
+      <DependentUpon>Vector2dPropEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PropEditors\Vector3dPropEditor.resx">
       <DependentUpon>Vector3dPropEditor.cs</DependentUpon>

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using OpenTK.Graphics.OpenGL;
 
 namespace LiteCAD
 {
@@ -48,11 +49,14 @@ namespace LiteCAD
         public ExtrudeModifier(XElement item)
         {
             ctor = true;
-            if (item.Attribute("visible") != null)            
+            if (item.Attribute("visible") != null)
                 Visible = bool.Parse(item.Attribute("visible").Value);
 
             if (item.Attribute("name") != null)
                 Name = item.Attribute("name").Value;
+
+            if (item.Element("transform") != null)
+                _matrix.RestoreXml(item.Element("transform"));
 
             Source = new Draft(item.Element("source").Element("draft"));
             Height = Helpers.ParseDecimal(item.Attribute("height").Value);
@@ -95,21 +99,21 @@ namespace LiteCAD
                 if (wire.Any(z => z is DraftLine))
                 {
                     foreach (var item in wire.OfType<DraftLine>())
-                {
-                    var diff = item.V0.Location - item.V1.Location;
-                    var p = new OpenTK.Vector3d(item.V0.Location.X, item.V0.Location.Y, 0);
-                    var pe = new OpenTK.Vector3d(item.V1.Location.X, item.V1.Location.Y, 0);
-                    edges.Add(new BRep.BRepEdge()
                     {
-                        Curve = new BRep.Curves.BRepLineCurve()
+                        var diff = item.V0.Location - item.V1.Location;
+                        var p = new OpenTK.Vector3d(item.V0.Location.X, item.V0.Location.Y, 0);
+                        var pe = new OpenTK.Vector3d(item.V1.Location.X, item.V1.Location.Y, 0);
+                        edges.Add(new BRep.BRepEdge()
                         {
-                            Point = p,
-                            Vector = new OpenTK.Vector3d(diff.X, diff.Y, 0)
-                        },
-                        Start = p,
-                        End = pe
-                    });
-                }
+                            Curve = new BRep.Curves.BRepLineCurve()
+                            {
+                                Point = p,
+                                Vector = new OpenTK.Vector3d(diff.X, diff.Y, 0)
+                            },
+                            Start = p,
+                            End = pe
+                        });
+                    }
                 }
                 else if (wire.Any(z => z is DraftEllipse))
                 {
@@ -155,9 +159,9 @@ namespace LiteCAD
                     ne.End = edge.End + shift;
                     if (edge.Curve is BRep.Curves.BRepLineCurve)
                     {
-                    var cc = edge.Curve as BRep.Curves.BRepLineCurve;
-                    ne.Curve = new BRep.Curves.BRepLineCurve() { Point = cc.Point + shift, Vector = cc.Vector };
-                }
+                        var cc = edge.Curve as BRep.Curves.BRepLineCurve;
+                        ne.Curve = new BRep.Curves.BRepLineCurve() { Point = cc.Point + shift, Vector = cc.Vector };
+                    }
                     else if (edge.Curve is BRep.Curves.BRepCircleCurve)
                     {
                         var cc = edge.Curve as BRep.Curves.BRepCircleCurve;
@@ -202,63 +206,63 @@ namespace LiteCAD
                 {
                     if ((item.Curve is BRep.Curves.BRepLineCurve))
                     {
-                    List<BRep.BRepEdge> edges2 = new List<BRep.BRepEdge>();
+                        List<BRep.BRepEdge> edges2 = new List<BRep.BRepEdge>();
 
-                    var dir = (item.End - item.Start).Normalized();
-                    dir = new Vector3d(-dir.Y, dir.X, 0);
-                    var sideFace = new BRepPlaneFace(_part)
-                    {
+                        var dir = (item.End - item.Start).Normalized();
+                        dir = new Vector3d(-dir.Y, dir.X, 0);
+                        var sideFace = new BRepPlaneFace(_part)
+                        {
                             Parent = _part,
-                        Surface = new BRepPlane()
+                            Surface = new BRepPlane()
+                            {
+                                Normal = -dir,
+                                Location = item.Start
+                            }
+                        };
+                        edges2.Add(new BRep.BRepEdge()
                         {
-                            Normal = -dir,
-                            Location = item.Start
-                        }
-                    };
-                    edges2.Add(new BRep.BRepEdge()
-                    {
-                        Curve = new BRep.Curves.BRepLineCurve()
-                        {
-                            Point = item.Start,
-                            Vector = (item.End - item.Start).Normalized()
-                        },
-                        Start = item.Start,
-                        End = item.End
-                    });
+                            Curve = new BRep.Curves.BRepLineCurve()
+                            {
+                                Point = item.Start,
+                                Vector = (item.End - item.Start).Normalized()
+                            },
+                            Start = item.Start,
+                            End = item.End
+                        });
 
-                    edges2.Add(new BRep.BRepEdge()
-                    {
-                        Curve = new BRep.Curves.BRepLineCurve()
+                        edges2.Add(new BRep.BRepEdge()
                         {
-                            Point = item.Start,
-                            Vector = (item.End - item.Start).Normalized()
-                        },
-                        Start = item.End,
-                        End = item.End + shift
-                    });
-                    edges2.Add(new BRep.BRepEdge()
-                    {
-                        Curve = new BRep.Curves.BRepLineCurve()
+                            Curve = new BRep.Curves.BRepLineCurve()
+                            {
+                                Point = item.Start,
+                                Vector = (item.End - item.Start).Normalized()
+                            },
+                            Start = item.End,
+                            End = item.End + shift
+                        });
+                        edges2.Add(new BRep.BRepEdge()
                         {
-                            Point = item.Start,
-                            Vector = (item.End - item.Start).Normalized()
-                        },
-                        Start = item.End + shift,
-                        End = item.Start + shift
-                    });
-                    edges2.Add(new BRep.BRepEdge()
-                    {
-                        Curve = new BRep.Curves.BRepLineCurve()
+                            Curve = new BRep.Curves.BRepLineCurve()
+                            {
+                                Point = item.Start,
+                                Vector = (item.End - item.Start).Normalized()
+                            },
+                            Start = item.End + shift,
+                            End = item.Start + shift
+                        });
+                        edges2.Add(new BRep.BRepEdge()
                         {
-                            Point = item.Start,
-                            Vector = (item.End - item.Start).Normalized()
-                        },
-                        Start = item.Start + shift,
-                        End = item.Start
-                    });
-                    sideFace.Wires.Add(new BRep.BRepWire() { Edges = edges2 });
-                    _part.Faces.Add(sideFace);
-                }
+                            Curve = new BRep.Curves.BRepLineCurve()
+                            {
+                                Point = item.Start,
+                                Vector = (item.End - item.Start).Normalized()
+                            },
+                            Start = item.Start + shift,
+                            End = item.Start
+                        });
+                        sideFace.Wires.Add(new BRep.BRepWire() { Edges = edges2 });
+                        _part.Faces.Add(sideFace);
+                    }
                     else
                     if ((item.Curve is BRep.Curves.BRepCircleCurve cc))
                     {
@@ -330,7 +334,7 @@ namespace LiteCAD
                         _part.Faces.Add(sideFace);
                     }
                 }
-            
+
             _part.Faces.Add(topFace);
             _part.ExtractMesh();
         }
@@ -365,7 +369,7 @@ namespace LiteCAD
                 var mn = Part.Faces.First().ExtractMesh();
                 var area = mn.Triangles.Sum(z => z.Area());
                 //var area = Part.Nodes.First().Triangles.Sum(z => z.Area());
-                return ((decimal)area * Height)/(1000m*1000m*1000m);
+                return ((decimal)area * Height) / (1000m * 1000m * 1000m);
                 return Source.CalcArea() * Height;
             }
         }
@@ -386,7 +390,13 @@ namespace LiteCAD
         {
             if (!Visible) return;
             if (Part == null) return;
+
+            GL.PushMatrix();
+            Matrix4d dd = _matrix.Calc();
+            GL.MultMatrix(ref dd);
             Part.Draw();
+
+            GL.PopMatrix();
         }
 
         public void RemoveChild(IDrawable dd)
@@ -399,14 +409,18 @@ namespace LiteCAD
 
         public void Store(TextWriter writer)
         {
-            writer.WriteLine($"<extrude id=\"{Id}\" height=\"{Height}\" visible=\"{Visible}\" name=\"{Name}\"><source>");
+            writer.WriteLine($"<extrude id=\"{Id}\" height=\"{Height}\" visible=\"{Visible}\" name=\"{Name}\">");
+            writer.WriteLine("<transform>");
+            _matrix.StoreXml(writer);
+            writer.WriteLine("</transform>");
+            writer.WriteLine("<source>");
             Source.Store(writer);
             writer.WriteLine("</source></extrude>");
         }
 
         public IDrawable[] GetAll(Predicate<IDrawable> p)
         {
-            return Childs.SelectMany(z => z.GetAll(p)).Union(new[] { this}).ToArray();
+            return Childs.SelectMany(z => z.GetAll(p)).Union(new[] { this }).ToArray();
         }
     }
 }

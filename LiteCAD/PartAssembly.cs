@@ -19,7 +19,10 @@ namespace LiteCAD
             Name = item.Attribute("name").Value;
             foreach (var xitem in item.Elements("instance"))
             {
-                AddPart(new PartInstance(scene, xitem));
+                if (xitem.Attribute("partId") != null)
+                    AddPart(new PartInstance(scene, xitem));
+                if (xitem.Attribute("groupId") != null)
+                    AddGroup(new GroupInstance(scene, xitem));
             }
         }
 
@@ -48,6 +51,10 @@ namespace LiteCAD
         {
             writer.WriteLine($"<assembly name=\"{Name}\">");
             foreach (var item in Parts)
+            {
+                item.Store(writer);
+            }
+            foreach (var item in Groups)
             {
                 item.Store(writer);
             }

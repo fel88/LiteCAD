@@ -49,6 +49,10 @@ namespace LiteCAD.BRep.Editor
                 paint.IsAntialias = true;
                 paint.StrokeWidth = pen.Width;
                 paint.Style = SKPaintStyle.Stroke;
+                if (pen.DashStyle != DashStyle.Solid)
+                {
+                    paint.PathEffect = SKPathEffect.CreateDash(pen.DashPattern, 0);
+                }
                 canvas.DrawCircle(v1, v2, rad, paint);
             }
         }

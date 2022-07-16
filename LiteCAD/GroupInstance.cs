@@ -3,7 +3,9 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace LiteCAD
 {
@@ -20,6 +22,29 @@ namespace LiteCAD
         {
             var ret = Childs.SelectMany(z => z.GetAll(p)).OfType<IDrawable>().Where(zz => p(zz)).ToArray();
             return ret;
+        }
+        public GroupInstance(LiteCADScene scene, XElement xitem) : base(xitem)
+        {
+            Name = xitem.Attribute("name").Value;
+            _matrix.RestoreXml(xitem.Element("transform"));
+            if (xitem.Attribute("color") != null)
+            {
+                var rgb = xitem.Attribute("color").Value.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToArray();
+                Color = Color.FromArgb(rgb[0], rgb[1], rgb[2]);
+            }
+            
+            var groupId = int.Parse(xitem.Attribute("groupId").Value);
+            var ps = scene.Parts.OfType<Group>().First(z => z.Id == groupId);
+            Group = ps;
+        }
+
+        public override void Store(TextWriter writer)
+        {
+            writer.WriteLine($"<instance id=\"{Id}\" groupId=\"{Group.Id}\" name=\"{Name}\" color=\"{Color.R};{Color.G};{Color.B}\" >");
+            writer.WriteLine("<transform>");
+            _matrix.StoreXml(writer);
+            writer.WriteLine("</transform>");
+            writer.WriteLine("</instance>");
         }
         public override void Draw()
         {

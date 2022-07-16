@@ -36,34 +36,13 @@ namespace LiteCAD
             menu.AutoSize = true;
             menu.Dock = DockStyle.Top;
 
-            menu.Ribbon.AdjointButtonClicked += Ribbon_AdjointButtonClicked;
-            menu.Ribbon.LoadButtonClicked += Ribbon_LoadButtonClicked;
-            menu.Ribbon.SelectionButtonClicked += Ribbon_SelectionButtonClicked;
-            menu.Ribbon.FiltAllButtonClicked += Ribbon_FiltAllButtonClicked;
+            toolStripContainer1.TopToolStripPanel.Visible = false;
 
             mf = new MessageFilter();
             Application.AddMessageFilter(mf);
-        }
 
-        private void Ribbon_FiltAllButtonClicked()
-        {
-            fitAll();
-        }
-
-        private void Ribbon_SelectionButtonClicked()
-        {
-            selectorUI();
-        }
-
-        private void Ribbon_LoadButtonClicked()
-        {
-            openUI();
-        }
-
-        private void Ribbon_AdjointButtonClicked()
-        {
-            adjointUI();
-        }
+            tableLayoutPanel1.ColumnStyles[2].Width = 0;
+        }        
 
         MessageFilter mf = null;
         GLControl glControl;
@@ -386,7 +365,7 @@ namespace LiteCAD
             return null;
         }
 
-        DraftEditorControl de;
+        public DraftEditorControl de;
         Label hoverText;
         public void LoadSettings()
         {
@@ -593,9 +572,9 @@ namespace LiteCAD
 
         internal void SetStatus(string v)
         {
-            toolStripStatusLabel1.Text = v;            
+            toolStripStatusLabel1.Text = v;
         }
-      
+
 
 
         private void TreeListView1_DragOver(object sender, DragEventArgs e)
@@ -697,25 +676,37 @@ namespace LiteCAD
             label1.Text = "camera len: " + camera1.DirLen;
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        public void ViewX()
         {
             camera1.CamTo = Vector3.Zero;
             camera1.CamFrom = new Vector3(-10, 0, 0);
             camera1.CamUp = Vector3.UnitZ;
         }
+        private void button2_Click(object sender, EventArgs e)
+        {
+            
+        }
 
-        private void button3_Click(object sender, EventArgs e)
+        public void ViewY()
         {
             camera1.CamTo = Vector3.Zero;
             camera1.CamFrom = new Vector3(0, -10, 0);
             camera1.CamUp = Vector3.UnitZ;
         }
+        private void button3_Click(object sender, EventArgs e)
+        {
+            
+        }
 
-        private void button4_Click(object sender, EventArgs e)
+        public void ViewZ()
         {
             camera1.CamTo = Vector3.Zero;
             camera1.CamFrom = new Vector3(0, 0, -10);
             camera1.CamUp = Vector3.UnitY;
+        }
+        private void button4_Click(object sender, EventArgs e)
+        {
+            
         }
 
 
@@ -727,7 +718,7 @@ namespace LiteCAD
         {
             openUI();
         }
-        void openUI()
+        public void openUI()
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "LiteCAD scene (*.lcs)|*.lcs";
@@ -847,7 +838,7 @@ namespace LiteCAD
             return vv.ToArray();
         }
 
-        void fitAll(Vector3d[] vv = null)
+        public void fitAll(Vector3d[] vv = null)
         {
             if (EditMode == EditModeEnum.Draft)
             {
@@ -950,12 +941,15 @@ namespace LiteCAD
             deleteItem();
         }
 
-        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        public void ShowNormalsToggle(bool v)
         {
             foreach (var item in Parts.OfType<Part>())
             {
-                item.ShowNormals = checkBox2.Checked;
+                item.ShowNormals = v;
             }
+        }
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
@@ -1193,7 +1187,6 @@ namespace LiteCAD
                 toolStrip2.Visible = true;
                 toolStrip3.Visible = true;
             }
-
         }
 
         public EditModeEnum EditMode;
@@ -1209,11 +1202,15 @@ namespace LiteCAD
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
+            LineStart();
+        }
+
+        public void LineStart()
+        {
             SetTool(new DraftLineTool(de));
             uncheckedAllToolButtons();
             toolStripButton2.Checked = true;
         }
-
         private void button1_Click(object sender, EventArgs e)
         {
 
@@ -1221,12 +1218,18 @@ namespace LiteCAD
         Draft editedDraft;
         private void toolStripButton3_Click(object sender, EventArgs e)
         {
+            RectangleStart();
+        }
+        public bool IsRectDraftTool => _currentTool is RectDraftTool;
+
+        public void RectangleStart()
+        {
             SetTool(new RectDraftTool(de));
             uncheckedAllToolButtons();
             toolStripButton3.Checked = true;
         }
 
-        private void toolStripButton8_Click(object sender, EventArgs e)
+        public void ExitDraft()
         {
             EditMode = EditModeEnum.Part;
             if (editedDraft.Parent is ExtrudeModifier em)
@@ -1249,12 +1252,19 @@ namespace LiteCAD
             camera1.CamFrom = camState[1];
             camera1.CamUp = camState[2];
         }
-
-        private void button1_Click_1(object sender, EventArgs e)
+        private void toolStripButton8_Click(object sender, EventArgs e)
+        {
+            ExitDraft();
+        }
+        public void ResetCamera()
         {
             camera1.CamTo = Vector3.Zero;
             camera1.CamFrom = new Vector3(250, 250, 250);
             camera1.CamUp = Vector3.UnitZ;
+        }
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            ResetCamera();
         }
         public event Action<ITool> ToolChanged;
         private void fitToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -1373,9 +1383,13 @@ namespace LiteCAD
             SetStatus($"{sfd.FileName} saved.");
         }
 
-        private void toolStripButton7_Click(object sender, EventArgs e)
+        public void ExportDraftToDxf()
         {
             exportDxf(editedDraft);
+        }
+        private void toolStripButton7_Click(object sender, EventArgs e)
+        {
+            ExportDraftToDxf();
         }
 
         private void partToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -1442,6 +1456,10 @@ namespace LiteCAD
         }
         private void toolStripButton6_Click(object sender, EventArgs e)
         {
+            Extrude();            
+        }
+        public void Extrude()
+        {
             if (treeListView1.SelectedObject is Draft dd)
             {
                 Parts.Remove(dd);
@@ -1473,6 +1491,10 @@ namespace LiteCAD
 
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            SaveAs();
+        }
+        public void SaveAs()
+        {
             SaveFileDialog ofd = new SaveFileDialog();
             ofd.Filter = "LiteCAD scene (*.lcs)|*.lcs";
             if (ofd.ShowDialog() != DialogResult.OK) return;
@@ -1481,11 +1503,14 @@ namespace LiteCAD
 
         private void toolStripButton4_Click(object sender, EventArgs e)
         {
+            CircleStart();
+        }
+        public void CircleStart()
+        {
             SetTool(new DraftEllipseTool(this));
             uncheckedAllToolButtons();
             toolStripButton4.Checked = true;
         }
-
         private void dxfToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;
@@ -1708,7 +1733,7 @@ namespace LiteCAD
         {
             adjointUI();
         }
-        void adjointUI()
+       public void adjointUI()
         {
             SetTool(new AdjoinTool(this));
             uncheckedAllToolButtons();
@@ -1718,7 +1743,7 @@ namespace LiteCAD
         {
             selectorUI();
         }
-        void selectorUI()
+        public void selectorUI()
         {
             SetTool(new SelectionTool(this));
             uncheckedAllToolButtons();
@@ -1770,14 +1795,10 @@ namespace LiteCAD
 
         private void button10_Click(object sender, EventArgs e)
         {
-            var aa = de.Draft.Helpers.OfType<LinearConstraintHelper>();
-            foreach (var item in aa)
-            {
-                item.Shift = 0;
-            }
+            
         }
 
-        private void button11_Click(object sender, EventArgs e)
+        public void PointAnchor()
         {
             var obj = propertyGrid1.SelectedObject as DraftPoint;
             if (obj != null)
@@ -1787,24 +1808,59 @@ namespace LiteCAD
             }
             else { MessageBox.Show("empty obj"); }
         }
+        private void button11_Click(object sender, EventArgs e)
+        {
+            
+        }
 
-        private void button12_Click(object sender, EventArgs e)
+        public void AddTopologyContstraint()
         {
             var ppc = new TopologyConstraint(de.Draft.DraftLines.ToArray(), de.Draft);
             de.Draft.AddConstraint(ppc);
         }
+        private void button12_Click(object sender, EventArgs e)
+        {
+            
+        }
 
-        private void button13_Click(object sender, EventArgs e)
+        public void SolveCSP()
         {
             if (!de.Draft.Solve())
             {
                 DebugHelpers.Error("constraints satisfaction error");
             }
         }
+        private void button13_Click(object sender, EventArgs e)
+        {
+            
+        }
 
-        private void button14_Click(object sender, EventArgs e)
+        public void RandomSolve()
         {
             de.Draft.RandomSolve();
+        }
+        private void button14_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void matrixEditToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeListView1.SelectedObjects.Count <= 0) return;
+            if (treeListView1.SelectedObject is IDrawable d)
+            {
+                GUIHelpers.EditorStart(d.Matrix, $"{d.Name}: matrix", typeof(Matrix4dPropEditor), false);
+            }
+        }
+
+        private void stepToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBox4_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
     }
 

@@ -110,7 +110,18 @@ namespace LiteCAD.DraftEditor
                     var rad = (float)el.Radius * ctx.zoom;
                     var tr = ctx.Transform(item0.X, item0.Y);
 
-                    ctx.DrawCircle(selected.Contains(el) ? Pens.Blue : Pens.Black, tr.X, tr.Y, rad);
+                    Pen p = new Pen(selected.Contains(el) ? Color.Blue : Color.Black);
+
+                    if (el.Dummy)
+                        p.DashPattern = new float[] { 10, 10 };
+                    if (nearest == el.Center || selected.Contains(el.Center))
+                    {
+                        p.Width = 2;
+                        p.Color = Color.Blue;
+                        ctx.DrawCircle(p, tr.X, tr.Y, rad);
+                    }
+                    else
+                        ctx.DrawCircle(p, tr.X, tr.Y, rad);
 
                     float gp = 5;
                     tr = ctx.Transform(el.Center.X, el.Center.Y);
@@ -248,6 +259,8 @@ namespace LiteCAD.DraftEditor
             sw.Stop();
             var ms = sw.ElapsedMilliseconds;
             LastRenderTime = ms;
+            ctx.DrawString("current tool: " + Form1.Form.CurrentTool.GetType().Name, SystemFonts.DefaultFont, Brushes.Black, 5, 5);
+
         }
         public long LastRenderTime;
 
@@ -260,7 +273,12 @@ namespace LiteCAD.DraftEditor
             {
                 if ((Control.ModifierKeys & Keys.Shift) != 0)
                 {
-                    
+
+                }
+                else
+                if ((Control.ModifierKeys & Keys.Control) != 0)
+                {
+
                 }
                 else
                 {
@@ -442,6 +460,11 @@ namespace LiteCAD.DraftEditor
                         selected = selected.Except(tt).ToArray();
                     }
                     else
+                    if ((Control.ModifierKeys & Keys.Control) != 0)
+                    {
+                        selected = selected.Union(tt).ToArray();
+                    }
+                    else
                         selected = tt;
                     Form1.Form.SetStatus($"selected: {tt.Count()} points");
                 }
@@ -470,9 +493,16 @@ namespace LiteCAD.DraftEditor
 
         public void FitAll()
         {
-            if (_draft == null || _draft.DraftPoints.Count() == 0) return;
+            if (_draft == null || _draft.Elements.Count() == 0) return;
 
             var t = _draft.DraftPoints.Select(z => z.Location).ToArray();
+            var t2 = _draft.DraftEllipses.SelectMany(z => new[] {
+                new Vector2d(z.Center.X - (double)z.Radius, z.Center.Y-(double)z.Radius) ,
+                new Vector2d(z.Center.X + (double)z.Radius, z.Center.Y+(double)z.Radius) ,
+
+            }).ToArray();
+            t = t.Union(t2).ToArray();
+
             ctx.FitToPoints(t.Select(z => z.ToPointF()).ToArray(), 5);
         }
         public static Type DrawerType = typeof(SkiaGLDrawingContext);
@@ -696,6 +726,31 @@ namespace LiteCAD.DraftEditor
             foreach (var item in points)
             {
                 item.SetLocation(item.Location + r);
+            }
+        }
+
+        private void offsetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dummyAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var l = Draft.DraftLines.Where(z => selected.Contains(z.V0) && selected.Contains(z.V1)).OfType<DraftElement>().ToArray();
+            l = l.Union(Draft.DraftEllipses.Where(z => selected.Contains(z.Center)).ToArray()).ToArray();
+            foreach (var item in l)
+            {
+                item.Dummy = true;
+            }
+        }
+
+        private void undummyAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var l = Draft.DraftLines.Where(z => selected.Contains(z.V0) && selected.Contains(z.V1)).OfType<DraftElement>().ToArray();
+            l = l.Union(Draft.DraftEllipses.Where(z => selected.Contains(z.Center)).ToArray()).ToArray();
+            foreach (var item in l)
+            {
+                item.Dummy = false;
             }
         }
     }

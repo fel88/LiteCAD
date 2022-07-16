@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("LiteCAD")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("CAD system for designing simple parts")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("https://github.com/fel88")]
 [assembly: AssemblyProduct("LiteCAD")]
-[assembly: AssemblyCopyright("Copyright ©  2021")]
+[assembly: AssemblyCopyright("Copyleft ©  2021-2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

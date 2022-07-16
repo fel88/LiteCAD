@@ -14,6 +14,7 @@ namespace LiteCAD
             InitializeComponent();
             ElementHost elementHost1 = new ElementHost();
             Ribbon = new RibbonMenuWpf();
+            Ribbon.DataContext = Form1.Form;
             elementHost1.Child = Ribbon;
             Controls.Add(elementHost1);
             elementHost1.Dock = DockStyle.Fill;

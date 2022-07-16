@@ -107,6 +107,12 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AboutBox1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AboutBox1.Designer.cs">
+      <DependentUpon>AboutBox1.cs</DependentUpon>
+    </Compile>
     <Compile Include="AbstractDraftTool.cs" />
     <Compile Include="AbstractTool.cs" />
     <Compile Include="Camera.cs" />
@@ -212,6 +218,9 @@
     <Compile Include="Tools\RectDraftTool.cs" />
     <Compile Include="Tools\SelectionTool.cs" />
     <Compile Include="Tools\VerticalConstraintTool.cs" />
+    <EmbeddedResource Include="AboutBox1.resx">
+      <DependentUpon>AboutBox1.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DraftEditor\DraftEditor.resx">
       <DependentUpon>DraftEditor.cs</DependentUpon>
     </EmbeddedResource>
@@ -290,6 +299,13 @@
     <Resource Include="Icons\magnifier.ico" />
     <Resource Include="Icons\arrow-curve-180-left.ico" />
     <Resource Include="Icons\arrow-resize.ico" />
+    <Resource Include="Icons\eraser.ico" />
+    <Resource Include="Icons\cross-button.ico" />
+    <Resource Include="Icons\layer-shape-ellipse.ico" />
+    <Resource Include="Icons\layer-shape-line.ico" />
+    <Resource Include="Icons\layer-shape.ico" />
+    <Resource Include="Icons\light-bulb.ico" />
+    <Resource Include="Icons\question.png" />
     <Content Include="ruler-triangle.ico" />
   </ItemGroup>
   <ItemGroup>

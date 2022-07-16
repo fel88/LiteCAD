@@ -33,9 +33,12 @@
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.detectCOMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.approxByCircleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.translateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.offsetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.dummyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dummyAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.undummyAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -46,9 +49,10 @@
             this.detectCOMToolStripMenuItem,
             this.approxByCircleToolStripMenuItem,
             this.translateToolStripMenuItem,
-            this.offsetToolStripMenuItem});
+            this.offsetToolStripMenuItem,
+            this.dummyToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 136);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 158);
             // 
             // deleteToolStripMenuItem
             // 
@@ -71,12 +75,6 @@
             this.approxByCircleToolStripMenuItem.Text = "approx by circle";
             this.approxByCircleToolStripMenuItem.Click += new System.EventHandler(this.approxByCircleToolStripMenuItem_Click);
             // 
-            // timer1
-            // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 15;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
             // translateToolStripMenuItem
             // 
             this.translateToolStripMenuItem.Name = "translateToolStripMenuItem";
@@ -89,6 +87,36 @@
             this.offsetToolStripMenuItem.Name = "offsetToolStripMenuItem";
             this.offsetToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.offsetToolStripMenuItem.Text = "offset";
+            this.offsetToolStripMenuItem.Click += new System.EventHandler(this.offsetToolStripMenuItem_Click);
+            // 
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Interval = 15;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+            // dummyToolStripMenuItem
+            // 
+            this.dummyToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dummyAllToolStripMenuItem,
+            this.undummyAllToolStripMenuItem});
+            this.dummyToolStripMenuItem.Name = "dummyToolStripMenuItem";
+            this.dummyToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.dummyToolStripMenuItem.Text = "dummy";
+            // 
+            // dummyAllToolStripMenuItem
+            // 
+            this.dummyAllToolStripMenuItem.Name = "dummyAllToolStripMenuItem";
+            this.dummyAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.dummyAllToolStripMenuItem.Text = "dummy all";
+            this.dummyAllToolStripMenuItem.Click += new System.EventHandler(this.dummyAllToolStripMenuItem_Click);
+            // 
+            // undummyAllToolStripMenuItem
+            // 
+            this.undummyAllToolStripMenuItem.Name = "undummyAllToolStripMenuItem";
+            this.undummyAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.undummyAllToolStripMenuItem.Text = "undummy all";
+            this.undummyAllToolStripMenuItem.Click += new System.EventHandler(this.undummyAllToolStripMenuItem_Click);
             // 
             // DraftEditorControl
             // 
@@ -109,5 +137,8 @@
         private System.Windows.Forms.ToolStripMenuItem approxByCircleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem translateToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem offsetToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dummyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dummyAllToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem undummyAllToolStripMenuItem;
     }
 }

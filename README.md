@@ -16,8 +16,8 @@ Simple CAD for designing 2D/3D parts and assemblies  :straight_ruler:
 <img src="imgs/2.jpg"/>
 
 <p align="center">
-<img height="300" src="imgs/3.jpg"/>
-<img height="300" src="imgs/1.jpg"/>
+<img height="250" src="imgs/3.jpg"/>
+<img height="250" src="imgs/1.jpg"/>
   
 </p>
 

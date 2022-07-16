@@ -10,13 +10,13 @@ using System.Xml.Linq;
 
 namespace LiteCAD.Common
 {
-    public class PlaneHelper : AbstractDrawable, IEditFieldsContainer
+    public class PlaneHelper : AbstractDrawable, IEditFieldsContainer, ICommandsContainer
     {
         public PlaneHelper()
         {
 
         }
-
+        
         public PlaneHelper(XElement elem)
         {
             if (elem.Attribute("name") != null)
@@ -169,6 +169,10 @@ namespace LiteCAD.Common
         }
 
         public bool Fill { get; set; }
+
+        public static List<ICommand> Commands = new List<ICommand>();
+        ICommand[] ICommandsContainer.Commands => Commands.ToArray();
+
         public double[] GetKoefs()
         {
             double[] ret = new double[4];
@@ -236,4 +240,14 @@ namespace LiteCAD.Common
             return ret.ToArray();
         }
     }
+
+    public interface ICommand
+    {
+        string Name { get; }
+        Action<IDrawable, object> Process { get; }
+    }
+    public interface ICommandsContainer
+    {
+        ICommand[] Commands { get; }        
+    }    
 }

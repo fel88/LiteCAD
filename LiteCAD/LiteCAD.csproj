@@ -118,6 +118,14 @@
     <Compile Include="Camera.cs" />
     <Compile Include="CameraViewManager.cs" />
     <Compile Include="DefaultCameraViewManager.cs" />
+    <Compile Include="Dialogs\OffsetDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\OffsetDialog.Designer.cs">
+      <DependentUpon>OffsetDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DraftEditor\ClipperHelper.cs" />
+    <Compile Include="ComboBoxItem.cs" />
     <Compile Include="DraftEditor\DraftEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -220,6 +228,9 @@
     <Compile Include="Tools\VerticalConstraintTool.cs" />
     <EmbeddedResource Include="AboutBox1.resx">
       <DependentUpon>AboutBox1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\OffsetDialog.resx">
+      <DependentUpon>OffsetDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DraftEditor\DraftEditor.resx">
       <DependentUpon>DraftEditor.cs</DependentUpon>

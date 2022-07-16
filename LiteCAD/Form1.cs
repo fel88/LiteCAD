@@ -27,6 +27,64 @@ namespace LiteCAD
 {
     public partial class Form1 : Form, IEditor
     {
+
+        static Form1()
+        {
+            //add new commands 
+            PlaneHelper.Commands.Add(new CutByPlaneCommand());
+
+        }
+
+        public class CutByPlaneCommand : ICommand
+        {
+            public string Name => "cut by plane";
+
+            public Action<IDrawable, object> Process => (owner, editor) =>
+            {
+                var form = editor as Form1;
+                var models = form.treeListView1.SelectedObjects.OfType<IPlaneSplittable>().ToArray();
+                if (models.Length == 0) return;
+                var ph = form.treeListView1.SelectedObjects.OfType<PlaneHelper>().FirstOrDefault();
+                if (ph == null) return;
+
+                var pnts = models.SelectMany(z => z.SplitPyPlane(ph));
+
+                //project all to ph
+                //var proj = pnts.Select(ph.ProjPoint).ToList();
+                var lines = pnts.ToList();
+                Draft d = new Draft() { Name = "cut-by-plane" };
+                float closeEps = 1e-3f;
+                /*Group gr = new Group() { Name = "cut-by-plane-lines" };
+                Parts.Add(gr);
+                foreach (var item in lines)
+                {
+                    gr.Childs.Add(new LineHelper(item));
+                }*/
+                foreach (var line in lines)
+                {
+                    var uv1 = ph.ProjectPointUV(line.Start);
+                    var uv2 = ph.ProjectPointUV(line.End);
+                    var fd1 = d.DraftPoints.FirstOrDefault(z => (z.Location - uv1).Length < closeEps);
+                    var fd2 = d.DraftPoints.FirstOrDefault(z => (z.Location - uv2).Length < closeEps);
+                    if (fd1 == null)
+                    {
+                        fd1 = new DraftPoint(d, uv1.X, uv1.Y);
+                        d.AddElement(fd1);
+                    }
+                    if (fd2 == null)
+                    {
+                        fd2 = new DraftPoint(d, uv2.X, uv2.Y);
+                        d.AddElement(fd2);
+                    }
+
+                    d.AddElement(new DraftLine(fd1, fd2, d));
+                }
+
+                form.Parts.Add(d);
+                form.updateList();
+            };
+        }
+
         RibbonMenu menu;
         public static Form1 Form;
         private void Form1_Load(object sender, EventArgs e)
@@ -42,7 +100,7 @@ namespace LiteCAD
             Application.AddMessageFilter(mf);
 
             tableLayoutPanel1.ColumnStyles[2].Width = 0;
-        }        
+        }
 
         MessageFilter mf = null;
         GLControl glControl;
@@ -684,7 +742,7 @@ namespace LiteCAD
         }
         private void button2_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         public void ViewY()
@@ -695,7 +753,7 @@ namespace LiteCAD
         }
         private void button3_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         public void ViewZ()
@@ -706,7 +764,7 @@ namespace LiteCAD
         }
         private void button4_Click(object sender, EventArgs e)
         {
-            
+
         }
 
 
@@ -801,10 +859,11 @@ namespace LiteCAD
             cam.OrthoWidth = (float)Math.Max(dx, dy);
         }
         Vector3d[] getAllPoints()
-        {
+        {   
             var t1 = Parts.OfType<IMesh>().ToArray();
             var ad = Parts.OfType<AbstractDrawable>().ToArray();
-            var t2 = ad.SelectMany(z => z.GetAll((xx) => xx is IMesh)).OfType<IMesh>();
+            var t2 = ad.SelectMany(z => z.GetAll((xx) => xx is IMesh)).OfType<IMesh>();           
+            
             var p1 = getAllPoints(t1.Union(t2).ToArray());
 
             //var p1 = getAllPoints(Parts.OfType<Part>().ToArray());
@@ -878,7 +937,11 @@ namespace LiteCAD
                     GUIHelpers.Warning("you can't delete edited draft", Text);
                     continue;
                 }
+                if (item is ExtrudeModifier em)
+                {
 
+
+                }
                 if (item is DraftElement de)
                 {
                     de.Parent.RemoveElement(de);
@@ -1447,7 +1510,7 @@ namespace LiteCAD
             }
         }
 
-        void updateList()
+        public void updateList()
         {
             /*var grp = new Group() { Name = "root" };
             grp.Childs.AddRange(Parts);
@@ -1456,7 +1519,7 @@ namespace LiteCAD
         }
         private void toolStripButton6_Click(object sender, EventArgs e)
         {
-            Extrude();            
+            Extrude();
         }
         public void Extrude()
         {
@@ -1636,46 +1699,7 @@ namespace LiteCAD
 
         private void cutAllByPlaneToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var models = treeListView1.SelectedObjects.OfType<IPlaneSplittable>().ToArray();
-            if (models.Length == 0) return;
-            var ph = treeListView1.SelectedObjects.OfType<PlaneHelper>().FirstOrDefault();
-            if (ph == null) return;
 
-            var pnts = models.SelectMany(z => z.SplitPyPlane(ph));
-
-            //project all to ph
-            //var proj = pnts.Select(ph.ProjPoint).ToList();
-            var lines = pnts.ToList();
-            Draft d = new Draft() { Name = "cut-by-plane" };
-            float closeEps = 1e-3f;
-            /*Group gr = new Group() { Name = "cut-by-plane-lines" };
-            Parts.Add(gr);
-            foreach (var item in lines)
-            {
-                gr.Childs.Add(new LineHelper(item));
-            }*/
-            foreach (var line in lines)
-            {
-                var uv1 = ph.ProjectPointUV(line.Start);
-                var uv2 = ph.ProjectPointUV(line.End);
-                var fd1 = d.DraftPoints.FirstOrDefault(z => (z.Location - uv1).Length < closeEps);
-                var fd2 = d.DraftPoints.FirstOrDefault(z => (z.Location - uv2).Length < closeEps);
-                if (fd1 == null)
-                {
-                    fd1 = new DraftPoint(d, uv1.X, uv1.Y);
-                    d.AddElement(fd1);
-                }
-                if (fd2 == null)
-                {
-                    fd2 = new DraftPoint(d, uv2.X, uv2.Y);
-                    d.AddElement(fd2);
-                }
-
-                d.AddElement(new DraftLine(fd1, fd2, d));
-            }
-
-            Parts.Add(d);
-            updateList();
         }
 
         private void groupToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1733,7 +1757,7 @@ namespace LiteCAD
         {
             adjointUI();
         }
-       public void adjointUI()
+        public void adjointUI()
         {
             SetTool(new AdjoinTool(this));
             uncheckedAllToolButtons();
@@ -1795,7 +1819,7 @@ namespace LiteCAD
 
         private void button10_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         public void PointAnchor()
@@ -1810,7 +1834,7 @@ namespace LiteCAD
         }
         private void button11_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         public void AddTopologyContstraint()
@@ -1820,7 +1844,7 @@ namespace LiteCAD
         }
         private void button12_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         public void SolveCSP()
@@ -1832,7 +1856,7 @@ namespace LiteCAD
         }
         private void button13_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         public void RandomSolve()
@@ -1841,7 +1865,7 @@ namespace LiteCAD
         }
         private void button14_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void matrixEditToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1861,6 +1885,33 @@ namespace LiteCAD
         private void checkBox4_CheckedChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+
+        }
+
+        private void commandsToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            commandsToolStripMenuItem.DropDownItems.Clear();
+            if (treeListView1.SelectedObjects.Count == 0) return;
+            
+            var pt = treeListView1.PointToClient(contextMenuStrip1.Bounds.Location);
+            var cc = (treeListView1.GetItemAt(pt.X, pt.Y) as BrightIdeasSoftware.OLVListItem).RowObject as ICommandsContainer;
+            if (cc == null) return;
+            List<IDrawable> all = new List<IDrawable>();
+            for (int i = 0; i < treeListView1.SelectedObjects.Count; i++)
+            {
+                all.Add(treeListView1.SelectedObjects[i] as IDrawable);
+            }
+
+            foreach (var item in cc.Commands)
+            {
+                var ccc = new ToolStripMenuItem(item.Name);
+                commandsToolStripMenuItem.DropDownItems.Add(ccc);
+                ccc.Click += (s, ee) => { item.Process(cc as IDrawable, this); };
+            }
         }
     }
 

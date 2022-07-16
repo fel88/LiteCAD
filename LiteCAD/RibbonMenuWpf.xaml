@@ -56,11 +56,10 @@
                     <RibbonButton  Label="Extrude" KeyTip="X" Click="RibbonButton_Click_3"  SmallImageSource="Icons/arrow-skip-090.ico"/>
                     <RibbonToggleButton x:Name="adjointButton"  Label="Adjoint" KeyTip="X" SmallImageSource="Icons/magnet.ico" Click="adjointButton_Click" />
                 </RibbonGroup>
-                <RibbonGroup x:Name="camera" Header="Camera ">
-                    
+                <RibbonGroup x:Name="camera" Header="Camera ">                    
                     <RibbonButton Click="RibbonButton_Click_6" Label="X view" KeyTip="X"   />
-                    <RibbonButton  Label="Y view" KeyTip="X"   />
-                    <RibbonButton  Label="Z view" KeyTip="X"   />
+                    <RibbonButton  Label="Y view" KeyTip="X" Click="RibbonButton_Click_7"   />
+                    <RibbonButton  Label="Z view" KeyTip="X" Click="RibbonButton_Click_8"  />
                     <RibbonButton  Click="RibbonButton_Click_5" Label="Reset camera" KeyTip="X"   />
                     <RibbonToggleButton  x:Name="showNormalsToggle"  Label="Show normals" Click="RibbonToggleButton_Click" KeyTip="X"   />
                 </RibbonGroup>
@@ -98,7 +97,8 @@
                 </RibbonGroup>
                 <RibbonGroup x:Name="operts" Header="Operators ">
                     <RibbonButton x:Name="flipH"  Label="Flip horizontal" KeyTip="X"  />
-                    
+                    <RibbonButton x:Name="array"  Label="Array" KeyTip="X"  />
+                    <RibbonButton x:Name="offset"  Label="Offset" KeyTip="X"  />
                 </RibbonGroup>
                 <RibbonGroup x:Name="misc" Header="Misc ">
                     

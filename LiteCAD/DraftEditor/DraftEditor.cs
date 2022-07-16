@@ -13,6 +13,9 @@ using System.Xml.Linq;
 using SkiaSharp;
 using System.Diagnostics;
 using LiteCAD.PropEditors;
+using ClipperLib;
+using System.Globalization;
+using LiteCAD.Dialogs;
 
 namespace LiteCAD.DraftEditor
 {
@@ -653,7 +656,8 @@ namespace LiteCAD.DraftEditor
 
         internal void CloseLine()
         {
-            _draft.Elements.Add(new DraftLine(_draft.DraftPoints.First(), _draft.DraftPoints.Last(), _draft));
+            if (_draft.DraftPoints.Any())
+                _draft.Elements.Add(new DraftLine(_draft.DraftPoints.First(), _draft.DraftPoints.Last(), _draft));
         }
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -731,7 +735,64 @@ namespace LiteCAD.DraftEditor
 
         private void offsetToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            OffsetDialog od = new OffsetDialog();
+            if (od.ShowDialog() != DialogResult.OK) return;
 
+            NFP p = new NFP();
+            NFP ph2 = new NFP();
+            //restore contours
+
+            var l = Draft.DraftLines.Where(z => selected.Contains(z.V0) && selected.Contains(z.V1)).OfType<DraftElement>().ToArray();
+            var l2 = Draft.DraftEllipses.Where(z => selected.Contains(z.Center)).ToArray();
+
+            //restore contours
+            /*    l = l.Union(Draft.DraftEllipses.Where(z => selected.Contains(z.Center)).ToArray()).ToArray();
+                foreach (var item in l)
+                {
+                    item.Dummy = true;
+                }*/
+
+            //p.Points = ph2.Polygon.Points.Select(z => new Vector2d(z.X, z.Y)).ToArray();
+            var jType = od.JoinType;
+            double offset = od.Offset;
+            double miterLimit = 4;
+            double curveTolerance = 0.25;
+            var offs = ClipperHelper.offset(p, offset, jType, curveTolerance: curveTolerance, miterLimit: miterLimit);
+            //if (offs.Count() > 1) throw new NotImplementedException();
+            NFP ph = new NFP();
+            foreach (var item in ph2.Childrens)
+            {
+                var offs2 = ClipperHelper.offset(item, -offset, jType, curveTolerance: curveTolerance, miterLimit: miterLimit);
+                var nfp1 = new NFP();
+                if (offs2.Any())
+                {
+                    //if (offs2.Count() > 1) throw new NotImplementedException();
+                    foreach (var zitem in offs2)
+                    {
+                        nfp1.Points = zitem.Points.Select(z => new Vector2d(z.X, z.Y)).ToArray();
+                        ph.Childrens.Add(nfp1);
+                    }
+                }
+            }
+
+            if (offs.Any())
+            {
+                ph.Points = offs.First().Points.Select(z => new Vector2d(z.X, z.Y)).ToArray();
+            }
+
+            foreach (var item in offs.Skip(1))
+            {
+                var nfp2 = new NFP();
+
+                nfp2.Points = item.Points.Select(z => new Vector2d(z.X, z.Y)).ToArray();
+                ph.Childrens.Add(nfp2);
+
+            }
+
+            /*ph.OffsetX = ph2.OffsetX;
+            ph.OffsetY = ph2.OffsetY;
+            ph.Rotation = ph2.Rotation;
+            dataModel.AddItem(ph);*/
         }
 
         private void dummyAllToolStripMenuItem_Click(object sender, EventArgs e)

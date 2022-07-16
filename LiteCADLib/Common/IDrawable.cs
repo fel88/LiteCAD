@@ -18,11 +18,12 @@ namespace LiteCAD.Common
         IDrawable[] GetAll(Predicate<IDrawable> p);
         void RemoveChild(IDrawable dd);
         void Store(TextWriter writer);
-    }
+    }    
 
     public interface IPartContainer
     {
         int Id { get; }
         Part Part { get; }
+
     }
 }

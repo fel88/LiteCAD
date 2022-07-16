@@ -346,7 +346,7 @@ namespace LiteCAD.Common
         }
 
         internal static string SegmentHashKey(BRep.Segment z, int v)
-        {            
+        {
             return PointHashKey(z.Start, v) + ";" + PointHashKey(z.End, v);
         }
 
@@ -354,11 +354,38 @@ namespace LiteCAD.Common
         {
             var str1 = PointHashKey(z.Start, v);
             var str2 = PointHashKey(z.End, v);
-            if (string.Compare(str1,str2)<0)
+            if (string.Compare(str1, str2) < 0)
             {
                 return str1 + ";" + str2;
             }
             return str2 + ";" + str1;
+        }
+
+        public static double polygonArea(NFP polygon)
+        {
+            double area = 0;
+            int i, j;
+            for (i = 0, j = polygon.Points.Length - 1; i < polygon.Points.Length; j = i++)
+            {
+                area += (polygon.Points[j].X + polygon.Points[i].X) * (polygon.Points[j].Y
+                    - polygon.Points[i].Y);
+            }
+            return 0.5f * area;
+        }
+
+        internal static double signed_area(Vector2d[] polygon)
+        {
+            double area = 0.0;
+
+            int j = 1;
+            for (int i = 0; i < polygon.Length; i++, j++)
+            {
+                j = j % polygon.Length;
+                area += (polygon[j].X - polygon[i].X) * (polygon[j].Y + polygon[i].Y);
+            }
+
+            return area / 2.0;
+
         }
     }
 }

@@ -9,11 +9,28 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using OpenTK.Graphics.OpenGL;
+using System.Drawing;
 
 namespace LiteCAD
 {
-    public class ExtrudeModifier : IDrawable, IEconomicsDetail, IPartContainer, IMeshNodesContainer
-    {
+    public class ExtrudeModifier : IDrawable, IEconomicsDetail, IMesh, IPartContainer, IMeshNodesContainer, ICommandsContainer
+    {        
+        public ICommand[] Commands => new ICommand[] { new ExtractDraftCommand() };
+        public class ExtractDraftCommand : ICommand
+        {
+            public string Name => "extract draft";
+
+            public Action<IDrawable, object> Process => (z, editor) =>
+            {
+                var d = z as ExtrudeModifier;
+                StringWriter sw = new StringWriter();
+                d.Source.Store(sw);
+                var d1 = new Draft(XElement.Parse(sw.ToString()));                
+                Form1.Form.Parts.Add(d1);
+                Form1.Form.updateList();
+            };
+        }
+
         MeshNode[] IMeshNodesContainer.Nodes
         {
             get
@@ -385,18 +402,21 @@ namespace LiteCAD
         protected TransformationChain _matrix = new TransformationChain();
         public TransformationChain Matrix { get => _matrix; set => _matrix = value; }
         public ProduceOperation Operation { get; set; }
+        public Color Color { get; set; } = Color.LightGray;
 
         public void Draw()
         {
             if (!Visible) return;
             if (Part == null) return;
-
+            GL.Color3(Color);
+            GL.Enable(EnableCap.ColorMaterial);
             GL.PushMatrix();
             Matrix4d dd = _matrix.Calc();
             GL.MultMatrix(ref dd);
             Part.Draw();
 
             GL.PopMatrix();
+            GL.Disable(EnableCap.ColorMaterial);
         }
 
         public void RemoveChild(IDrawable dd)
@@ -421,6 +441,20 @@ namespace LiteCAD
         public IDrawable[] GetAll(Predicate<IDrawable> p)
         {
             return Childs.SelectMany(z => z.GetAll(p)).Union(new[] { this }).ToArray();
+        }
+
+        public IEnumerable<Vector3d> GetPoints()        
+        {
+            var nodes = ((IMeshNodesContainer)this).Nodes;
+            List<Vector3d> ret = new List<Vector3d>();
+            foreach (var item in nodes)
+            {
+                foreach (var item2 in item.Triangles)
+                {
+                    ret.AddRange(item2.Vertices.Select(zz => zz.Position));
+                }
+            }
+            return ret.ToArray();
         }
     }
 }

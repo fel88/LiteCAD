@@ -167,5 +167,15 @@ namespace LiteCAD
         {
             Form.AddTopologyContstraint();
         }
+
+        private void RibbonButton_Click_7(object sender, RoutedEventArgs e)
+        {
+            Form.ViewY();
+        }
+
+        private void RibbonButton_Click_8(object sender, RoutedEventArgs e)
+        {
+            Form.ViewZ();
+        }
     }
 }

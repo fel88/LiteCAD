@@ -177,5 +177,15 @@ namespace LiteCAD
         {
             Form.ViewZ();
         }
+
+        private void undo_Click(object sender, RoutedEventArgs e)
+        {
+            Form.Undo();
+        }
+
+        private void offset_Click(object sender, RoutedEventArgs e)
+        {
+            Form.de.OffsetUI();
+        }
     }
 }

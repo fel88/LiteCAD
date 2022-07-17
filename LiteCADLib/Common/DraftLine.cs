@@ -20,10 +20,10 @@ namespace LiteCAD.Common
             V1 = parent.DraftPoints.First(z => z.Id == v1Id);
         }
 
-        public DraftLine(DraftPoint last, DraftPoint draftPoint, Draft parent) : base(parent)
+        public DraftLine(DraftPoint v0, DraftPoint v1, Draft parent) : base(parent)
         {
-            this.V0 = last;
-            this.V1 = draftPoint;
+            this.V0 = v0;
+            this.V1 = v1;
         }
 
         public Vector2d Center => (V0.Location + V1.Location) / 2;

@@ -42,9 +42,9 @@
                     <RibbonButton  Label="Add" KeyTip="C" />-->
                 </RibbonGroup>
                 <RibbonGroup x:Name="FileGroup" Header="File">
-                    <RibbonButton  Label="Open" KeyTip="C" Click="RibbonButton_Click" />
+                    <RibbonButton  Label="Open" KeyTip="C" SmallImageSource="Icons/folder-horizontal-open.png"  Click="RibbonButton_Click" />
                     <RibbonButton  Label="Save as" KeyTip="X"  Click="RibbonButton_Click_4" SmallImageSource="Icons/disk.ico" />
-                    <RibbonMenuButton Label="Export as" KeyTip="V">
+                    <RibbonMenuButton Label="Export as"  SmallImageSource="Icons/blue-document-export.png" KeyTip="V">
                         <RibbonMenuItem  Header="Step" KeyTip="T"/>
                     </RibbonMenuButton>
                     <!--<RibbonButton  Label="Format Painter" KeyTip="FP" />-->
@@ -67,7 +67,7 @@
             <!-- Ribbon Tab #2: -->
             <RibbonTab x:Name="draftTab" IsEnabled="false" Header="Draft" KeyTip="I">
                 <RibbonGroup x:Name="general" Header="General ">
-                    <RibbonButton x:Name="undo"  Label="Undo" KeyTip="X"  SmallImageSource="Icons/arrow-curve-180-left.ico"/>
+                    <RibbonButton x:Name="undo"  Label="Undo" KeyTip="X" Click="undo_Click"  SmallImageSource="Icons/arrow-curve-180-left.ico"/>
                     <RibbonButton x:Name="fitAll"  Label="Fit all" Click="RibbonButton_Click_2" KeyTip="F" SmallImageSource="Icons/magnifier.ico"/>
 
                 </RibbonGroup>
@@ -96,9 +96,9 @@
                     <RibbonButton x:Name="Circle" Click="Circle_Click" Label="Circle" KeyTip="X" SmallImageSource="Icons/layer-shape-ellipse.ico"  />
                 </RibbonGroup>
                 <RibbonGroup x:Name="operts" Header="Operators ">
-                    <RibbonButton x:Name="flipH"  Label="Flip horizontal" KeyTip="X"  />
-                    <RibbonButton x:Name="array"  Label="Array" KeyTip="X"  />
-                    <RibbonButton x:Name="offset"  Label="Offset" KeyTip="X"  />
+                    <RibbonButton x:Name="flipH"  Label="Flip horizontal" SmallImageSource="Icons/layer-flip.png" KeyTip="X"  />
+                    <RibbonButton x:Name="array"  Label="Array" SmallImageSource="Icons/application-tile.png"  KeyTip="X"  />
+                    <RibbonButton x:Name="offset"  Click="offset_Click" SmallImageSource="Icons/layer-resize.png" Label="Offset" KeyTip="X"  />
                 </RibbonGroup>
                 <RibbonGroup x:Name="misc" Header="Misc ">
                     

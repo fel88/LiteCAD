@@ -471,6 +471,48 @@ namespace LiteCAD.DraftEditor
                         selected = tt;
                     Form1.Form.SetStatus($"selected: {tt.Count()} points");
                 }
+                else
+                {
+                    if ((Control.ModifierKeys & Keys.Control) != 0)
+                    {
+                        if (selected.Length == 1)
+                        {
+                            if (selected[0] is DraftLine dl)
+                            {
+                                List<DraftLine> contour = new List<DraftLine>();
+                                contour.Add(dl);
+
+                                //contour select
+                                double eps = 1e-8;
+                                var remains = Draft.DraftLines.Except(new[] { dl }).ToList();
+                                while (true)
+                                {
+                                    DraftLine add = null;
+                                    foreach (var line in remains)
+                                    {
+                                        var v1 = new[] { line.V0, line.V1 };
+                                        if ((contour[0].V0.Location - v1[0].Location).Length < eps
+                                            || (contour[0].V0.Location - v1[1].Location).Length < eps
+                                             || (contour[0].V1.Location - v1[0].Location).Length < eps
+                                              || (contour[0].V1.Location - v1[1].Location).Length < eps
+                                            )
+                                        {
+                                            add = line;
+                                            contour.Insert(0, line);
+                                            break;
+                                        }
+                                    }
+
+                                    if (add == null) break;
+                                    remains.Remove(add);
+                                }
+                                //check closed
+                                //select all
+                                selected = contour.SelectMany(z => new[] { z.V0, z.V1 }).Distinct().OfType<object>().Union(contour.ToArray()).ToArray();
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -733,14 +775,94 @@ namespace LiteCAD.DraftEditor
             }
         }
 
-        private void offsetToolStripMenuItem_Click(object sender, EventArgs e)
+        public void Swap<T>(List<T> ar, int i, int j)
+        {
+            var temp = ar[i];
+            ar[i] = ar[j];
+            ar[j] = temp;
+        }
+        public DraftPoint[] ExtractStripContour(DraftLine[] lines)
+        {
+            List<DraftPoint> ret = new List<DraftPoint>();
+            ret = lines.SelectMany(z => new[] { z.V0, z.V1 }).ToList();
+            //reverse pairs inplace
+            for (int i = 0; i < ret.Count - 2; i += 2)
+            {
+                var cur1 = ret[i];
+                var cur2 = ret[i + 1];
+                var next1 = ret[i + 2];
+                var next2 = ret[i + 3];
+                //find connection point
+                var dist0 = (cur2.Location - next1.Location).Length;
+                var dist1 = (cur1.Location - next2.Location).Length;
+                var dist2 = (cur2.Location - next2.Location).Length;
+                var dist3 = (cur1.Location - next1.Location).Length;
+                var minIndex = new[] { dist0, dist1, dist2, dist3 }.Select((z, ii) => new Tuple<double, int>(z, ii)).OrderBy(z => z.Item1).First().Item2;
+                bool reverse1 = false;
+                bool reverse2 = false;
+                switch (minIndex)
+                {
+                    case 0:
+
+                        break;
+                    case 1:
+                        //reverse both
+                        reverse1 = true;
+                        reverse2 = true;
+                        break;
+                    case 2:
+
+                        reverse2 = true;
+                        break;
+                    case 3:
+                        reverse1 = true;
+                        break;
+                }
+                if (reverse1)
+                {
+                    Swap(ret, i, i + 1);
+                }
+                if (reverse2)
+                {
+                    Swap(ret, i + 2, i + 3);
+                }
+            }
+
+            /*for (int i = 1; i < ret.Count - 2; i += 2)
+            {
+                var cur = ret[i];
+                var forw1 = ret[i + 1];
+                var forw2 = ret[i + 2];
+                var dist0 = (cur.Location - forw1.Location).Length;
+                var dist1 = (cur.Location - forw2.Location).Length;
+                if (dist0 < dist1)
+                {
+
+                }
+                else
+                {
+                    //swap
+                    var temp = ret[i + 1];
+                    ret[i + 1] = ret[i + 2];
+                    ret[i + 2] = temp;
+                }
+            }*/
+            return ret.Distinct().ToArray();
+        }
+
+        public void OffsetUI()
         {
             OffsetDialog od = new OffsetDialog();
             if (od.ShowDialog() != DialogResult.OK) return;
 
+            Backup();
+
             NFP p = new NFP();
             NFP ph2 = new NFP();
             //restore contours
+            var lines = selected.OfType<DraftLine>().ToArray();
+
+            //single contour support only yet
 
             var l = Draft.DraftLines.Where(z => selected.Contains(z.V0) && selected.Contains(z.V1)).OfType<DraftElement>().ToArray();
             var l2 = Draft.DraftEllipses.Where(z => selected.Contains(z.Center)).ToArray();
@@ -753,6 +875,8 @@ namespace LiteCAD.DraftEditor
                 }*/
 
             //p.Points = ph2.Polygon.Points.Select(z => new Vector2d(z.X, z.Y)).ToArray();
+            var strip = ExtractStripContour(lines);
+            p.Points = strip.Select(z => z.Location).ToArray();
             var jType = od.JoinType;
             double offset = od.Offset;
             double miterLimit = 4;
@@ -789,10 +913,27 @@ namespace LiteCAD.DraftEditor
 
             }
 
+            List<DraftPoint> newp = new List<DraftPoint>();
+            for (int i = 0; i < ph.Points.Length; i++)
+            {
+                newp.Add(new DraftPoint(Draft, ph.Points[i].X, ph.Points[i].Y));
+
+            }
+            Draft.Elements.AddRange(newp);
+            for (int i = 1; i <= ph.Points.Length; i++)
+            {
+                Draft.AddElement(new DraftLine(newp[i - 1], newp[i % ph.Points.Length], Draft));
+            }
+
             /*ph.OffsetX = ph2.OffsetX;
             ph.OffsetY = ph2.OffsetY;
             ph.Rotation = ph2.Rotation;
             dataModel.AddItem(ph);*/
+        }
+
+        private void offsetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OffsetUI();
         }
 
         private void dummyAllToolStripMenuItem_Click(object sender, EventArgs e)

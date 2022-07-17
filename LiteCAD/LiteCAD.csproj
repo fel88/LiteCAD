@@ -317,6 +317,12 @@
     <Resource Include="Icons\layer-shape.ico" />
     <Resource Include="Icons\light-bulb.ico" />
     <Resource Include="Icons\question.png" />
+    <Resource Include="Icons\folder-horizontal-open.png" />
+    <Resource Include="Icons\layer-resize.png" />
+    <Resource Include="Icons\application-tile.png" />
+    <Resource Include="Icons\blue-document-export.png" />
+    <Resource Include="Icons\layer-flip-vertical.png" />
+    <Resource Include="Icons\layer-flip.png" />
     <Content Include="ruler-triangle.ico" />
   </ItemGroup>
   <ItemGroup>

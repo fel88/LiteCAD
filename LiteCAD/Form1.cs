@@ -1718,6 +1718,11 @@ namespace LiteCAD
             de.Undo();
         }
 
+        public void Undo()
+        {
+            de.Undo();
+        }
+
         private void toolStripButton17_Click(object sender, EventArgs e)
         {
 

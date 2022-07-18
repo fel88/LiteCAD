@@ -43,7 +43,7 @@ namespace LiteCAD.Common
         {
             if (Childs.Count == 0)
                 return new[] { this };
-            return Childs.SelectMany(z => z.GetAll(p)).ToArray();
+            return new[] { this }.Union(Childs.SelectMany(z => z.GetAll(p))).ToArray();
         }
 
         public bool Visible { get; set; } = true;

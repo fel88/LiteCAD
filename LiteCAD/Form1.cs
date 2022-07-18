@@ -137,6 +137,10 @@ namespace LiteCAD
                 if (item is IDrawable d)
                 {
                     if (!d.Visible) continue;
+                    if (d.Parent != null)
+                    {
+                        if (!d.Parent.Visible) continue;//todo: check all tree up
+                    }
                 }
                 var r = UpdatePickTriangle(item);
                 if (r != null)
@@ -173,6 +177,7 @@ namespace LiteCAD
 
         bool drawAxes = true;
         Vector3d lastHovered;
+        object hovered;
         void Redraw()
         {
             UpdatePickTriangle();
@@ -278,6 +283,7 @@ namespace LiteCAD
             }
 
             CurrentTool.Draw();
+            hovered = null;
             if (pick != null)
             {
                 float pickEps = camera1.OrthoWidth * 0.02f;
@@ -286,10 +292,12 @@ namespace LiteCAD
                 var pp = new[] { pick.Target.V0,
                 pick.Target.V1,pick.Target.V2}.ToArray();
 
+
                 if (pp.Any(uu => (uu - pick.Point).Length < pickEps))
                 {
                     var fr = pp.OrderBy(uu => (uu - pick.Point).Length).First(uu => (uu - pick.Point).Length < pickEps);
                     lastHovered = fr;
+                    hovered = fr;
                     toolStripStatusLabel3.Text = $"hovered point: X: {fr.X:N3} Y: {fr.Y:N3} Z: {fr.Z:N3}";
                     float gap1 = 3;
                     GL.Disable(EnableCap.Lighting);
@@ -309,6 +317,10 @@ namespace LiteCAD
                     if (part is PartInstance pii)
                     {
                         var mtr1 = pii.Matrix.Calc();
+                        if (pii.Parent != null)
+                        {
+                            mtr1 *= pii.Parent.Matrix.Calc();
+                        }
                         frr = part.Part.Nodes.FirstOrDefault(zzz => zzz.Contains(pick.Target, mtr1));
                     }
                     else
@@ -317,6 +329,8 @@ namespace LiteCAD
                     }
                     if (frr != null)
                     {
+                        hovered = frr;
+
                         var face = frr.Parent;
                         GL.Disable(EnableCap.DepthTest);
                         GL.Disable(EnableCap.Lighting);
@@ -325,6 +339,10 @@ namespace LiteCAD
                         if (part is PartInstance pii3)
                         {
                             var ref1 = pii3.Matrix.Calc();
+                            if (pii3.Parent != null)
+                            {
+                                ref1 *= pii3.Parent.Matrix.Calc();
+                            }
                             GL.MultMatrix(ref ref1);
 
                         }
@@ -859,11 +877,11 @@ namespace LiteCAD
             cam.OrthoWidth = (float)Math.Max(dx, dy);
         }
         Vector3d[] getAllPoints()
-        {   
+        {
             var t1 = Parts.OfType<IMesh>().ToArray();
-            var ad = Parts.OfType<AbstractDrawable>().ToArray();
-            var t2 = ad.SelectMany(z => z.GetAll((xx) => xx is IMesh)).OfType<IMesh>();           
-            
+            var ad = Parts.OfType<AbstractDrawable>().Where(z => z.Visible).ToArray();
+            var t2 = ad.SelectMany(z => z.GetAll((xx) => xx is IMesh)).OfType<IMesh>();
+
             var p1 = getAllPoints(t1.Union(t2).ToArray());
 
             //var p1 = getAllPoints(Parts.OfType<Part>().ToArray());
@@ -879,6 +897,8 @@ namespace LiteCAD
             List<Vector3d> vv = new List<Vector3d>();
             foreach (var p in parts)
             {
+                if (p is IDrawable dd && !dd.Visible) continue;
+                
                 vv.AddRange(p.GetPoints());
                 /*var nn = p.Nodes.SelectMany(z => z.Triangles.SelectMany(u => u.Vertices.Select(zz => zz.Position))).ToArray();
                 vv.AddRange(nn);
@@ -1114,7 +1134,28 @@ namespace LiteCAD
         {
             if (keyData == Keys.Decimal)
             {
-                camToSelected(new[] { lastHovered });
+                if (hovered is Vector3d v)
+                    camToSelected(new[] { v });
+                else if (hovered is MeshNode mn)
+                {
+                    var cc = mn.Triangles.Select(z => z.Center());
+                    Vector3d sum = Vector3d.Zero;
+                    foreach (var item in cc)
+                    {
+                        sum += item;
+                    }
+                    sum /= cc.Count();
+                    camToSelected(new[] { sum });
+
+                    //camera perpendicular to face?
+                    /*var t = mn.Triangles.First();
+                    var up = (t.Center() - t.V0).ToVector3();
+                    var nm = t.Normal().ToVector3();
+                    camera1.CamTo = t.V0.ToVector3();
+                    camera1.CamFrom = camera1.CamTo - nm * 100;
+                    camera1.CamUp = up;*/
+
+                }
             }
             return base.ProcessCmdKey(ref msg, keyData);
         }
@@ -1901,7 +1942,7 @@ namespace LiteCAD
         {
             commandsToolStripMenuItem.DropDownItems.Clear();
             if (treeListView1.SelectedObjects.Count == 0) return;
-            
+
             var pt = treeListView1.PointToClient(contextMenuStrip1.Bounds.Location);
             var cc = (treeListView1.GetItemAt(pt.X, pt.Y) as BrightIdeasSoftware.OLVListItem).RowObject as ICommandsContainer;
             if (cc == null) return;

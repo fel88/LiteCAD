@@ -75,6 +75,12 @@ namespace LiteCAD
             if (item.Element("transform") != null)
                 _matrix.RestoreXml(item.Element("transform"));
 
+            if (item.Attribute("color") != null)
+            {
+                var rgb = item.Attribute("color").Value.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToArray();
+                Color = Color.FromArgb(rgb[0], rgb[1], rgb[2]);
+            }
+
             Source = new Draft(item.Element("source").Element("draft"));
             Height = Helpers.ParseDecimal(item.Attribute("height").Value);
             Source.Parent = this;
@@ -429,7 +435,7 @@ namespace LiteCAD
 
         public void Store(TextWriter writer)
         {
-            writer.WriteLine($"<extrude id=\"{Id}\" height=\"{Height}\" visible=\"{Visible}\" name=\"{Name}\">");
+            writer.WriteLine($"<extrude id=\"{Id}\" height=\"{Height}\" visible=\"{Visible}\" name=\"{Name}\" color=\"{Color.R};{Color.G};{Color.B}\">");
             writer.WriteLine("<transform>");
             _matrix.StoreXml(writer);
             writer.WriteLine("</transform>");

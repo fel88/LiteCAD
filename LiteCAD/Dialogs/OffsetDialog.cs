@@ -18,6 +18,8 @@ namespace LiteCAD.Dialogs
         public OffsetDialog()
         {
             InitializeComponent();
+            textBox1.Text = LastOffset.ToString();
+            textBox2.Text = LastCurveTolerance.ToString();
             StartPosition = FormStartPosition.CenterParent;
             var vls = Enum.GetValues(typeof(JoinType));
             foreach (var item in vls)
@@ -28,7 +30,10 @@ namespace LiteCAD.Dialogs
         }
 
         public double Offset;
+        static double LastCurveTolerance = 0.25;
+        public double CurveTolerance;
         public JoinType JoinType = JoinType.jtRound;
+
         private void button1_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.OK;
@@ -41,16 +46,32 @@ namespace LiteCAD.Dialogs
             var t = (ClipperLib.JoinType)(comboBox1.SelectedItem as ComboBoxItem).Tag;
             JoinType = t;
         }
-
+        static double LastOffset = 1;
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             try
             {
                 Offset = Helpers.ParseDouble(textBox1.Text);
+                LastOffset = Offset;
+                textBox1.SetNormalStyle();
             }
             catch (Exception ex)
             {
+                textBox1.SetErrorStyle();
+            }
+        }
 
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                CurveTolerance = Helpers.ParseDouble(textBox2.Text);
+                LastCurveTolerance = CurveTolerance;
+                textBox2.SetNormalStyle();
+            }
+            catch (Exception ex)
+            {
+                textBox2.SetErrorStyle();
             }
         }
     }

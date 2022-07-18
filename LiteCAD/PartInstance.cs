@@ -71,7 +71,12 @@ namespace LiteCAD
         {
             get
             {
+                
                 var mtr = Matrix.Calc();
+                if (Parent!= null)
+                {
+                    mtr *= Parent.Matrix.Calc();
+                }
                 List<MeshNode> ret = new List<MeshNode>();
                 foreach (var item in Part.Part.Nodes)
                 {

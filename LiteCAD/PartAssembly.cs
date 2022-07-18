@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
 
 namespace LiteCAD
 {
@@ -17,6 +19,10 @@ namespace LiteCAD
         public PartAssembly(LiteCADScene scene, XElement item)
         {
             Name = item.Attribute("name").Value;
+
+            if (item.Element("transform") != null)
+                _matrix.RestoreXml(item.Element("transform"));
+
             foreach (var xitem in item.Elements("instance"))
             {
                 if (xitem.Attribute("partId") != null)
@@ -49,7 +55,10 @@ namespace LiteCAD
 
         public override void Store(TextWriter writer)
         {
-            writer.WriteLine($"<assembly name=\"{Name}\">");
+            writer.WriteLine($"<assembly id=\"{Id}\" name=\"{Name}\">");
+            writer.WriteLine("<transform>");
+            _matrix.StoreXml(writer);
+            writer.WriteLine("</transform>");
             foreach (var item in Parts)
             {
                 item.Store(writer);
@@ -63,6 +72,9 @@ namespace LiteCAD
 
         public override void Draw()
         {
+            GL.PushMatrix();
+            Matrix4d dd = _matrix.Calc();
+            GL.MultMatrix(ref dd);
             foreach (var item in Parts)
             {
                 item.Draw();
@@ -71,6 +83,7 @@ namespace LiteCAD
             {
                 item.Draw();
             }
+            GL.PopMatrix();
         }
 
         internal void AddPart(PartInstance partInstance)

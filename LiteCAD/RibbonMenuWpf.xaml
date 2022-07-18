@@ -61,6 +61,11 @@
                     <RibbonButton  Label="Y view" KeyTip="X" Click="RibbonButton_Click_7"   />
                     <RibbonButton  Label="Z view" KeyTip="X" Click="RibbonButton_Click_8"  />
                     <RibbonButton  Click="RibbonButton_Click_5" Label="Reset camera" KeyTip="X"   />
+                  
+                    <RibbonMenuButton Label="Switch" >
+                        <RibbonButton  Click="RibbonButton_Click_9" Label="Switch up" KeyTip="X"   />
+                        <RibbonButton  Click="RibbonButton_Click_10" Label="Switch from" KeyTip="X"   />
+                    </RibbonMenuButton>
                     <RibbonToggleButton  x:Name="showNormalsToggle"  Label="Show normals" Click="RibbonToggleButton_Click" KeyTip="X"   />
                 </RibbonGroup>
             </RibbonTab>

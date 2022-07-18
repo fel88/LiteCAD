@@ -187,5 +187,16 @@ namespace LiteCAD
         {
             Form.de.OffsetUI();
         }
+
+        private void RibbonButton_Click_9(object sender, RoutedEventArgs e)
+        {
+            Form.camera1.CamUp *= -1;
+        }
+
+        private void RibbonButton_Click_10(object sender, RoutedEventArgs e)
+        {
+            var d = Form.camera1.CameraFrom - Form.camera1.CameraTo;
+            Form.camera1.CamFrom = Form.camera1.CameraTo - d;
+        }
     }
 }

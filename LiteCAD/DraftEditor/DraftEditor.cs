@@ -880,7 +880,7 @@ namespace LiteCAD.DraftEditor
             var jType = od.JoinType;
             double offset = od.Offset;
             double miterLimit = 4;
-            double curveTolerance = 0.25;
+            double curveTolerance = od.CurveTolerance;
             var offs = ClipperHelper.offset(p, offset, jType, curveTolerance: curveTolerance, miterLimit: miterLimit);
             //if (offs.Count() > 1) throw new NotImplementedException();
             NFP ph = new NFP();

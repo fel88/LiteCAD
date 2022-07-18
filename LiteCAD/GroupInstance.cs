@@ -32,9 +32,11 @@ namespace LiteCAD
                 var rgb = xitem.Attribute("color").Value.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToArray();
                 Color = Color.FromArgb(rgb[0], rgb[1], rgb[2]);
             }
-            
+
             var groupId = int.Parse(xitem.Attribute("groupId").Value);
-            var ps = scene.Parts.OfType<Group>().First(z => z.Id == groupId);
+            var all = scene.GetAll(z => true).ToArray();
+            var ps = scene.GetAll(z => true).OfType<Group>().First(z => z.Id == groupId);
+            //var ps = scene.Parts.OfType<Group>().First(z => z.Id == groupId);
             Group = ps;
         }
 

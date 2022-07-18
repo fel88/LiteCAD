@@ -14,7 +14,7 @@ namespace LiteCAD
 
         public IDrawable[] GetAll(Predicate<IDrawable> p)
         {
-            var t = Parts.SelectMany(z => z.GetAll(p)).ToArray();
+            var t = Parts.Union(Parts.SelectMany(z => z.GetAll(p))).ToArray();
             return t;
         }
 
@@ -23,7 +23,7 @@ namespace LiteCAD
             FactoryHelper.NewId = 0;
             var doc = XDocument.Load(fileName);
             var root = doc.Descendants("root").First();
-     
+
             int fId = 0;
 
             foreach (var item in root.Elements())

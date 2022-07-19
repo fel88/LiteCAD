@@ -14,12 +14,17 @@ Simple CAD for designing 2D/3D parts and assemblies  :straight_ruler:
 :warning:**Project status:** WIP  :construction::construction_worker: (not all functions are fully supported:warning:)
 
 <img src="imgs/2.jpg"/>
-
 <p align="center">
 <img height="250" src="imgs/3.jpg"/>
 <img height="250" src="imgs/1.jpg"/>
+
   
 </p>
+Draft editor:
+
+<img  src="imgs/4.jpg"/>
+
+
 
 ## References:
 * Original Triangle code by Jonathan Richard Shewchuk, http://www.cs.cmu.edu/~quake/triangle.html

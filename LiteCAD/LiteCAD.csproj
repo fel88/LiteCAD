@@ -118,6 +118,12 @@
     <Compile Include="Camera.cs" />
     <Compile Include="CameraViewManager.cs" />
     <Compile Include="DefaultCameraViewManager.cs" />
+    <Compile Include="Dialogs\ArrayDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\ArrayDialog.Designer.cs">
+      <DependentUpon>ArrayDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\OffsetDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -229,6 +235,9 @@
     <EmbeddedResource Include="AboutBox1.resx">
       <DependentUpon>AboutBox1.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ArrayDialog.resx">
+      <DependentUpon>ArrayDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\OffsetDialog.resx">
       <DependentUpon>OffsetDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -323,6 +332,15 @@
     <Resource Include="Icons\blue-document-export.png" />
     <Resource Include="Icons\layer-flip-vertical.png" />
     <Resource Include="Icons\layer-flip.png" />
+    <Resource Include="Icons\light-bulb-off.png" />
+    <Resource Include="Icons\gear.png" />
+    <Resource Include="Icons\puzzle.png" />
+    <Resource Include="Icons\magnifier-zoom-actual-equal.png" />
+    <Resource Include="Icons\grid.png" />
+    <Resource Include="Icons\blue-document.png" />
+    <Resource Include="Icons\molecule.png" />
+    <Resource Include="Icons\anchor.png" />
+    <Resource Include="Icons\layer-shape-polygon.png" />
     <Content Include="ruler-triangle.ico" />
   </ItemGroup>
   <ItemGroup>

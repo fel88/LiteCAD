@@ -1,4 +1,6 @@
-﻿using LiteCAD.DraftEditor;
+﻿using LiteCAD.BRep;
+using LiteCAD.Common;
+using LiteCAD.DraftEditor;
 using LiteCAD.Tools;
 using System;
 using System.Collections.Generic;
@@ -23,7 +25,6 @@ namespace LiteCAD
 
         private void RibbonWin_Loaded(object sender, RoutedEventArgs e)
         {
-
             Grid child = VisualTreeHelper.GetChild((DependencyObject)sender, 0) as Grid;
             if (child != null)
             {
@@ -141,6 +142,7 @@ namespace LiteCAD
 
         private void allSizesInline_Click(object sender, RoutedEventArgs e)
         {
+            Form.de.Backup();
             var aa = Form.de.Draft.Helpers.OfType<LinearConstraintHelper>();
             foreach (var item in aa)
             {
@@ -197,6 +199,60 @@ namespace LiteCAD
         {
             var d = Form.camera1.CameraFrom - Form.camera1.CameraTo;
             Form.camera1.CamFrom = Form.camera1.CameraTo - d;
+        }
+
+        private void vertConstrBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Form.SetTool(new VerticalConstraintTool(Form.de));
+        }
+
+        private void horConstrBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Form.SetTool(new HorizontalConstraintTool(Form.de));
+        }
+
+        private void equalConstr_Click(object sender, RoutedEventArgs e)
+        {
+            Form.SetTool(new EqualsConstraintTool(Form.de));
+        }
+
+        private void hVis_Click(object sender, RoutedEventArgs e)
+        {
+            Form.de.ShowHelpers = !hVis.IsChecked.Value;
+        }
+
+        private void flipH_Click(object sender, RoutedEventArgs e)
+        {
+            Form.de.FlipHorizontal();
+        }
+
+        private void flipV_Click(object sender, RoutedEventArgs e)
+        {
+            Form.de.FlipVertical();
+        }
+
+        private void translate_Click(object sender, RoutedEventArgs e)
+        {
+            Form.de.TranslateUI();
+        }
+
+        private void RibbonButton_Click_11(object sender, RoutedEventArgs e)
+        {
+            Form.Scene = new LiteCADScene();
+            Form.InfoPanel.Clear();
+            
+            BRepFace.NewId = 0;
+            FactoryHelper.NewId = 0;
+            Form.de.SetDraft(new Common.Draft());
+            Form.updateList();
+            Form.ResetCamera();
+
+        }
+
+        private void array_Click(object sender, RoutedEventArgs e)
+        {
+            Form.de.ArrayUI();
+            
         }
     }
 }

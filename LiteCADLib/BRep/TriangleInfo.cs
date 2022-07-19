@@ -73,7 +73,7 @@ namespace LiteCAD.BRep
             return ret.ToArray();
         }
 
-        internal PlaneHelper GetPlane()
+        public PlaneHelper GetPlane()
         {
             var n0 = V2 - V0;
             var n1 = V1 - V0;

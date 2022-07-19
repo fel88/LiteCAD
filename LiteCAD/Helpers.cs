@@ -23,6 +23,8 @@ namespace LiteCAD
         {
             Form f = new Form() { Text = nm };
             f.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            f.MaximizeBox = false;
+            f.MinimizeBox = false;
             f.StartPosition = FormStartPosition.CenterScreen;
             var cc = Activator.CreateInstance(control) as UserControl;
             (cc as IPropEditor).Init(init);

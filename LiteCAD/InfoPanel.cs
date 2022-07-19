@@ -112,10 +112,15 @@ namespace LiteCAD
             status = !status;
         }
 
-        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        public void Clear()
         {
             Messages.Clear();
             listView1.Items.Clear();
+        }
+
+        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Clear();
         }
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)

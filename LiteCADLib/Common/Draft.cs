@@ -603,7 +603,9 @@ namespace LiteCAD.Common
             if (de is DraftPoint dp)
             {
                 var ww = Elements.OfType<DraftLine>().Where(z => z.V0 == dp || z.V1 == dp).ToArray();
-                foreach (var item in ww)
+                var ww2 = Elements.OfType<DraftEllipse>().Where(z => z.Center == dp).ToArray();
+                var ww3 = ww.OfType<DraftElement>().Union(ww2).ToArray();
+                foreach (var item in ww3)
                 {
                     Constraints.RemoveAll(z => z.ContainsElement(item));
                     Helpers.RemoveAll(z => z.Constraint.ContainsElement(item));

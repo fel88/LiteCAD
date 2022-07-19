@@ -38,6 +38,7 @@ namespace LiteCAD.Tools
                 }
                 else
                 {
+                    Editor.Backup();
                     var p0 = new DraftPoint(_draft, p.X, p.Y);
                     var p1 = new DraftPoint(_draft, firstClick.Value.X, p.Y);
                     var p2 = new DraftPoint(_draft, firstClick.Value.X, firstClick.Value.Y);

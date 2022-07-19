@@ -27,12 +27,10 @@ namespace LiteCAD
 {
     public partial class Form1 : Form, IEditor
     {
-
         static Form1()
-        {
+        {       
             //add new commands 
             PlaneHelper.Commands.Add(new CutByPlaneCommand());
-
         }
 
         public class CutByPlaneCommand : ICommand
@@ -178,6 +176,7 @@ namespace LiteCAD
         bool drawAxes = true;
         Vector3d lastHovered;
         object hovered;
+        Matrix4d hoveredMatrix;
         void Redraw()
         {
             UpdatePickTriangle();
@@ -314,6 +313,7 @@ namespace LiteCAD
                 else if (pick.Model is IPartContainer part && pick.Target != null)
                 {
                     MeshNode frr = null;
+                    Matrix4d hm = Matrix4d.Identity;
                     if (part is PartInstance pii)
                     {
                         var mtr1 = pii.Matrix.Calc();
@@ -322,6 +322,7 @@ namespace LiteCAD
                             mtr1 *= pii.Parent.Matrix.Calc();
                         }
                         frr = part.Part.Nodes.FirstOrDefault(zzz => zzz.Contains(pick.Target, mtr1));
+                        hm = mtr1;
                     }
                     else
                     {
@@ -330,6 +331,7 @@ namespace LiteCAD
                     if (frr != null)
                     {
                         hovered = frr;
+                        hoveredMatrix = hm;
 
                         var face = frr.Parent;
                         GL.Disable(EnableCap.DepthTest);
@@ -378,53 +380,69 @@ namespace LiteCAD
             hoverText.Visible = middleDrag;
             if (middleDrag)
             {
-                if (pick != null)
+                if (hovered is MeshNode mn)
+                {
+                    var snap1 = SnapPoint(startMeasurePick);
+                    if (snap1 != null)
+                    {
+                        var p = mn.Triangles[0].Multiply(hoveredMatrix).GetPlane();
+                        var snap2 = p.ProjPoint(snap1.Value);                         
+                        DrawMeasureLine(snap1.Value, snap2);
+                        hoverText.Text = $"dist: {(snap1.Value - snap2).Length:N4}";
+                    }
+                }
+                else if (pick != null)
                 {
                     var snap2 = SnapPoint(pick);
                     var snap1 = SnapPoint(startMeasurePick);
                     if (snap1 != null && snap2 != null)
                     {
-                        GL.Disable(EnableCap.DepthTest);
-                        GL.LineStipple(1, 0x3F07);
-                        GL.LineWidth(3);
-                        GL.Enable(EnableCap.LineStipple);
-
-                        GL.Color3(Color.White);
-                        GL.Begin(PrimitiveType.Lines);
-                        GL.Vertex3(snap1.Value);
-                        GL.Vertex3(snap2.Value);
-                        GL.End();
-                        GL.LineStipple(1, 0xf8);
-
-                        GL.Color3(Color.Blue);
-                        GL.Begin(PrimitiveType.Lines);
-                        GL.Vertex3(snap1.Value);
-                        GL.Vertex3(snap2.Value);
-                        GL.End();
+                        DrawMeasureLine(snap1.Value, snap2.Value);
                         hoverText.Text = $"dist: {(snap1.Value - snap2.Value).Length:N4}";
-
-                        GL.PointSize(15);
-                        GL.Color3(Color.Black);
-                        GL.Begin(PrimitiveType.Points);
-                        GL.Vertex3(snap1.Value);
-                        GL.Vertex3(snap2.Value);
-                        GL.End();
-
-                        GL.PointSize(10);
-                        GL.Color3(Color.White);
-                        GL.Begin(PrimitiveType.Points);
-                        GL.Vertex3(snap1.Value);
-                        GL.Vertex3(snap2.Value);
-                        GL.End();
-
-                        GL.Disable(EnableCap.LineStipple);
-                        GL.Enable(EnableCap.DepthTest);
                     }
                 }
             }
             GL.Disable(EnableCap.Lighting);
 
             glControl.SwapBuffers();
+        }
+
+        private void DrawMeasureLine(Vector3d snap1, Vector3d snap2)
+        {
+            GL.Disable(EnableCap.DepthTest);
+            GL.LineStipple(1, 0x3F07);
+            GL.LineWidth(3);
+            GL.Enable(EnableCap.LineStipple);
+
+            GL.Color3(Color.White);
+            GL.Begin(PrimitiveType.Lines);
+            GL.Vertex3(snap1);
+            GL.Vertex3(snap2);
+            GL.End();
+            GL.LineStipple(1, 0xf8);
+
+            GL.Color3(Color.Blue);
+            GL.Begin(PrimitiveType.Lines);
+            GL.Vertex3(snap1);
+            GL.Vertex3(snap2);
+            GL.End();
+
+            GL.PointSize(15);
+            GL.Color3(Color.Black);
+            GL.Begin(PrimitiveType.Points);
+            GL.Vertex3(snap1);
+            GL.Vertex3(snap2);
+            GL.End();
+
+            GL.PointSize(10);
+            GL.Color3(Color.White);
+            GL.Begin(PrimitiveType.Points);
+            GL.Vertex3(snap1);
+            GL.Vertex3(snap2);
+            GL.End();
+
+            GL.Disable(EnableCap.LineStipple);
+            GL.Enable(EnableCap.DepthTest);
         }
 
         Vector3d? SnapPoint(IntersectInfo inter)
@@ -743,7 +761,8 @@ namespace LiteCAD
             CurrentTool.MouseDown(e);
         }
 
-        InfoPanel infoPanel = new InfoPanel();
+         InfoPanel infoPanel = new InfoPanel();
+        public InfoPanel InfoPanel => infoPanel;
 
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -898,7 +917,7 @@ namespace LiteCAD
             foreach (var p in parts)
             {
                 if (p is IDrawable dd && !dd.Visible) continue;
-                
+
                 vv.AddRange(p.GetPoints());
                 /*var nn = p.Nodes.SelectMany(z => z.Triangles.SelectMany(u => u.Vertices.Select(zz => zz.Position))).ToArray();
                 vv.AddRange(nn);

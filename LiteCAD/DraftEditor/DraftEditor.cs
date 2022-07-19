@@ -265,6 +265,55 @@ namespace LiteCAD.DraftEditor
             ctx.DrawString("current tool: " + Form1.Form.CurrentTool.GetType().Name, SystemFonts.DefaultFont, Brushes.Black, 5, 5);
 
         }
+
+        internal void ArrayUI()
+        {
+            var points = selected.OfType<DraftPoint>().ToArray();
+            if (points.Length == 0) return;
+
+            ArrayDialog ad = new ArrayDialog();
+            if (ad.ShowDialog() != DialogResult.OK) return;
+
+            Backup();
+            var maxx = points.Max(z => z.X);
+            var maxy = points.Max(z => z.Y);
+            var minx = points.Min(z => z.X);
+            var miny = points.Min(z => z.Y);
+            var width = maxx - minx;
+            var height = maxy - miny;
+
+            var lines = _draft.DraftLines.Where(z => points.Contains(z.V0) && points.Contains(z.V1)).ToArray();
+            var circles = _draft.DraftEllipses.Where(z => points.Contains(z.Center)).ToArray();
+
+            for (int i = 0; i < ad.QtyX; i++)
+            {
+                for (int j = 0; j < ad.QtyY; j++)
+                {
+                    if (i == 0 && j == 0) continue;
+                    var shx = i * (ad.OffsetX + width);
+                    var shy = j * (ad.OffsetY + height);
+                    List<DraftPoint> added = new List<DraftPoint>();
+                    foreach (var item in points)
+                    {
+                        var dp = new DraftPoint(_draft, item.X + shx, item.Y + shy);
+                        _draft.AddElement(dp);
+                        added.Add(dp);
+                    }
+                    foreach (var item in lines)
+                    {
+                        var v0 = added.First(z => (z.Location - (item.V0.Location + new Vector2d(shx, shy))).Length < float.Epsilon);
+                        var v1 = added.First(z => (z.Location - (item.V1.Location + new Vector2d(shx, shy))).Length < float.Epsilon);
+                        _draft.AddElement(new DraftLine(v0, v1, _draft));
+                    }
+                    foreach (var item in circles)
+                    {
+                        var v0 = added.First(z => (z.Location - (item.Center.Location + new Vector2d(shx, shy))).Length < float.Epsilon);                        
+                        _draft.AddElement(new DraftEllipse(v0, item.Radius, _draft));
+                    }
+                }
+            }
+        }
+
         public long LastRenderTime;
 
         public event Action UndosChanged;
@@ -750,17 +799,31 @@ namespace LiteCAD.DraftEditor
 
         internal void FlipHorizontal()
         {
-            var maxy = _draft.DraftPoints.Max(z => z.Y);
-            var miny = _draft.DraftPoints.Min(z => z.Y);
-            var my = (maxy + miny) / 2;
-            for (int i = 0; i < _draft.DraftPoints.Length; i++)
+            var points = selected.OfType<DraftPoint>().ToArray();
+            if (points.Length == 0) return;
+            var maxx = points.Max(z => z.X);
+            var minx = points.Min(z => z.X);
+            var mx = (maxx + minx) / 2;
+            for (int i = 0; i < points.Length; i++)
             {
-                _draft.DraftPoints[i].SetLocation(_draft.DraftPoints[i].X, 2 * my - _draft.DraftPoints[i].Location.Y);
-
+                points[i].SetLocation(2 * mx - points[i].Location.X, points[i].Y);
             }
         }
 
-        private void translateToolStripMenuItem_Click(object sender, EventArgs e)
+        internal void FlipVertical()
+        {
+            var points = selected.OfType<DraftPoint>().ToArray();
+            if (points.Length == 0) return;
+            var maxy = points.Max(z => z.Y);
+            var miny = points.Min(z => z.Y);
+            var my = (maxy + miny) / 2;
+            for (int i = 0; i < points.Length; i++)
+            {
+                points[i].SetLocation(points[i].X, 2 * my - points[i].Location.Y);
+            }
+        }
+
+        public void TranslateUI()
         {
             var points = selected.OfType<DraftPoint>().ToArray();
             if (points.Length == 0) return;
@@ -773,6 +836,10 @@ namespace LiteCAD.DraftEditor
             {
                 item.SetLocation(item.Location + r);
             }
+        }
+        private void translateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TranslateUI();
         }
 
         public void Swap<T>(List<T> ar, int i, int j)

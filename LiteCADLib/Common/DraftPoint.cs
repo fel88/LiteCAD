@@ -8,11 +8,8 @@ namespace LiteCAD.Common
 {
     public class DraftPoint : DraftElement
     {
-
         public Vector2d _location;
         public Vector2d Location { get => _location; private set => _location = value; }
-
-
 
         public double X
         {

@@ -177,12 +177,19 @@
     <Compile Include="PartAssembly.cs" />
     <Compile Include="PartInstance.cs" />
     <Compile Include="ProductionStuff.cs" />
+    <Compile Include="PropEditors\DoublePropEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PropEditors\DoublePropEditor.Designer.cs">
+      <DependentUpon>DoublePropEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="PropEditors\Matrix4dPropEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="PropEditors\Matrix4dPropEditor.Designer.cs">
       <DependentUpon>Matrix4dPropEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="PropEditors\RPNCalc.cs" />
     <Compile Include="PropEditors\Vector2dPropEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -258,6 +265,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="InfoPanel.resx">
       <DependentUpon>InfoPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PropEditors\DoublePropEditor.resx">
+      <DependentUpon>DoublePropEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PropEditors\Matrix4dPropEditor.resx">
       <DependentUpon>Matrix4dPropEditor.cs</DependentUpon>

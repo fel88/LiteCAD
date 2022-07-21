@@ -133,6 +133,7 @@ namespace LiteCAD.DraftEditor
                     {
                         ctx.FillRectangle(Brushes.Blue, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
                     }
+                    ctx.SetPen(p);
                     ctx.DrawRectangle(tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
                 }
 
@@ -1004,9 +1005,10 @@ namespace LiteCAD.DraftEditor
         }
 
         private void dummyAllToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        {         
             var l = Draft.DraftLines.Where(z => selected.Contains(z.V0) && selected.Contains(z.V1)).OfType<DraftElement>().ToArray();
             l = l.Union(Draft.DraftEllipses.Where(z => selected.Contains(z.Center)).ToArray()).ToArray();
+            if(l.Any()) Backup();
             foreach (var item in l)
             {
                 item.Dummy = true;
@@ -1017,6 +1019,7 @@ namespace LiteCAD.DraftEditor
         {
             var l = Draft.DraftLines.Where(z => selected.Contains(z.V0) && selected.Contains(z.V1)).OfType<DraftElement>().ToArray();
             l = l.Union(Draft.DraftEllipses.Where(z => selected.Contains(z.Center)).ToArray()).ToArray();
+            if (l.Any()) Backup();
             foreach (var item in l)
             {
                 item.Dummy = false;

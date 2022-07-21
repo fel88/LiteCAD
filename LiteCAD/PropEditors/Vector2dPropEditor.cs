@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using LiteCAD.Common;
 using OpenTK;
 
 namespace LiteCAD.PropEditors
@@ -19,11 +20,12 @@ namespace LiteCAD.PropEditors
         {
             try
             {
-                vector.Y = double.Parse(textBox2.Text);
+                vector.Y = Helpers.ParseDouble(textBox2.Text);
+                textBox2.SetNormalStyle();
             }
             catch (Exception ex)
             {
-
+                textBox2.SetErrorStyle();
             }
         }
 
@@ -31,11 +33,12 @@ namespace LiteCAD.PropEditors
         {
             try
             {
-                vector.X = double.Parse(textBox1.Text);
+                vector.X = Helpers.ParseDouble(textBox1.Text);
+                textBox1.SetNormalStyle();
             }
             catch (Exception ex)
             {
-
+                textBox1.SetErrorStyle();
             }
         }
 

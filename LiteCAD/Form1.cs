@@ -662,6 +662,11 @@ namespace LiteCAD
                 gi.PropertyDescriptor.SetValue(obj, (Vector3d)ret);
                 //gi.PropertyDescriptor.Name
             }
+            if (gi.PropertyDescriptor.PropertyType == typeof(double))
+            {                
+                var ret = GUIHelpers.EditorStart(gi.Value, gi.PropertyDescriptor.Name, typeof(DoublePropEditor));
+                gi.PropertyDescriptor.SetValue(obj, (double)ret);                
+            }
         }
 
         internal void SetStatus(string v)

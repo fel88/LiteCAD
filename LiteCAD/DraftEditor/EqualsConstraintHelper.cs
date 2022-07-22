@@ -5,11 +5,14 @@ using System.Drawing;
 
 namespace LiteCAD.DraftEditor
 {
-    public class EqualsConstraintHelper : AbstractDrawable, IDraftHelper
+    public class EqualsConstraintHelper : AbstractDrawable, IDraftConstraintHelper
     {
         public readonly EqualsConstraint constraint;
-        public EqualsConstraintHelper(EqualsConstraint c)
+
+        public Draft DraftParent { get; private set; }
+        public EqualsConstraintHelper(Draft parent, EqualsConstraint c)
         {
+            DraftParent = parent;
             constraint = c;
         }
 

@@ -512,6 +512,7 @@ namespace LiteCAD.Common
         }
         public List<DraftElement> Elements = new List<DraftElement>();
         public List<IDraftHelper> Helpers = new List<IDraftHelper>();
+        public IEnumerable<IDraftConstraintHelper> ConstraintHelpers => Helpers.OfType<IDraftConstraintHelper>();
         public List<DraftConstraint> Constraints = new List<DraftConstraint>();
         public void AddHelper(IDraftHelper h)
         {
@@ -579,12 +580,11 @@ namespace LiteCAD.Common
         }
         public override void RemoveChild(IDrawable dd)
         {
-            if (dd is IDraftHelper dh)
+            if (dd is IDraftConstraintHelper dh)
             {
                 Helpers.Remove(dh);
                 Constraints.Remove(dh.Constraint);
             }
-
 
             Childs.Remove(dd);
         }
@@ -598,6 +598,11 @@ namespace LiteCAD.Common
             h.Parent = this;
         }
 
+        public void RemoveElement(IDraftHelper  de)
+        {
+            Helpers.Remove(de);            
+        }
+
         public void RemoveElement(DraftElement de)
         {
             if (de is DraftPoint dp)
@@ -608,12 +613,12 @@ namespace LiteCAD.Common
                 foreach (var item in ww3)
                 {
                     Constraints.RemoveAll(z => z.ContainsElement(item));
-                    Helpers.RemoveAll(z => z.Constraint.ContainsElement(item));
+                    Helpers.RemoveAll(zz => zz is IDraftConstraintHelper z && z.Constraint.ContainsElement(item));
                     Elements.Remove(item);
                 }
             }
             Constraints.RemoveAll(z => z.ContainsElement(de));
-            Helpers.RemoveAll(z => z.Constraint.ContainsElement(de));
+            Helpers.RemoveAll(zz => zz is IDraftConstraintHelper z && z.Constraint.ContainsElement(de));
             Elements.Remove(de);
         }
 

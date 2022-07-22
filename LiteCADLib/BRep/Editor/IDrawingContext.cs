@@ -26,6 +26,12 @@ namespace LiteCAD.BRep.Editor
         void UpdateDrag();
         Control GenerateRenderControl();
         void ResetView();
+        void ResetMatrix();
+        void RotateDegress(float deg);
+        void Translate(double x, double y);
+        void Scale(double x, double y);
+        void PushMatrix();
+        void PopMatrix();
         object Tag { get; set; }
         EventWrapperPictureBox PictureBox { get; set; }
         void InitGraphics();
@@ -38,7 +44,7 @@ namespace LiteCAD.BRep.Editor
 
         void FitToPoints(PointF[] points, int gap = 0);
 
-        void DrawLineTransformed( PointF point, PointF point2);
+        void DrawLineTransformed(PointF point, PointF point2);
 
         PointF BackTransform(PointF p1);
         PointF BackTransform(float x, float y);
@@ -54,12 +60,9 @@ namespace LiteCAD.BRep.Editor
         void FillRoundRectangle(Brush blue, SKRoundRect rr);
         void DrawArrowedLine(Pen p, PointF tr0, PointF tr1, int v);
         void DrawRoundRectangle(Pen pen, SKRoundRect rect);
-        void DrawRectangle( float rxm, float rym, float rdx, float rdy);
+        void DrawRectangle(float rxm, float rym, float rdx, float rdy);
 
         void FillRectangle(Brush blue, float v1, float v2, float v3, float v4);
-
-
-
-
+        void DrawImage(Bitmap image, float x1, float y1, float x2, float y2);
     }
 }

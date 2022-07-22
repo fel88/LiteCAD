@@ -41,7 +41,7 @@ namespace LiteCAD.Tools
                     {
                         Editor.Backup();
                         _draft.AddConstraint(cc);
-                        _draft.AddHelper(new EqualsConstraintHelper(cc));
+                        _draft.AddHelper(new EqualsConstraintHelper(_draft, cc));
                         _draft.Childs.Add(_draft.Helpers.Last());
                     }
                     else

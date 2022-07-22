@@ -71,7 +71,15 @@ namespace LiteCAD.DraftEditor
             if (_draft != null)
             {
                 var dpnts = _draft.DraftPoints.ToArray();
+                if (ShowHelpers)
+                {
+                    foreach (var item in _draft.Helpers.Where(z => z.Z < 0))
+                    {
+                        if (!item.Visible) continue;
 
+                        item.Draw(ctx);
+                    }
+                }
                 ctx.SetPen(Pens.Black);
                 for (int i = 0; i < dpnts.Length; i++)
                 {
@@ -139,7 +147,7 @@ namespace LiteCAD.DraftEditor
 
                 if (ShowHelpers)
                 {
-                    foreach (var item in _draft.Helpers)
+                    foreach (var item in _draft.Helpers.Where(z => z.Z >= 0))
                     {
                         if (!item.Visible) continue;
 
@@ -153,6 +161,8 @@ namespace LiteCAD.DraftEditor
                 pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
                 pen.DashPattern = new float[] { 4.0F, 2.0F, 1.0F, 3.0F };
                 ctx.SetPen(pen);
+                Pen pen2 = new Pen(Color.White, 2);
+
                 var gcur = ctx.GetCursor();
                 var curp = ctx.Transform(gcur);
                 double maxSnapDist = 10 / ctx.zoom;
@@ -215,7 +225,13 @@ namespace LiteCAD.DraftEditor
                 {
 
                 }
+                ctx.SetPen(pen2);
+
                 ctx.DrawLine(ctx.startx, ctx.starty, curp.X, curp.Y);
+                ctx.SetPen(pen);
+
+                ctx.DrawLine(ctx.startx, ctx.starty, curp.X, curp.Y);
+
                 //ctx.gr.DrawLine(pen, ctx.startx, ctx.starty, curp.X, curp.Y);
                 var pp = ctx.BackTransform(new PointF(ctx.startx, ctx.starty));
                 Vector2 v1 = new Vector2(pp.X, pp.Y);
@@ -234,7 +250,12 @@ namespace LiteCAD.DraftEditor
                 {
                     hintText = "[perpendicular] : " + hintText;
                 }
+                var mss = ctx.MeasureString(hintText, SystemFonts.DefaultFont);
+                
+                ctx.FillRectangle(Brushes.White, curp.X + 10, curp.Y, mss.Width, mss.Height);
                 ctx.DrawString(hintText, SystemFonts.DefaultFont, Brushes.Black, curp.X + 10, curp.Y);
+
+
             }
             if (ctx.isLeftDrag)//rect tool
             {
@@ -258,13 +279,24 @@ namespace LiteCAD.DraftEditor
                 Vector2 v2 = new Vector2(gcur.X, gcur.Y);
                 var dist = (v2 - v1).Length;
                 ctx.DrawString(dist.ToString("N2"), SystemFonts.DefaultFont, Brushes.Black, curp.X + 10, curp.Y);
+
+
             }
 
             sw.Stop();
             var ms = sw.ElapsedMilliseconds;
             LastRenderTime = ms;
+
             ctx.DrawString("current tool: " + Form1.Form.CurrentTool.GetType().Name, SystemFonts.DefaultFont, Brushes.Black, 5, 5);
 
+        }
+
+        internal void AddImage()
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+            var bmp = Bitmap.FromFile(ofd.FileName) as Bitmap;
+            Draft.Helpers.Add(new ImageDraftHelper(Draft, bmp));
         }
 
         internal void ArrayUI()
@@ -308,7 +340,7 @@ namespace LiteCAD.DraftEditor
                     }
                     foreach (var item in circles)
                     {
-                        var v0 = added.First(z => (z.Location - (item.Center.Location + new Vector2d(shx, shy))).Length < float.Epsilon);                        
+                        var v0 = added.First(z => (z.Location - (item.Center.Location + new Vector2d(shx, shy))).Length < float.Epsilon);
                         _draft.AddElement(new DraftEllipse(v0, item.Radius, _draft));
                     }
                 }
@@ -648,7 +680,7 @@ namespace LiteCAD.DraftEditor
                     minp = item;
                 }
             }
-            foreach (var item in _draft.Helpers)
+            foreach (var item in _draft.ConstraintHelpers)
             {
                 var d = (item.SnapPoint - _pos).Length;
                 if (d < minl)
@@ -705,7 +737,7 @@ namespace LiteCAD.DraftEditor
             //restore helpers
             foreach (var citem in draft.Constraints)
             {
-                if (draft.Helpers.Any(z => z.Constraint == citem)) continue;
+                if (draft.ConstraintHelpers.Any(z => z.Constraint == citem)) continue;
                 if (citem is LinearConstraint lc)
                 {
                     draft.AddHelper(new LinearConstraintHelper(lc));
@@ -720,7 +752,7 @@ namespace LiteCAD.DraftEditor
                 }
                 if (citem is EqualsConstraint ec)
                 {
-                    _draft.AddHelper(new EqualsConstraintHelper(ec));
+                    _draft.AddHelper(new EqualsConstraintHelper(draft, ec));
                 }
             }
         }
@@ -1005,10 +1037,10 @@ namespace LiteCAD.DraftEditor
         }
 
         private void dummyAllToolStripMenuItem_Click(object sender, EventArgs e)
-        {         
+        {
             var l = Draft.DraftLines.Where(z => selected.Contains(z.V0) && selected.Contains(z.V1)).OfType<DraftElement>().ToArray();
             l = l.Union(Draft.DraftEllipses.Where(z => selected.Contains(z.Center)).ToArray()).ToArray();
-            if(l.Any()) Backup();
+            if (l.Any()) Backup();
             foreach (var item in l)
             {
                 item.Dummy = true;

@@ -66,12 +66,12 @@ namespace LiteCAD.Tools
 
                     foreach (var item in _draft.Constraints.OfType<VerticalConstraint>())
                     {
-                        if (_draft.Helpers.Any(z => z.Constraint == item)) continue;
+                        if (_draft.ConstraintHelpers.Any(z => z.Constraint == item)) continue;
                         _draft.AddHelper(new VerticalConstraintHelper(item));
                     }
                     foreach (var item in _draft.Constraints.OfType<HorizontalConstraint>())
                     {
-                        if (_draft.Helpers.Any(z => z.Constraint == item)) continue;
+                        if (_draft.ConstraintHelpers.Any(z => z.Constraint == item)) continue;
                         _draft.AddHelper(new HorizontalConstraintHelper(item));
                     }
                 }

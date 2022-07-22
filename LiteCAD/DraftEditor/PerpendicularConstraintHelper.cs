@@ -6,7 +6,7 @@ using System.Drawing.Drawing2D;
 
 namespace LiteCAD.DraftEditor
 {
-    public class PerpendicularConstraintHelper : AbstractDrawable, IDraftHelper
+    public class PerpendicularConstraintHelper : AbstractDrawable, IDraftConstraintHelper
     {
         public readonly PerpendicularConstraint constraint;
         public PerpendicularConstraintHelper(PerpendicularConstraint c)
@@ -18,6 +18,8 @@ namespace LiteCAD.DraftEditor
         public DraftConstraint Constraint => constraint;
 
         public bool Enabled { get => constraint.Enabled; set => constraint.Enabled = value; }
+
+        public Draft DraftParent => throw new System.NotImplementedException();
 
         public void Draw(IDrawingContext ctx)
         {

@@ -1,6 +1,7 @@
 ﻿using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -233,7 +234,7 @@ namespace LiteCAD.BRep.Editor
             CurrentPaint.PathEffect = null;
             if (pen.DashStyle != DashStyle.Solid)
             {
-                CurrentPaint.PathEffect = SKPathEffect.CreateDash(pen.DashPattern, 0);
+                CurrentPaint.PathEffect = SKPathEffect.CreateDash(pen.DashPattern, pen.DashOffset);
             }
         }
 
@@ -282,7 +283,46 @@ namespace LiteCAD.BRep.Editor
             Surface = e.Surface;
             PaintAction?.Invoke();
         }
+
+        public override void DrawImage(Bitmap image, float x1, float y1, float x2, float y2)
+        {
+            var s = image.ToSKImage();
+            var temp = CurrentPaint.FilterQuality;
+            CurrentPaint.FilterQuality = SKFilterQuality.High;
+            Canvas.DrawImage(s, new SKRect(x1, y1, x2, y2), CurrentPaint);
+            CurrentPaint.FilterQuality = temp;
+
+        }
+
+        public override void ResetMatrix()
+        {
+            Canvas.ResetMatrix();
+        }
+
+        public override void RotateDegress(float deg)
+        {
+            Canvas.RotateDegrees(deg);
+        }
+
+        public override void Translate(double x, double y)
+        {
+            Canvas.Translate((float)x, (float)y);
+        }
+
+        Stack<SKMatrix> stack = new Stack<SKMatrix>();
+        public override void PushMatrix()
+        {
+            stack.Push(Canvas.TotalMatrix);
+        }
+
+        public override void PopMatrix()
+        {
+            Canvas.SetMatrix(stack.Pop());
+        }
+
+        public override void Scale(double x, double y)
+        {
+            Canvas.Scale((float)x, (float)y);
+        }
     }
-
-
 }

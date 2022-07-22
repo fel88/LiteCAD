@@ -31,7 +31,8 @@ namespace LiteCAD
                 if (item.Name == "draft")
                 {
                     Draft d = new Draft(item);
-                    fId = Math.Max(d.Elements.Max(z => z.Id), fId);
+                    if (d.Elements.Any())
+                        fId = Math.Max(d.Elements.Max(z => z.Id), fId);
                     Parts.Add(d);
                 }
                 if (item.Name == "extrude")

@@ -254,5 +254,10 @@ namespace LiteCAD
             Form.de.ArrayUI();
             
         }
+
+        private void Image_Click(object sender, RoutedEventArgs e)
+        {
+            Form.de.AddImage();
+        }
     }
 }

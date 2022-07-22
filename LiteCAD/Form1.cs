@@ -990,6 +990,10 @@ namespace LiteCAD
                 {
                     de.Parent.RemoveElement(de);
                 }
+                if (item is IDraftHelper dh)
+                {                    
+                    dh.DraftParent.RemoveElement(dh);
+                }
                 if (item is IDrawable dd)
                 {
                     if (dd.Parent == null)

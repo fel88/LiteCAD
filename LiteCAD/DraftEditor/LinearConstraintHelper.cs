@@ -12,7 +12,7 @@ using SkiaSharp;
 namespace LiteCAD.DraftEditor
 {
     [XmlName(XmlName = "linearConstraintHelper")]
-    public class LinearConstraintHelper : AbstractDrawable, IDraftHelper
+    public class LinearConstraintHelper : AbstractDrawable, IDraftConstraintHelper
     {
         public readonly LinearConstraint constraint;
         public LinearConstraintHelper(LinearConstraint c)
@@ -30,6 +30,9 @@ namespace LiteCAD.DraftEditor
         public DraftConstraint Constraint => constraint;
         public int Shift { get; set; } = 10;
         public bool Enabled { get => constraint.Enabled; set => constraint.Enabled = value; }
+
+        public Draft DraftParent => throw new System.NotImplementedException();
+
         public override void Store(TextWriter writer)
         {
             writer.WriteLine($"<linearConstraintHelper constrId=\"{constraint.Id}\" shift=\"{Shift}\" enabled=\"{Enabled}\" snapPoint=\"{SnapPoint.X};{SnapPoint.Y}\"/>");

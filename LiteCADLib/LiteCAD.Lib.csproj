@@ -136,6 +136,7 @@
     <Compile Include="Common\DraftLine.cs" />
     <Compile Include="Common\DraftPoint.cs" />
     <Compile Include="Common\HorizontalConstraint.cs" />
+    <Compile Include="Common\IDraftConstraintHelper.cs" />
     <Compile Include="Common\IDraftHelper.cs" />
     <Compile Include="Common\IXmlStorable.cs" />
     <Compile Include="Common\Line3D.cs" />

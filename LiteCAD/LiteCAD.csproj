@@ -142,6 +142,7 @@
     <Compile Include="DraftEditor\EventWrapperPictureBox.cs" />
     <Compile Include="DraftEditor\HorizontalConstraintHelper.cs" />
     <Compile Include="DraftEditor\IDraftEditor.cs" />
+    <Compile Include="DraftEditor\ImageDraftHelper.cs" />
     <Compile Include="DraftEditor\LinearConstraintHelper.cs" />
     <Compile Include="DraftEditor\LinearConstraintLengthDialog.cs">
       <SubType>Form</SubType>
@@ -351,6 +352,7 @@
     <Resource Include="Icons\molecule.png" />
     <Resource Include="Icons\anchor.png" />
     <Resource Include="Icons\layer-shape-polygon.png" />
+    <Resource Include="Icons\picture.png" />
     <Content Include="ruler-triangle.ico" />
   </ItemGroup>
   <ItemGroup>

@@ -230,10 +230,10 @@ namespace LiteCAD.BRep.Editor
         public abstract void DrawString(string text, Font font, Brush brush, float x, float y);
 
 
-        public abstract void DrawLine( float x0, float y0, float x1, float y1);
+        public abstract void DrawLine(float x0, float y0, float x1, float y1);
 
 
-        public abstract void DrawLine(  PointF pp, PointF pp2);
+        public abstract void DrawLine(PointF pp, PointF pp2);
 
 
         public abstract void FillRoundRectangle(Brush blue, SKRoundRect rr);
@@ -248,13 +248,25 @@ namespace LiteCAD.BRep.Editor
         public abstract void DrawRectangle(float rxm, float rym, float rdx, float rdy);
 
 
-        
+
 
         public abstract void FillRectangle(Brush blue, float v1, float v2, float v3, float v4);
 
         public abstract void Clear(Color white);
 
-        public abstract Control GenerateRenderControl();        
-        
+        public abstract Control GenerateRenderControl();
+
+        public abstract void DrawImage(Bitmap image, float x1, float y1, float x2, float y2);
+
+        public abstract void ResetMatrix();
+
+        public abstract void RotateDegress(float deg);
+
+        public abstract void Translate(double x, double y);
+        public abstract void Scale(double x, double y);
+
+        public abstract void PushMatrix();
+
+        public abstract void PopMatrix();
     }
 }

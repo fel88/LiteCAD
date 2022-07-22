@@ -409,6 +409,7 @@ namespace LiteCAD
         public TransformationChain Matrix { get => _matrix; set => _matrix = value; }
         public ProduceOperation Operation { get; set; }
         public Color Color { get; set; } = Color.LightGray;
+        public int Z { get; set; }
 
         public void Draw()
         {

@@ -112,6 +112,9 @@
                     <RibbonButton x:Name="translate" Click="translate_Click"    Label="Translate" KeyTip="X"  />
                     <RibbonButton x:Name="offset"  Click="offset_Click" SmallImageSource="Icons/layer-resize.png" Label="Offset" KeyTip="X"  />
                 </RibbonGroup>
+                <RibbonGroup x:Name="helpers" Header="Helpers ">
+                    <RibbonButton x:Name="Image" SmallImageSource="Icons/picture.png" Click="Image_Click"  Label="Image" KeyTip="I"  />
+                </RibbonGroup >
                 <RibbonGroup x:Name="misc" Header="Misc ">
 
                     <RibbonButton x:Name="Export" SmallImageSource="Icons/blue-document-export.png" Click="Export_Click"  Label="Export" KeyTip="X"  />

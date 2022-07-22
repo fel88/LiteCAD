@@ -5,7 +5,7 @@ using System.Drawing;
 
 namespace LiteCAD.DraftEditor
 {
-    public class VerticalConstraintHelper : AbstractDrawable, IDraftHelper
+    public class VerticalConstraintHelper : AbstractDrawable, IDraftConstraintHelper
     {
         public readonly VerticalConstraint constraint;
         public VerticalConstraintHelper(VerticalConstraint c)
@@ -17,6 +17,8 @@ namespace LiteCAD.DraftEditor
         public DraftConstraint Constraint => constraint;
 
         public bool Enabled { get => constraint.Enabled; set => constraint.Enabled = value; }
+
+        public Draft DraftParent { get; private set; }
 
         public void Draw(IDrawingContext ctx)
         {

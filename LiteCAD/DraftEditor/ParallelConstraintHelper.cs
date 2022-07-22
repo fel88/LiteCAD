@@ -6,7 +6,7 @@ using System.Drawing.Drawing2D;
 
 namespace LiteCAD.DraftEditor
 {
-    public class ParallelConstraintHelper : AbstractDrawable, IDraftHelper
+    public class ParallelConstraintHelper : AbstractDrawable, IDraftConstraintHelper
     {
         public readonly ParallelConstraint constraint;
         public ParallelConstraintHelper(ParallelConstraint c)
@@ -18,6 +18,8 @@ namespace LiteCAD.DraftEditor
         public DraftConstraint Constraint => constraint;
 
         public bool Enabled { get => constraint.Enabled; set => constraint.Enabled = value; }
+
+        public Draft DraftParent => throw new System.NotImplementedException();
 
         public void Draw(IDrawingContext ctx)
         {

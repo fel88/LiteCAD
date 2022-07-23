@@ -663,9 +663,14 @@ namespace LiteCAD
                 //gi.PropertyDescriptor.Name
             }
             if (gi.PropertyDescriptor.PropertyType == typeof(double))
-            {                
+            {
                 var ret = GUIHelpers.EditorStart(gi.Value, gi.PropertyDescriptor.Name, typeof(DoublePropEditor));
-                gi.PropertyDescriptor.SetValue(obj, (double)ret);                
+                gi.PropertyDescriptor.SetValue(obj, (double)ret);
+            }
+            if (gi.PropertyDescriptor.PropertyType == typeof(Color))
+            {
+                var ret = GUIHelpers.EditorStart(gi.Value, gi.PropertyDescriptor.Name, typeof(ColorPickerDialog));
+                gi.PropertyDescriptor.SetValue(obj, (Color)ret);
             }
         }
 

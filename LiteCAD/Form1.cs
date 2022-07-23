@@ -28,7 +28,7 @@ namespace LiteCAD
     public partial class Form1 : Form, IEditor
     {
         static Form1()
-        {       
+        {
             //add new commands 
             PlaneHelper.Commands.Add(new CutByPlaneCommand());
         }
@@ -386,7 +386,7 @@ namespace LiteCAD
                     if (snap1 != null)
                     {
                         var p = mn.Triangles[0].Multiply(hoveredMatrix).GetPlane();
-                        var snap2 = p.ProjPoint(snap1.Value);                         
+                        var snap2 = p.ProjPoint(snap1.Value);
                         DrawMeasureLine(snap1.Value, snap2);
                         hoverText.Text = $"dist: {(snap1.Value - snap2).Length:N4}";
                     }
@@ -771,7 +771,7 @@ namespace LiteCAD
             CurrentTool.MouseDown(e);
         }
 
-         InfoPanel infoPanel = new InfoPanel();
+        InfoPanel infoPanel = new InfoPanel();
         public InfoPanel InfoPanel => infoPanel;
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -996,7 +996,7 @@ namespace LiteCAD
                     de.Parent.RemoveElement(de);
                 }
                 if (item is IDraftHelper dh)
-                {                    
+                {
                     dh.DraftParent.RemoveElement(dh);
                 }
                 if (item is IDrawable dd)
@@ -1475,6 +1475,43 @@ namespace LiteCAD
                     //item.Triangles
                 }
             }
+        }
+        void exportStl(Part part)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "STL model (*.stl)|*.stl";
+            if (sfd.ShowDialog() != DialogResult.OK) return;
+            Thread th = new Thread(() =>
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"solid {part.Name}");
+                var nodes = part.Nodes.ToArray();
+                for (int i = 0; i < nodes.Length; i++)
+                {
+                    MeshNode item = nodes[i];
+                    DebugHelpers.Progress(true, 100f * (float)i / nodes.Length);
+                    
+                    foreach (var tr in item.Triangles)
+                    {
+                        var nrm = tr.Normal();
+                        sb.AppendLine($"facet normal {nrm.X:0.00000E0} {nrm.Y:0.00000E0} {nrm.Z:0.00000E0}".Replace(",", "."));
+                        sb.AppendLine($"outer loop");
+                        sb.AppendLine($"vertex {tr.V0.X:0.00000E0} {tr.V0.Y:0.00000E0} {tr.V0.Z:0.00000E0}".Replace(",", "."));
+                        sb.AppendLine($"vertex {tr.V1.X:0.00000E0} {tr.V1.Y:0.00000E0} {tr.V1.Z:0.00000E0}".Replace(",", "."));
+                        sb.AppendLine($"vertex {tr.V2.X:0.00000E0} {tr.V2.Y:0.00000E0} {tr.V2.Z:0.00000E0}".Replace(",", "."));
+                        sb.AppendLine($"endloop");
+                        sb.AppendLine($"endfacet");
+                    }
+                }
+                sb.AppendLine($"endsolid {part.Name}");
+                DebugHelpers.Progress(true, 100f);
+
+                File.WriteAllText(sfd.FileName, sb.ToString());
+                DebugHelpers.Progress(false, 100);
+            });
+
+            th.IsBackground = true;
+            th.Start();
         }
 
         void exportDxf(Draft draft)
@@ -1990,6 +2027,24 @@ namespace LiteCAD
                 var ccc = new ToolStripMenuItem(item.Name);
                 commandsToolStripMenuItem.DropDownItems.Add(ccc);
                 ccc.Click += (s, ee) => { item.Process(cc as IDrawable, this); };
+            }
+        }
+
+        private void stlToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeListView1.SelectedObjects.Count <= 0) return;
+            var vv = treeListView1.SelectedObjects.OfType<Part>().ToArray();
+            if (vv.Any())
+            {
+                exportStl(vv[0]);
+            }
+            else
+            {
+                var vv2 = treeListView1.SelectedObjects.OfType<ExtrudeModifier>().ToArray();
+                if (vv2.Any() && vv2[0].Part != null)
+                {
+                    exportStl(vv2[0].Part);
+                }
             }
         }
     }

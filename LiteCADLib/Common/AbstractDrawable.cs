@@ -8,11 +8,12 @@ namespace LiteCAD.Common
 {
     public abstract class AbstractDrawable : IDrawable
     {
-
+        public static IMessageReporter MessageReporter;
         public AbstractDrawable()
         {
             Id = FactoryHelper.NewId++;
         }
+        
         public AbstractDrawable(XElement item)
         {
             if (item.Attribute("id") != null)

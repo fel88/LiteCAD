@@ -15,12 +15,14 @@ namespace LiteCAD.DraftEditor
     public class LinearConstraintHelper : AbstractDrawable, IDraftConstraintHelper
     {
         public readonly LinearConstraint constraint;
-        public LinearConstraintHelper(LinearConstraint c)
+        public LinearConstraintHelper(Draft parent, LinearConstraint c)
         {
+            DraftParent = parent;
             constraint = c;
         }
         public LinearConstraintHelper(XElement el, Draft draft)
         {
+            DraftParent = draft;
             var cid = int.Parse(el.Attribute("constrId").Value);
             constraint = draft.Constraints.OfType<LinearConstraint>().First(z => z.Id == cid);
             Shift = int.Parse(el.Attribute("shift").Value);
@@ -31,7 +33,7 @@ namespace LiteCAD.DraftEditor
         public int Shift { get; set; } = 10;
         public bool Enabled { get => constraint.Enabled; set => constraint.Enabled = value; }
 
-        public Draft DraftParent => throw new System.NotImplementedException();
+        public Draft DraftParent { get; private set; }
 
         public override void Store(TextWriter writer)
         {

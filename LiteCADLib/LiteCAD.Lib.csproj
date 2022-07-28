@@ -138,6 +138,7 @@
     <Compile Include="Common\HorizontalConstraint.cs" />
     <Compile Include="Common\IDraftConstraintHelper.cs" />
     <Compile Include="Common\IDraftHelper.cs" />
+    <Compile Include="Common\IMessageReporter.cs" />
     <Compile Include="Common\IXmlStorable.cs" />
     <Compile Include="Common\Line3D.cs" />
     <Compile Include="Common\LinearConstaint.cs" />

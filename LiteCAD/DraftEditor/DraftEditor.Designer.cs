@@ -35,10 +35,11 @@
             this.approxByCircleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.translateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.offsetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.dummyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dummyAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.undummyAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.mergePointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -50,9 +51,10 @@
             this.approxByCircleToolStripMenuItem,
             this.translateToolStripMenuItem,
             this.offsetToolStripMenuItem,
-            this.dummyToolStripMenuItem});
+            this.dummyToolStripMenuItem,
+            this.mergePointsToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 158);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 180);
             // 
             // deleteToolStripMenuItem
             // 
@@ -89,12 +91,6 @@
             this.offsetToolStripMenuItem.Text = "offset";
             this.offsetToolStripMenuItem.Click += new System.EventHandler(this.offsetToolStripMenuItem_Click);
             // 
-            // timer1
-            // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 15;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
             // dummyToolStripMenuItem
             // 
             this.dummyToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -107,16 +103,29 @@
             // dummyAllToolStripMenuItem
             // 
             this.dummyAllToolStripMenuItem.Name = "dummyAllToolStripMenuItem";
-            this.dummyAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.dummyAllToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.dummyAllToolStripMenuItem.Text = "dummy all";
             this.dummyAllToolStripMenuItem.Click += new System.EventHandler(this.dummyAllToolStripMenuItem_Click);
             // 
             // undummyAllToolStripMenuItem
             // 
             this.undummyAllToolStripMenuItem.Name = "undummyAllToolStripMenuItem";
-            this.undummyAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.undummyAllToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.undummyAllToolStripMenuItem.Text = "undummy all";
             this.undummyAllToolStripMenuItem.Click += new System.EventHandler(this.undummyAllToolStripMenuItem_Click);
+            // 
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Interval = 15;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+            // mergePointsToolStripMenuItem
+            // 
+            this.mergePointsToolStripMenuItem.Name = "mergePointsToolStripMenuItem";
+            this.mergePointsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.mergePointsToolStripMenuItem.Text = "merge points";
+            this.mergePointsToolStripMenuItem.Click += new System.EventHandler(this.mergePointsToolStripMenuItem_Click);
             // 
             // DraftEditorControl
             // 
@@ -140,5 +149,6 @@
         private System.Windows.Forms.ToolStripMenuItem dummyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dummyAllToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem undummyAllToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mergePointsToolStripMenuItem;
     }
 }

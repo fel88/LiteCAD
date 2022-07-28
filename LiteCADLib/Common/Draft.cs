@@ -89,7 +89,25 @@ namespace LiteCAD.Common
                     var fr = types.FirstOrDefault(z => (z.GetCustomAttributes(typeof(XmlNameAttribute), true).First() as XmlNameAttribute).XmlName == item.Name);
                     if (fr == null) continue;
                     var v = Activator.CreateInstance(fr, new object[] { item, this }) as IDraftHelper;
-                    AddHelper(v);
+                    var ch = ConstraintHelpers.ToArray();
+                    if (v is IDraftConstraintHelper dch)
+                    {
+                        if (!ch.Any(z => z.Constraint.Id == dch.Constraint.Id))
+                        {
+                            AddHelper(v);
+                        }
+                        else
+                        {
+                            //todo: warning!
+                            //
+                            if (MessageReporter != null)
+                            {
+                                MessageReporter.Warning($"duplicate constraint helper detected. skipped: {dch.Constraint.Id}");
+                            }
+                        }
+                    }
+                    else
+                        AddHelper(v);
                 }
             }
 
@@ -598,9 +616,9 @@ namespace LiteCAD.Common
             h.Parent = this;
         }
 
-        public void RemoveElement(IDraftHelper  de)
+        public void RemoveElement(IDraftHelper de)
         {
-            Helpers.Remove(de);            
+            Helpers.Remove(de);
         }
 
         public void RemoveElement(DraftElement de)

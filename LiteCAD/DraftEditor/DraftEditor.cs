@@ -282,6 +282,7 @@ namespace LiteCAD.DraftEditor
 
 
             }
+            editor.CurrentTool.Draw();
 
             sw.Stop();
             var ms = sw.ElapsedMilliseconds;
@@ -740,7 +741,7 @@ namespace LiteCAD.DraftEditor
                 if (draft.ConstraintHelpers.Any(z => z.Constraint == citem)) continue;
                 if (citem is LinearConstraint lc)
                 {
-                    draft.AddHelper(new LinearConstraintHelper(lc));
+                    draft.AddHelper(new LinearConstraintHelper(_draft, lc));
                 }
                 if (citem is VerticalConstraint vc)
                 {
@@ -1056,6 +1057,27 @@ namespace LiteCAD.DraftEditor
             {
                 item.Dummy = false;
             }
+        }
+
+        private void mergePointsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var points = selected.OfType<DraftPoint>().ToArray();
+            if (points.Length == 0) return;
+
+            
+            var sx = points.Sum(z => z.X) / points.Length;
+            var sy = points.Sum(z => z.Y) / points.Length;
+            Backup();
+            _draft.AddElement(new DraftPoint(_draft, sx, sy));
+
+            var l = Draft.DraftLines.Where(z => selected.Contains(z.V0) && selected.Contains(z.V1)).OfType<DraftElement>().ToArray();
+                        
+
+            for (int i = 0; i < points.Length; i++)
+            {
+                _draft.RemoveElement(points[i]);
+            }           
+            //todo: add lines
         }
     }
 }

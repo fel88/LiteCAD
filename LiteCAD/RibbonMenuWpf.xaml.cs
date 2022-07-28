@@ -259,5 +259,10 @@ namespace LiteCAD
         {
             Form.de.AddImage();
         }
+
+        private void CutEdge_Click(object sender, RoutedEventArgs e)
+        {
+            Form.CutEdgeStart();
+        }
     }
 }

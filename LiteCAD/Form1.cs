@@ -25,13 +25,13 @@ using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public partial class Form1 : Form, IEditor
+    public partial class Form1 : Form, IEditor, IMessageReporter
     {
         static Form1()
         {
             //add new commands 
             PlaneHelper.Commands.Add(new CutByPlaneCommand());
-        }
+        }        
 
         public class CutByPlaneCommand : ICommand
         {
@@ -485,6 +485,7 @@ namespace LiteCAD
         {
             InitializeComponent();
             LoadSettings();
+            AbstractDrawable.MessageReporter = this;
 
             _currentTool = new SelectionTool(this);
             foreach (Control c in propertyGrid1.Controls)
@@ -1365,6 +1366,10 @@ namespace LiteCAD
             uncheckedAllToolButtons();
             toolStripButton3.Checked = true;
         }
+        public void CutEdgeStart()
+        {
+            SetTool(new CutEdgeTool(de));            
+        }
 
         public void ExitDraft()
         {
@@ -1970,20 +1975,12 @@ namespace LiteCAD
                 DebugHelpers.Error("constraints satisfaction error");
             }
         }
-        private void button13_Click(object sender, EventArgs e)
-        {
-
-        }
-
+        
         public void RandomSolve()
         {
             de.Draft.RandomSolve();
         }
-        private void button14_Click(object sender, EventArgs e)
-        {
-
-        }
-
+        
         private void matrixEditToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;
@@ -1997,12 +1994,7 @@ namespace LiteCAD
         {
 
         }
-
-        private void checkBox4_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
+     
         private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
 
@@ -2046,6 +2038,21 @@ namespace LiteCAD
                     exportStl(vv2[0].Part);
                 }
             }
+        }
+
+        public void Warning(string text)
+        {
+            infoPanel.AddWarning(text);
+        }
+
+        public void Error(string text)
+        {
+            infoPanel.AddError(text);
+        }
+
+        public void Info(string text)
+        {
+            infoPanel.AddInfo(text);
         }
     }
 

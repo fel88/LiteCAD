@@ -73,9 +73,16 @@
                 <RibbonGroup x:Name="settings" Header="Settings ">
                     <RibbonButton  Label="Settings" SmallImageSource="Icons/gear.png" />
                 </RibbonGroup>
+                <RibbonGroup x:Name="blueprint" Header="PCB ">
+                    <RibbonButton x:Name="scheme"    Label="Scheme" KeyTip="I"  />
+                    <RibbonButton x:Name="board"    Label="Board" KeyTip="I"  />
+                    <RibbonButton x:Name="export"    Label="Export" KeyTip="I"  />
+                </RibbonGroup >
             </RibbonTab>
+         
+         
             <!-- Ribbon Tab #2: -->
-            <RibbonTab x:Name="draftTab" IsEnabled="false" Header="Draft" KeyTip="I">
+            <RibbonTab x:Name="draftTab"  IsEnabled="false" Header="Draft" KeyTip="I">
                 <RibbonGroup x:Name="general" Header="General ">
                     <RibbonButton x:Name="undo"  Label="Undo" KeyTip="X" Click="undo_Click"  SmallImageSource="Icons/arrow-curve-180-left.ico"/>
                     <RibbonButton x:Name="fitAll"  Label="Fit all" Click="RibbonButton_Click_2" KeyTip="F" SmallImageSource="Icons/magnifier.ico"/>
@@ -104,6 +111,8 @@
                     <RibbonButton x:Name="CloseLine" SmallImageSource="Icons/layer-shape-polygon.png" Click="CloseLine_Click" Label="Close Line" KeyTip="X"  />
                     <RibbonButton Click="Rectangle_Click" x:Name="Rectangle"  Label="Rectangle" KeyTip="X"  SmallImageSource="Icons/layer-shape.ico"/>
                     <RibbonButton x:Name="Circle" Click="Circle_Click" Label="Circle" KeyTip="X" SmallImageSource="Icons/layer-shape-ellipse.ico"  />
+                    <RibbonButton x:Name="CutEdge" Click="CutEdge_Click"  Label="Cut edge" KeyTip="X" SmallImageSource="Icons/cutter.png"  />
+                    <RibbonButton x:Name="Merge"   Label="Merge" KeyTip="X"   />
                 </RibbonGroup>
                 <RibbonGroup x:Name="operts" Header="Operators ">
                     <RibbonButton x:Name="flipV" Click="flipV_Click"  Label="Flip vertical" SmallImageSource="Icons/layer-flip-vertical.png" KeyTip="X"  />
@@ -111,6 +120,7 @@
                     <RibbonButton x:Name="array" Click="array_Click"  Label="Array" SmallImageSource="Icons/grid.png"  KeyTip="X"  />
                     <RibbonButton x:Name="translate" Click="translate_Click"    Label="Translate" KeyTip="X"  />
                     <RibbonButton x:Name="offset"  Click="offset_Click" SmallImageSource="Icons/layer-resize.png" Label="Offset" KeyTip="X"  />
+
                 </RibbonGroup>
                 <RibbonGroup x:Name="helpers" Header="Helpers ">
                     <RibbonButton x:Name="Image" SmallImageSource="Icons/picture.png" Click="Image_Click"  Label="Image" KeyTip="I"  />

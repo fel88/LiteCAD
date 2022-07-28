@@ -219,6 +219,7 @@
       <DependentUpon>RibbonMenuWpf.xaml</DependentUpon>
     </Compile>
     <Compile Include="Tools\AdjoinTool.cs" />
+    <Compile Include="Tools\CutEdgeTool.cs" />
     <Compile Include="Tools\DraftEllipseTool.cs" />
     <Compile Include="Tools\DraftLineTool.cs" />
     <Compile Include="EventWrapperGlControl.cs" />
@@ -362,6 +363,7 @@
     <Resource Include="Icons\anchor.png" />
     <Resource Include="Icons\layer-shape-polygon.png" />
     <Resource Include="Icons\picture.png" />
+    <Resource Include="Icons\cutter.png" />
     <Content Include="ruler-triangle.ico" />
   </ItemGroup>
   <ItemGroup>

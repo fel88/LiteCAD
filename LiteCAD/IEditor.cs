@@ -11,5 +11,7 @@ namespace LiteCAD
         IntersectInfo Pick { get; }
         void ObjectSelect(object nearest);
         void ResetTool();
+        void Backup();
+        void Undo();
     }
 }

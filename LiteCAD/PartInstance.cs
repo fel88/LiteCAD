@@ -20,7 +20,6 @@ namespace LiteCAD
         }*/
 
 
-        public bool Frozen { get; set; }
         public PartInstance(IPartContainer part)
         {
             Part = part;

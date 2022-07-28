@@ -49,8 +49,8 @@ namespace LiteCAD.Tools
                      }*/
                     //var drw1 = list.FirstOrDefault(z => z.Part.Part == pf1.Parent);
                     //var drw2 = list.FirstOrDefault(z => z.Part.Part == pf2.Parent);
-                    var drw1 = inter1.Model as PartInstance;
-                    var drw2 = inter2.Model as PartInstance;
+                    var drw1 = inter1.Model as IDrawable;
+                    var drw2 = inter2.Model as IDrawable;
                     //calc adjoint matrix
                     if (drw1 != null && drw2 != null)
                     {
@@ -64,26 +64,34 @@ namespace LiteCAD.Tools
                         var rot2 = q2.ExtractRotation();
                         var pnrm1 = Vector3d.Transform(plane1.Normal, rot1);
                         var pnrm2 = Vector3d.Transform(plane2.Normal, rot2);
-                        
+
                         var cross1 = Vector3d.Cross(pnrm1, pnrm2);
                         float eps = 1e-8f;
                         if (Math.Abs(cross1.Length) < eps)
                         {//colinear
                          //just translate
-
+                          
                             if (!drw1.Frozen)
                             {
                                 BRep.Surfaces.BRepPlane temp = new BRep.Surfaces.BRepPlane() { Location = ploc2, Normal = pnrm2 };
                                 var proj = temp.GetProjPoint(ploc1);
                                 proj = proj - ploc1;//shift
-                                drw1.Matrix.Items.Add(new TranslateTransformChainItem() { Vector = proj });
+                                if (proj.Length > eps)
+                                {
+                                    Editor.Backup();
+                                    drw1.Matrix.Items.Add(new TranslateTransformChainItem() { Vector = proj });
+                                }
                             }
                             else if (!drw2.Frozen)
                             {
                                 BRep.Surfaces.BRepPlane temp = new BRep.Surfaces.BRepPlane() { Location = ploc1, Normal = pnrm1 };
                                 var proj = temp.GetProjPoint(ploc2);
                                 proj = proj - ploc2;//shift
-                                drw2.Matrix.Items.Add(new TranslateTransformChainItem() { Vector = proj });
+                                if (proj.Length > eps)
+                                {
+                                    Editor.Backup();
+                                    drw2.Matrix.Items.Add(new TranslateTransformChainItem() { Vector = proj });
+                                }
                             }
                         }
                         else
@@ -108,12 +116,21 @@ namespace LiteCAD.Tools
             MeshNode frr = null;
             if (part is PartInstance pii)
             {
-                var mtr1 = pii.Matrix.Calc();
+                var mtr1 = pii.Matrix.Calc(); 
+                if (pii.Parent != null)
+                {
+                    mtr1 *= pii.Parent.Matrix.Calc();
+                }
                 frr = part.Part.Nodes.FirstOrDefault(zzz => zzz.Contains(pick.Target, mtr1));
             }
             else
             {
-                frr = part.Part.Nodes.FirstOrDefault(zzz => zzz.Contains(pick.Target));
+                var mtr1 = part.Part.Matrix.Calc();
+                if (part is IDrawable ad)
+                {
+                    mtr1 *= ad.Matrix.Calc();
+                }
+                frr = part.Part.Nodes.FirstOrDefault(zzz => zzz.Contains(pick.Target, mtr1));
             }
 
             //var frr = part.Part.Nodes.FirstOrDefault(zzz => zzz.Contains(pick.Target));

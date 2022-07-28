@@ -14,7 +14,7 @@ using System.Drawing;
 namespace LiteCAD
 {
     public class ExtrudeModifier : IDrawable, IEconomicsDetail, IMesh, IPartContainer, IMeshNodesContainer, ICommandsContainer
-    {        
+    {
         public ICommand[] Commands => new ICommand[] { new ExtractDraftCommand() };
         public class ExtractDraftCommand : ICommand
         {
@@ -25,7 +25,7 @@ namespace LiteCAD
                 var d = z as ExtrudeModifier;
                 StringWriter sw = new StringWriter();
                 d.Source.Store(sw);
-                var d1 = new Draft(XElement.Parse(sw.ToString()));                
+                var d1 = new Draft(XElement.Parse(sw.ToString()));
                 Form1.Form.Parts.Add(d1);
                 Form1.Form.updateList();
             };
@@ -39,7 +39,7 @@ namespace LiteCAD
                 List<MeshNode> ret = new List<MeshNode>();
                 foreach (var item in Part.Nodes)
                 {
-                    var mn = new MeshNode();
+                    var mn = new MeshNode() { Parent = item.Parent };
                     foreach (var titem in item.Triangles)
                     {
                         mn.Triangles.Add(titem.Multiply(mtr));
@@ -410,6 +410,7 @@ namespace LiteCAD
         public ProduceOperation Operation { get; set; }
         public Color Color { get; set; } = Color.LightGray;
         public int Z { get; set; }
+        public bool Frozen { get; set; }
 
         public void Draw()
         {
@@ -450,7 +451,7 @@ namespace LiteCAD
             return Childs.SelectMany(z => z.GetAll(p)).Union(new[] { this }).ToArray();
         }
 
-        public IEnumerable<Vector3d> GetPoints()        
+        public IEnumerable<Vector3d> GetPoints()
         {
             var nodes = ((IMeshNodesContainer)this).Nodes;
             List<Vector3d> ret = new List<Vector3d>();

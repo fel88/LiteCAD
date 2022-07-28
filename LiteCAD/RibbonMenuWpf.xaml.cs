@@ -264,5 +264,10 @@ namespace LiteCAD
         {
             Form.CutEdgeStart();
         }
+
+        private void RibbonButton_Click_12(object sender, RoutedEventArgs e)
+        {
+            Form.Backup();
+        }
     }
 }

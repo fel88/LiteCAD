@@ -17,12 +17,11 @@ namespace LiteCAD
             var t = Parts.Union(Parts.SelectMany(z => z.GetAll(p))).ToArray();
             return t;
         }
-
-        internal void FromXml(string fileName)
+       public void Restore(XElement el)
         {
             FactoryHelper.NewId = 0;
-            var doc = XDocument.Load(fileName);
-            var root = doc.Descendants("root").First();
+
+            var root = el;
 
             int fId = 0;
 
@@ -78,23 +77,36 @@ namespace LiteCAD
             }
         }
 
+        internal void FromXml(string fileName)
+        {
+            FactoryHelper.NewId = 0;
+            var doc = XDocument.Load(fileName);
+            var root = doc.Descendants("root").First();
+            Restore(root);
+        }
+
+        public void Store(StringWriter writer)
+        {
+            writer.WriteLine("<?xml version=\"1.0\"?>");
+            writer.WriteLine($"<root newId=\"{FactoryHelper.NewId}\">");
+            foreach (var item in Parts)
+            {
+                item.Store(writer);
+            }
+            writer.WriteLine("</root>");
+        }
+
         public void SaveToXml(string fileName)
         {
             using (var stream = new FileStream(fileName, FileMode.Create))
             {
                 using (StreamWriter writer = new StreamWriter(stream))
                 {
-                    writer.WriteLine("<?xml version=\"1.0\"?>");
-                    writer.WriteLine($"<root newId=\"{FactoryHelper.NewId}\">");
-                    foreach (var item in Parts)
-                    {
-                        item.Store(writer);
-                    }
-                    writer.WriteLine("</root>");
+                    var sw = new StringWriter();
+                    Store(sw);
+                    writer.Write(sw.ToString());
                 }
             }
         }
     }
-
-
 }

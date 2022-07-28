@@ -13,7 +13,8 @@ namespace LiteCAD.Common
         {
             Id = FactoryHelper.NewId++;
         }
-        
+        public bool Frozen { get; set; }
+
         public AbstractDrawable(XElement item)
         {
             if (item.Attribute("id") != null)

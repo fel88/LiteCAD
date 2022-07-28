@@ -11,6 +11,7 @@ namespace LiteCAD.Common
         List<IDrawable> Childs { get; }
         string Name { get; set; }
         bool Visible { get; set; }
+        bool Frozen { get; set; }
         void Draw();
         bool Selected { get; set; }
         TransformationChain Matrix { get; }

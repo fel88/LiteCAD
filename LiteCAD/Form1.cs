@@ -31,7 +31,7 @@ namespace LiteCAD
         {
             //add new commands 
             PlaneHelper.Commands.Add(new CutByPlaneCommand());
-        }        
+        }
 
         public class CutByPlaneCommand : ICommand
         {
@@ -324,9 +324,20 @@ namespace LiteCAD
                         frr = part.Part.Nodes.FirstOrDefault(zzz => zzz.Contains(pick.Target, mtr1));
                         hm = mtr1;
                     }
+                    /*else if (pick.Model is IMeshNodesContainer mnc)
+                    {
+                        frr = mnc.Nodes.FirstOrDefault(zzz => zzz.Contains(pick.Target));                        
+                    }*/
                     else
                     {
-                        frr = part.Part.Nodes.FirstOrDefault(zzz => zzz.Contains(pick.Target));
+                        var mtr1 = part.Part.Matrix.Calc();
+                        if (part is IDrawable ad)
+                        {
+                            mtr1 *= ad.Matrix.Calc();
+                        }
+                        frr = part.Part.Nodes.FirstOrDefault(zzz => zzz.Contains(pick.Target, mtr1));
+                        hm = mtr1;
+
                     }
                     if (frr != null)
                     {
@@ -338,7 +349,7 @@ namespace LiteCAD
                         GL.Disable(EnableCap.Lighting);
                         GL.LineWidth(3);
                         GL.PushMatrix();
-                        if (part is PartInstance pii3)
+                        /*if (part is PartInstance pii3)
                         {
                             var ref1 = pii3.Matrix.Calc();
                             if (pii3.Parent != null)
@@ -347,7 +358,9 @@ namespace LiteCAD
                             }
                             GL.MultMatrix(ref ref1);
 
-                        }
+                        }*/
+                        GL.MultMatrix(ref hoveredMatrix);
+
                         GL.Color3(Color.Orange);
 
 
@@ -405,6 +418,30 @@ namespace LiteCAD
             GL.Disable(EnableCap.Lighting);
 
             glControl.SwapBuffers();
+        }
+
+        public List<string> Undos = new List<string>();
+        public void Undo()
+        {
+            if (EditMode == EditModeEnum.Draft)
+            {
+                de.Undo();
+                return;
+            }
+
+            if (Undos.Count == 0) return;
+            var el = XElement.Parse(Undos.Last());
+            Scene.Restore(el);
+            Undos.RemoveAt(Undos.Count - 1);
+            //UndosChanged?.Invoke();
+        }
+
+        public void Backup()
+        {
+            StringWriter sw = new StringWriter();
+            Scene.Store(sw);
+            Undos.Add(sw.ToString());
+            //UndosChanged?.Invoke();
         }
 
         private void DrawMeasureLine(Vector3d snap1, Vector3d snap2)
@@ -1368,7 +1405,7 @@ namespace LiteCAD
         }
         public void CutEdgeStart()
         {
-            SetTool(new CutEdgeTool(de));            
+            SetTool(new CutEdgeTool(de));
         }
 
         public void ExitDraft()
@@ -1495,7 +1532,7 @@ namespace LiteCAD
                 {
                     MeshNode item = nodes[i];
                     DebugHelpers.Progress(true, 100f * (float)i / nodes.Length);
-                    
+
                     foreach (var tr in item.Triangles)
                     {
                         var nrm = tr.Normal();
@@ -1834,10 +1871,7 @@ namespace LiteCAD
             de.Undo();
         }
 
-        public void Undo()
-        {
-            de.Undo();
-        }
+
 
         private void toolStripButton17_Click(object sender, EventArgs e)
         {
@@ -1975,12 +2009,12 @@ namespace LiteCAD
                 DebugHelpers.Error("constraints satisfaction error");
             }
         }
-        
+
         public void RandomSolve()
         {
             de.Draft.RandomSolve();
         }
-        
+
         private void matrixEditToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;
@@ -1994,7 +2028,7 @@ namespace LiteCAD
         {
 
         }
-     
+
         private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
 

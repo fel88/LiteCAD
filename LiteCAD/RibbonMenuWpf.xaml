@@ -31,7 +31,7 @@
                 <RibbonGroup x:Name="General" Header="General">
                     <RibbonToggleButton  Label="Selection" Click="RibbonButton_Click_1" KeyTip="X" SmallImageSource="Icons/cursor.ico"/>
                     <RibbonButton  Label="Fit all" Click="RibbonButton_Click_2" KeyTip="F" SmallImageSource="Icons/magnifier.ico"/>
-                    <RibbonButton  Label="Undo" SmallImageSource="Icons/arrow-curve-180-left.ico" />
+                    <RibbonButton  Label="Undo" Click="RibbonButton_Click_12" SmallImageSource="Icons/arrow-curve-180-left.ico" />
 
 
 

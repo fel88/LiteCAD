@@ -2,6 +2,7 @@
 using IxMilia.Dxf.Entities;
 using LiteCAD.BRep;
 using LiteCAD.BRep.Editor;
+using LiteCAD.BRep.Faces;
 using LiteCAD.Common;
 using LiteCAD.DraftEditor;
 using LiteCAD.Parsers.Step;
@@ -418,6 +419,72 @@ namespace LiteCAD
             GL.Disable(EnableCap.Lighting);
 
             glControl.SwapBuffers();
+        }
+
+        internal void Merge()
+        {
+            var objs = treeListView1.SelectedObjects;
+            if (objs.Count < 2) return;
+            var target = objs[0] as IPartContainer;
+            var adder = objs[1] as IPartContainer;
+            Part newPart = new Part() { Name = "merge01" };
+            lock (Parts)
+            {
+                Parts.Add(newPart);
+            }
+            updateList();
+            foreach (var item in target.Part.Faces)
+            {
+                var mtr4 = (target as IDrawable).Matrix.Calc();
+                var cln = item.Clone();
+                cln.Parent = newPart;
+                cln.Transform(mtr4);
+                newPart.Faces.Add(cln);
+            }
+            foreach (var item in adder.Part.Faces)
+            {
+                var mtr4 = (adder as IDrawable).Matrix.Calc();
+                var cln = item.Clone();
+                cln.Parent = newPart;
+                cln.Transform(mtr4);
+                newPart.Faces.Add(cln);
+            }
+            //find same plane and connect
+
+            while (true)
+            {
+                bool was = false;
+                foreach (var face in newPart.Faces)
+                {
+                    if (!(face is BRepPlaneFace p1)) continue;
+                    foreach (var face2 in newPart.Faces)
+                    {
+                        if (face == face2) continue;
+                        if (!(face2 is BRepPlaneFace p2)) continue;
+                        //check normals colliniear
+                        var cross = Vector3d.Dot(p1.Plane.Normal, p2.Plane.Normal);
+                        if (Math.Abs(Math.Abs(cross) - 1) < 1e-5f && p2.Plane.IsOnSurface(p1.Plane.Location))
+                        {                            
+                            var outterFace = p1;
+                            var innerFace = p2;
+                            newPart.Faces.Remove(innerFace);
+                            newPart.Faces.Remove(outterFace);
+                            var cln = outterFace.Clone();
+                            foreach (var item in innerFace.Wires)
+                            {
+                                cln.Wires.Add(item.Clone());
+                            }
+                            cln.Parent = newPart;
+                            newPart.Faces.Add(cln);
+                            was = true;
+                            break;
+                        }
+                    }
+                    if (was) break;
+                }
+                if (!was) break;
+            }
+            newPart.ExtractMesh();
         }
 
         public List<string> Undos = new List<string>();
@@ -1386,16 +1453,15 @@ namespace LiteCAD
             uncheckedAllToolButtons();
             toolStripButton2.Checked = true;
         }
-        private void button1_Click(object sender, EventArgs e)
-        {
 
-        }
+
         Draft editedDraft;
+
         private void toolStripButton3_Click(object sender, EventArgs e)
         {
             RectangleStart();
         }
-        public bool IsRectDraftTool => _currentTool is RectDraftTool;
+
 
         public void RectangleStart()
         {
@@ -1403,6 +1469,7 @@ namespace LiteCAD
             uncheckedAllToolButtons();
             toolStripButton3.Checked = true;
         }
+
         public void CutEdgeStart()
         {
             SetTool(new CutEdgeTool(de));
@@ -1571,9 +1638,26 @@ namespace LiteCAD
             {
                 if (item.Dummy)
                     continue;
-                //file.Entities.Add(new DxfEllipse(new DxfPoint(item.Center.X, item.Center.Y, 0), new DxfVector((double)item.Radius, 0, 0), 360));
-                file.Entities.Add(new DxfCircle(new DxfPoint(item.Center.X, item.Center.Y, 0), (double)item.Radius));
-                //file.Entities.Add(new DxfArc(new DxfPoint(item.Center.X, item.Center.Y, 0), (double)item.Radius, 0, 360));
+                if (!item.SpecificAngles)
+                {
+                    //file.Entities.Add(new DxfEllipse(new DxfPoint(item.Center.X, item.Center.Y, 0), new DxfVector((double)item.Radius, 0, 0), 360));
+                    file.Entities.Add(new DxfCircle(new DxfPoint(item.Center.X, item.Center.Y, 0), (double)item.Radius));
+                    //file.Entities.Add(new DxfArc(new DxfPoint(item.Center.X, item.Center.Y, 0), (double)item.Radius, 0, 360));
+                }
+                else
+                {
+                    var pp = item.GetPoints();
+
+                    //file.Entities.Add(new DxfPolyline(pp.Select(zz => new DxfVertex(new DxfPoint(zz.X, zz.Y, 0)))));
+                    for (int i = 1; i <= pp.Length; i++)
+                    {
+                        var p0 = pp[i - 1];
+                        var p1 = pp[i % pp.Length];
+                        //polyline?
+
+                        file.Entities.Add(new DxfLine(new DxfPoint(p0.X, p0.Y, 0), new DxfPoint(p1.X, p1.Y, 0)));
+                    }
+                }
             }
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "DXF files (*.dxf)|*.dxf";
@@ -1721,12 +1805,21 @@ namespace LiteCAD
         {
             CircleStart();
         }
+
         public void CircleStart()
         {
-            SetTool(new DraftEllipseTool(this));
+            SetTool(new DraftEllipseTool(de));
             uncheckedAllToolButtons();
             toolStripButton4.Checked = true;
         }
+
+        public void HexStart()
+        {
+            SetTool(new DraftEllipseTool(de) { SpecificAngles = true, Angles = 6 });
+            uncheckedAllToolButtons();
+            //toolStripButton4.Checked = true;
+        }
+
         private void dxfToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;

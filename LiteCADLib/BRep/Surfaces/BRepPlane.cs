@@ -27,5 +27,20 @@ namespace LiteCAD.BRep.Surfaces
         {
             return (Math.Abs(Vector3d.Dot(Location - v, Normal)) < eps);
         }
+
+        public override BRepSurface Clone()
+        {
+            BRepPlane ret = new BRepPlane();
+            ret.Location = Location;
+            ret.Normal = Normal;
+            return ret;
+        }
+
+        public override void Transform(Matrix4d mtr4)
+        {
+            Location = Vector3d.Transform(Location, mtr4);
+            var rot = mtr4.ExtractRotation();            
+            Normal = Vector3d.Transform(Normal, rot);
+        }
     }
 }

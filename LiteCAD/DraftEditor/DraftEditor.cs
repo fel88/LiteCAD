@@ -113,7 +113,7 @@ namespace LiteCAD.DraftEditor
                     ctx.DrawLine(tr, tr11);
                 }
 
-                var elps = _draft.DraftEllipses.ToArray();
+                var elps = _draft.DraftEllipses.Where(z => !z.SpecificAngles).ToArray();
                 for (int i = 0; i < elps.Length; i++)
                 {
                     var el = elps[i];
@@ -133,6 +133,37 @@ namespace LiteCAD.DraftEditor
                     }
                     else
                         ctx.DrawCircle(p, tr.X, tr.Y, rad);
+
+                    float gp = 5;
+                    tr = ctx.Transform(el.Center.X, el.Center.Y);
+
+                    if (nearest == el.Center || selected.Contains(el.Center))
+                    {
+                        ctx.FillRectangle(Brushes.Blue, tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
+                    }
+                    ctx.SetPen(p);
+                    ctx.DrawRectangle(tr.X - gp, tr.Y - gp, gp * 2, gp * 2);
+                }
+
+                var hexes = _draft.DraftEllipses.Where(z => z.SpecificAngles).ToArray();
+                for (int i = 0; i < hexes.Length; i++)
+                {
+                    var el = hexes[i];
+                    Vector2d item0 = hexes[i].Center.Location;
+                    var rad = (float)el.Radius * ctx.zoom;
+                    var tr = ctx.Transform(item0.X, item0.Y);
+
+                    Pen p = new Pen(selected.Contains(el) ? Color.Blue : Color.Black);
+
+                    if (el.Dummy)
+                        p.DashPattern = new float[] { 10, 10 };
+                    if (nearest == el.Center || selected.Contains(el.Center))
+                    {
+                        p.Width = 2;
+                        p.Color = Color.Blue;
+                    }
+
+                    ctx.DrawCircle(p, tr.X, tr.Y, rad, el.Angles, 0);
 
                     float gp = 5;
                     tr = ctx.Transform(el.Center.X, el.Center.Y);
@@ -251,7 +282,7 @@ namespace LiteCAD.DraftEditor
                     hintText = "[perpendicular] : " + hintText;
                 }
                 var mss = ctx.MeasureString(hintText, SystemFonts.DefaultFont);
-                
+
                 ctx.FillRectangle(Brushes.White, curp.X + 10, curp.Y, mss.Width, mss.Height);
                 ctx.DrawString(hintText, SystemFonts.DefaultFont, Brushes.Black, curp.X + 10, curp.Y);
 
@@ -480,40 +511,12 @@ namespace LiteCAD.DraftEditor
             }
 
             editor.CurrentTool.MouseDown(e);
-
-
-
-            if (editor.CurrentTool is DraftEllipseTool && e.Button == MouseButtons.Left)
-            {
-                var p = (ctx.GetCursor());
-                if (firstClick == null)
-                {
-
-                    firstClick = p;
-                }
-                else
-                {
-
-                    var p0 = new DraftPoint(_draft, p.X, p.Y);
-
-                    var p2 = new DraftPoint(_draft, firstClick.Value.X, firstClick.Value.Y);
-                    var c = new DraftPoint(_draft, (firstClick.Value.X + p.X) / 2, (firstClick.Value.Y + p.Y) / 2);
-
-                    editor.ResetTool();
-
-
-                    _draft.AddElement(new DraftEllipse(c, (decimal)Math.Abs(firstClick.Value.X - p.X) / 2, _draft));
-                    firstClick = null;
-                }
-            }
         }
 
-        PointF? firstClick;
 
-        bool isPressed = false;
         private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
-            isPressed = false;
+            //isPressed = false;
             var cp = Cursor.Position;
             var pos = ctx.PictureBox.Control.PointToClient(Cursor.Position);
 
@@ -1064,19 +1067,19 @@ namespace LiteCAD.DraftEditor
             var points = selected.OfType<DraftPoint>().ToArray();
             if (points.Length == 0) return;
 
-            
+
             var sx = points.Sum(z => z.X) / points.Length;
             var sy = points.Sum(z => z.Y) / points.Length;
             Backup();
             _draft.AddElement(new DraftPoint(_draft, sx, sy));
 
             var l = Draft.DraftLines.Where(z => selected.Contains(z.V0) && selected.Contains(z.V1)).OfType<DraftElement>().ToArray();
-                        
+
 
             for (int i = 0; i < points.Length; i++)
             {
                 _draft.RemoveElement(points[i]);
-            }           
+            }
             //todo: add lines
         }
     }

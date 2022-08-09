@@ -269,5 +269,15 @@ namespace LiteCAD
         {
             Form.Backup();
         }
+
+        private void Hex_Click(object sender, RoutedEventArgs e)
+        {
+            Form.HexStart();
+        }
+
+        private void RibbonButton_Click_13(object sender, RoutedEventArgs e)
+        {
+            Form.Merge();
+        }
     }
 }

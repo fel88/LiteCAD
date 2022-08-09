@@ -24,5 +24,23 @@ namespace LiteCAD.BRep
             }
             return true;
         }
+
+        public BRepWire Clone()
+        {
+            BRepWire ret = new BRepWire();
+            foreach (var item in Edges)
+            {
+                ret.Edges.Add(item.Clone());
+            }
+            return ret;
+        }
+
+        public void Transform(Matrix4d mtr4)
+        {
+            foreach (var item in Edges)
+            {
+                item.Transform(mtr4);
+            }
+        }
     }
 }

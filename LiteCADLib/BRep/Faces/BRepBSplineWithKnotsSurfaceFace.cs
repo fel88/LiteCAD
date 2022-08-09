@@ -11,6 +11,11 @@ namespace LiteCAD.BRep.Faces
     {
         public BRepBSplineWithKnotsSurfaceFace(Part parent) : base(parent) { }
 
+        public override BRepFace Clone()
+        {
+            throw new NotImplementedException();
+        }
+
         public override MeshNode ExtractMesh()
         {
             var surf = Surface as BRepBSplineWithKnotsSurface;

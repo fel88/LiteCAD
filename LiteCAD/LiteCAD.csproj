@@ -364,6 +364,8 @@
     <Resource Include="Icons\layer-shape-polygon.png" />
     <Resource Include="Icons\picture.png" />
     <Resource Include="Icons\cutter.png" />
+    <Resource Include="Icons\fill-090.png" />
+    <Resource Include="Icons\plug-connect.png" />
     <Content Include="ruler-triangle.ico" />
   </ItemGroup>
   <ItemGroup>

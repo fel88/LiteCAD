@@ -1,5 +1,6 @@
 ﻿using LiteCAD.Common;
 using LiteCAD.Parsers.Step;
+using OpenTK;
 using System;
 using System.Collections.Generic;
 
@@ -14,6 +15,11 @@ namespace LiteCAD.BRep
             Parent = parent;
             Id = NewId++;
         }
+        protected BRepFace()
+        {
+            Id = NewId++;
+        }
+
         public Part Parent;
         public MeshNode Node;
         bool _selected;
@@ -62,6 +68,13 @@ namespace LiteCAD.BRep
                     throw new LiteCadException("not closed wire detected");
                 }
             }
+        }
+
+        public abstract BRepFace Clone();
+
+        public virtual void Transform(Matrix4d mtr4)
+        {
+
         }
     }
 }

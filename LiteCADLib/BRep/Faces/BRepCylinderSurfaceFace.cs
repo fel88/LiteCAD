@@ -13,6 +13,7 @@ namespace LiteCAD.BRep.Faces
     public class BRepCylinderSurfaceFace : BRepFace
     {
         public BRepCylinderSurfaceFace(Part parent) : base(parent) { }
+        public BRepCylinderSurfaceFace() { }
 
         Segment[] getSegments(Vector3d pp0, Vector3d pp1, double step = 0.1)
         {
@@ -1076,6 +1077,25 @@ namespace LiteCAD.BRep.Faces
                 }
             }
             base.Load(face);
+        }
+
+        public override BRepFace Clone()
+        {
+            BRepCylinderSurfaceFace ret = new BRepCylinderSurfaceFace();
+            ret.Surface = Surface.Clone();
+            foreach (var item in Wires)
+            {
+                ret.Wires.Add(item.Clone());
+            }
+            return ret;
+        }
+        public override void Transform(Matrix4d mtr4)
+        {
+            Surface.Transform(mtr4);
+            foreach (var item in Wires)
+            {
+                item.Transform(mtr4);
+            }
         }
     }
 }

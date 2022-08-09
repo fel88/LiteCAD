@@ -51,6 +51,7 @@ namespace LiteCAD.BRep.Editor
         float zoom { get; set; }
         void FillCircle(Brush brush, float v1, float v2, int rad);
         void DrawCircle(Pen pen, float v1, float v2, float rad);
+        void DrawCircle(Pen pen, float v1, float v2, float rad, int angles, float startAngle);
         SizeF MeasureString(string text, Font font);
         void DrawString(string text, Font font, Brush brush, PointF position);
         void DrawString(string text, Font font, Brush brush, float x, float y);

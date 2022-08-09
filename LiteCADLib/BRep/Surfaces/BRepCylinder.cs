@@ -34,5 +34,23 @@ namespace LiteCAD.BRep.Surfaces
             if (ang < 0) ang += Math.PI * 2;
             return new Vector2d(ang, p);
         }
+
+        public override void Transform(Matrix4d mtr4)
+        {
+            var rot = mtr4.ExtractRotation();
+            Location = Vector3d.Transform(Location,mtr4);
+            Axis = Vector3d.Transform(Axis, rot);
+            RefDir = Vector3d.Transform(RefDir, rot);
+        }
+
+        public override BRepSurface Clone()
+        {
+            BRepCylinder ret = new BRepCylinder();
+            ret.Location = Location;
+            ret.Radius = Radius;
+            ret.Axis = Axis;
+            ret.RefDir = RefDir;
+            return ret;
+        }
     }
 }

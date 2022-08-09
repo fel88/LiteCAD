@@ -142,23 +142,48 @@ namespace LiteCAD
                 {
                     foreach (var item in wire.OfType<DraftEllipse>())
                     {
-                        var p = new OpenTK.Vector3d(item.Center.X + (double)item.Radius, item.Center.Y, 0);
-                        var dir2 = (p.Xy - item.Center.Location);
-                        var dir3 = new Vector3d(dir2.X, dir2.Y, 0);
-
-                        edges.Add(new BRep.BRepEdge()
+                        if (item.SpecificAngles)
                         {
-                            Curve = new BRep.Curves.BRepCircleCurve()
+                            var pp = item.GetPoints();
+                            for (int ii = 1; ii <= pp.Length; ii++)
                             {
-                                Dir = dir3,
-                                Radius = (double)item.Radius,
-                                Axis = top,
-                                SweepAngle = Math.PI * 2,
-                                Location = new Vector3d(item.Center.X, item.Center.Y, 0)
-                            },
-                            Start = p,
-                            End = p
-                        }); ;
+                                var p0 = pp[ii - 1];
+                                var p1 = pp[ii % pp.Length];
+                                var diff = p0 - p1;
+                                var p = new Vector3d(p0.X, p0.Y, 0);
+                                var pe = new Vector3d(p1.X, p1.Y, 0);
+                                edges.Add(new BRepEdge()
+                                {
+                                    Curve = new BRep.Curves.BRepLineCurve()
+                                    {
+                                        Point = p,
+                                        Vector = new Vector3d(diff.X, diff.Y, 0)
+                                    },
+                                    Start = p,
+                                    End = pe
+                                });
+                            }
+                        }
+                        else
+                        {
+                            var p = new OpenTK.Vector3d(item.Center.X + (double)item.Radius, item.Center.Y, 0);
+                            var dir2 = (p.Xy - item.Center.Location);
+                            var dir3 = new Vector3d(dir2.X, dir2.Y, 0);
+
+                            edges.Add(new BRep.BRepEdge()
+                            {
+                                Curve = new BRep.Curves.BRepCircleCurve()
+                                {
+                                    Dir = dir3,
+                                    Radius = (double)item.Radius,
+                                    Axis = top,
+                                    SweepAngle = Math.PI * 2,
+                                    Location = new Vector3d(item.Center.X, item.Center.Y, 0)
+                                },
+                                Start = p,
+                                End = p
+                            }); ;
+                        }
                     }
                 }
                 bottomFace.Wires.Add(new BRep.BRepWire() { Edges = edges });

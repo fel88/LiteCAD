@@ -55,8 +55,9 @@
 
 
                 <RibbonGroup x:Name="operators" Header="Operators ">
-                    <RibbonButton  Label="Extrude" KeyTip="X" Click="RibbonButton_Click_3"  SmallImageSource="Icons/arrow-skip-090.ico"/>
+                    <RibbonButton  Label="Extrude" KeyTip="X" Click="RibbonButton_Click_3"  SmallImageSource="Icons/fill-090.png"/>
                     <RibbonToggleButton x:Name="adjointButton"  Label="Adjoint" KeyTip="X" SmallImageSource="Icons/magnet.ico" Click="adjointButton_Click" />
+                    <RibbonButton  Label="Merge" KeyTip="M" Click="RibbonButton_Click_13"  SmallImageSource="Icons/plug-connect.png"/>
                 </RibbonGroup>
                 <RibbonGroup x:Name="camera" Header="Camera ">
                     <RibbonButton Click="RibbonButton_Click_6" Label="X view" KeyTip="X"   />
@@ -111,6 +112,7 @@
                     <RibbonButton x:Name="CloseLine" SmallImageSource="Icons/layer-shape-polygon.png" Click="CloseLine_Click" Label="Close Line" KeyTip="X"  />
                     <RibbonButton Click="Rectangle_Click" x:Name="Rectangle"  Label="Rectangle" KeyTip="X"  SmallImageSource="Icons/layer-shape.ico"/>
                     <RibbonButton x:Name="Circle" Click="Circle_Click" Label="Circle" KeyTip="X" SmallImageSource="Icons/layer-shape-ellipse.ico"  />
+                    <RibbonButton x:Name="Hex" Click="Hex_Click"  Label="Hex" KeyTip="H"   />
                     <RibbonButton x:Name="CutEdge" Click="CutEdge_Click"  Label="Cut edge" KeyTip="X" SmallImageSource="Icons/cutter.png"  />
                     <RibbonButton x:Name="Merge"   Label="Merge" KeyTip="X"   />
                 </RibbonGroup>

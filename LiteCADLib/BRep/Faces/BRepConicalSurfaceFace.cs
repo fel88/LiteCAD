@@ -281,5 +281,10 @@ namespace LiteCAD.BRep.Faces
                 }
             }
         }
+
+        public override BRepFace Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

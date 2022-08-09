@@ -1,6 +1,8 @@
-﻿using OpenTK;
+﻿using LiteCAD.Common;
+using OpenTK;
 using SkiaSharp;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -268,5 +270,25 @@ namespace LiteCAD.BRep.Editor
         public abstract void PushMatrix();
 
         public abstract void PopMatrix();
+
+        public void DrawCircle(Pen pen, float v1, float v2, float rad, int angles, float startAngle)
+        {
+            var step = 360f / angles;
+            List<Vector2d> pp = new List<Vector2d>();
+            for (int i = 0; i < angles; i++)
+            {
+                var ang = step * i;
+                var radd = ang * Math.PI / 180f;
+                var xx = v1 + rad * Math.Cos(radd);
+                var yy = v2 + rad * Math.Sin(radd);
+                pp.Add(new Vector2d(xx, yy));
+            }
+            for (int i = 1; i <= pp.Count; i++)
+            {
+                var p0 = pp[i - 1].ToPointF();
+                var p1 = pp[i % pp.Count].ToPointF();
+                DrawLine(p0, p1);
+            }
+        }
     }
 }

@@ -12,6 +12,11 @@ namespace LiteCAD.BRep.Faces
     {
         public BRepToroidalSurfaceFace(Part parent) : base(parent) { }
 
+        public override BRepFace Clone()
+        {
+            throw new NotImplementedException();
+        }
+
         public override MeshNode ExtractMesh()
         {
             throw new NotImplementedException();

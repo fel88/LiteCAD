@@ -31,5 +31,23 @@ namespace LiteCAD.BRep
             }
             return false;
         }
+
+        internal BRepEdge Clone()
+        {
+            BRepEdge edge = new BRepEdge();
+            edge.Start = Start;
+            edge.End = End;
+            edge.Param1 = Param1;
+            edge.Param2 = Param2;
+            edge.Curve = Curve.Clone();
+            return edge;
+        }
+
+        public void Transform(Matrix4d mtr4)
+        {
+            Start = Vector3d.Transform(Start, mtr4);
+            End = Vector3d.Transform(End, mtr4);
+            Curve.Transform(mtr4);
+        }
     }
 }

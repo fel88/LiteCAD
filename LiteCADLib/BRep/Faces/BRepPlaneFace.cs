@@ -12,6 +12,7 @@ namespace LiteCAD.BRep.Faces
     public class BRepPlaneFace : BRepFace
     {
         public BRepPlaneFace(Part p) : base(p) { }
+        public BRepPlaneFace()  { }
         public override MeshNode ExtractMesh()
         {
             MeshNode ret = null;
@@ -378,7 +379,8 @@ namespace LiteCAD.BRep.Faces
             }
             return edge;
         }
-        
+
+        public BRepPlane Plane => Surface as BRepPlane;
         public override void Load(AdvancedFace face)
         {
             Surface = new BRepPlane() { Location = face.Surface.Axis.Location, Normal = face.Surface.Axis.Dir1 };
@@ -540,6 +542,25 @@ namespace LiteCAD.BRep.Faces
                 }
             }
             base.Load(face);
+        }
+
+        public override BRepFace Clone()
+        {
+            BRepPlaneFace ret = new BRepPlaneFace();
+            ret.Surface = Surface.Clone();            
+            foreach (var item in Wires)
+            {
+                ret.Wires.Add(item.Clone());
+            }
+            return ret;
+        }
+        public override void Transform(Matrix4d mtr4)
+        {
+            Surface.Transform(mtr4);
+            foreach (var item in Wires)
+            {
+                item.Transform(mtr4);
+            }
         }
     }
 }

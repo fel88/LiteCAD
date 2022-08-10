@@ -464,7 +464,7 @@ namespace LiteCAD
                         //check normals colliniear
                         var cross = Vector3d.Dot(p1.Plane.Normal, p2.Plane.Normal);
                         if (Math.Abs(Math.Abs(cross) - 1) < 1e-5f && p2.Plane.IsOnSurface(p1.Plane.Location))
-                        {                            
+                        {
                             var outterFace = p1;
                             var innerFace = p2;
                             newPart.Faces.Remove(innerFace);
@@ -1884,52 +1884,8 @@ namespace LiteCAD
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "STL file (*.stl)|*.stl";
             if (ofd.ShowDialog() != DialogResult.OK) return;
-            var bts = File.ReadAllBytes(ofd.FileName);
-            var cnt = BitConverter.ToInt32(bts, 80);
-            MeshModel mm = new MeshModel() { Name = Path.GetFileNameWithoutExtension(ofd.FileName) };
-            MeshNode node = new MeshNode();
-            mm.Nodes.Add(node);
-            Parts.Add(mm);
-
-
-            for (int i = 0; i < cnt; i++)
-            {
-                TriangleInfo tr = new TriangleInfo();
-                node.Triangles.Add(tr);
-
-                tr.Vertices = new VertexInfo[3];
-                Vector3d normal = new Vector3d();
-                Vector3d v1 = new Vector3d();
-                Vector3d v2 = new Vector3d();
-                Vector3d v3 = new Vector3d();
-
-                for (int j = 0; j < 3; j++)
-                {
-                    var fl = BitConverter.ToSingle(bts, 84 + j * 4 + i * 50);
-                    normal[j] = fl;
-                }
-                for (int j = 0; j < 3; j++)
-                {
-                    var fl = BitConverter.ToSingle(bts, 84 + 12 + j * 4 + i * 50);
-                    v1[j] = fl;
-                }
-
-                for (int j = 0; j < 3; j++)
-                {
-                    var fl = BitConverter.ToSingle(bts, 84 + 24 + j * 4 + i * 50);
-                    v2[j] = fl;
-                }
-                for (int j = 0; j < 3; j++)
-                {
-                    var fl = BitConverter.ToSingle(bts, 84 + 36 + j * 4 + i * 50);
-                    v3[j] = fl;
-                }
-                tr.Vertices[0] = new VertexInfo() { Position = v1, Normal = normal };
-                tr.Vertices[1] = new VertexInfo() { Position = v2, Normal = normal };
-                tr.Vertices[2] = new VertexInfo() { Position = v3, Normal = normal };
-
-
-            }
+            var mesh = STLLoader.LoadFromFile(ofd.FileName);
+            Parts.Add(mesh);
             updateList();
         }
 

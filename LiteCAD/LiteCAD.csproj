@@ -218,6 +218,7 @@
     <Compile Include="RibbonMenuWpf.xaml.cs">
       <DependentUpon>RibbonMenuWpf.xaml</DependentUpon>
     </Compile>
+    <Compile Include="STLLoader.cs" />
     <Compile Include="Tools\AdjoinTool.cs" />
     <Compile Include="Tools\CutEdgeTool.cs" />
     <Compile Include="Tools\DraftEllipseTool.cs" />

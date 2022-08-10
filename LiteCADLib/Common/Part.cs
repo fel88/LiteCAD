@@ -26,10 +26,14 @@ namespace LiteCAD.Common
 
         public void ExtractMesh()
         {
-            for (int i = 0; i < Faces.Count; i++)
+            //cylinder priority?
+            //var cyls = Faces.OfType<BRepCylinderSurfaceFace>().ToArray();
+            //  var faces = cyls.Union(Faces.Except(cyls)).ToArray();
+            var faces = Faces.ToArray();
+            for (int i = 0; i < faces.Length; i++)
             {
-                BRepFace item = Faces[i];
-                float prog = (i / (float)Faces.Count) * 100;
+                BRepFace item = faces[i];
+                float prog = (i / (float)faces.Length) * 100;
                 DebugHelpers.Progress(true, prog);
                 try
                 {

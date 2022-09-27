@@ -9,6 +9,7 @@ using System.Text;
 
 namespace LiteCAD.Parsers.Step
 {
+
     public static class StepParser
     {
         public static string[] Tokenize(string data)

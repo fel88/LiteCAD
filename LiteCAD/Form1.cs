@@ -5,6 +5,7 @@ using LiteCAD.BRep.Editor;
 using LiteCAD.BRep.Faces;
 using LiteCAD.Common;
 using LiteCAD.DraftEditor;
+using LiteCAD.Parsers.Iges;
 using LiteCAD.Parsers.Step;
 using LiteCAD.PropEditors;
 using LiteCAD.Tools;
@@ -1695,7 +1696,7 @@ namespace LiteCAD
         private void partToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "STEP files (*.stp;*.step)|*.stp;*.step|All files (*.*)|*.*";
+            ofd.Filter = "STEP files (*.stp;*.step)|*.stp;*.step|IGES files (*.igs;*.iges)|*.igs;*.iges|All files (*.*)|*.*";
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 loaded = false;
@@ -1703,7 +1704,15 @@ namespace LiteCAD
                 {
                     try
                     {
-                        Part prt = StepParser.Parse(ofd.FileName);
+                        var lw = ofd.FileName.ToLower();
+                        Part prt = null;
+
+                        if (lw.EndsWith(".stp") || lw.EndsWith(".step"))
+                            prt = StepParser.Parse(ofd.FileName);
+
+                        if (lw.EndsWith(".igs") || lw.EndsWith(".iges"))
+                            prt = IgesParser.Parse(ofd.FileName);
+
                         var fi = new FileInfo(ofd.FileName);
                         loaded = true;
                         lock (Parts)

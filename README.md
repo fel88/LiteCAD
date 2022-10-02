@@ -4,7 +4,7 @@
 Simple CAD for designing 2D/3D parts and assemblies  :straight_ruler:
 </p><p>
 
-**Supported formats:** <a href="https://en.wikipedia.org/wiki/Boundary_representation">BREP</a> (Step), STL, Dxf
+**Supported formats:** <a href="https://en.wikipedia.org/wiki/Boundary_representation">BREP</a> (Step, IGES), STL, Dxf
 
 </p>
 

@@ -18,7 +18,14 @@ namespace IxMilia.Iges.Entities
         CAndSurfaceAndB = 3
     }
 
-    public class IgesCurveOnAParametricSurface : IgesEntity
+
+    public interface IIgesSurface 
+    {
+         IgesEntity Surface { get; }
+
+    }
+
+    public class IgesCurveOnAParametricSurface : IgesEntity, IIgesSurface
     {
         public override IgesEntityType EntityType { get { return IgesEntityType.CurveOnAParametricSurface; } }
 

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace IxMilia.Iges.Entities
 {
-    public class IgesOffsetSurface : IgesEntity
+    public class IgesOffsetSurface : IgesEntity, IIgesSurface
     {
         public override IgesEntityType EntityType { get { return IgesEntityType.OffsetSurface; } }
 

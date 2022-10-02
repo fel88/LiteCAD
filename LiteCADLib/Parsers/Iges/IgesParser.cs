@@ -5,7 +5,9 @@ using LiteCAD.BRep.Curves;
 using LiteCAD.BRep.Faces;
 using LiteCAD.BRep.Surfaces;
 using LiteCAD.Common;
+using OpenTK;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -18,10 +20,26 @@ namespace LiteCAD.Parsers.Iges
             Part ret = new Part();
             IgesFile igesFile = IgesFile.Load(filename);
             ret.Name = new FileInfo(filename).Name;
+            //List<IIgesSurface> surfaces = new List<IIgesSurface>();
             foreach (IgesEntity entity in igesFile.Entities)
             {
+               /* if (entity is IIgesSurface ss)
+                {
+                    surfaces.Add(ss);
+                }*/
                 switch (entity.EntityType)
                 {
+                    case IgesEntityType.RationalBSplineCurve:
+                        {
+                            IgesRationalBSplineCurve bs = entity as IgesRationalBSplineCurve;
+                            var fr = bs.FormNumber;
+                            if (fr == 1)//curve
+                            {
+
+                            }
+
+                        }
+                        break;
                     case IgesEntityType.TrimmedParametricSurface:
                         {
 
@@ -46,6 +64,29 @@ namespace LiteCAD.Parsers.Iges
                                         Location = pos
                                     }
                                 };
+                            }
+                            if (surf is IgesRationalBSplineSurface rbs)
+                            {
+                                if (outter is IgesCurveOnAParametricSurface p)
+                                {
+                                    var owire = GetWire(p);
+                                    var v0 = owire.Edges[0].Start;
+                                    var v1 = owire.Edges[0].End;
+                                    var v2 = owire.Edges[1].Start;
+                                    var v3 = owire.Edges[1].End;
+
+                                    var normal = Vector3d.Cross(v1 - v0, v3 - v2).Normalized();
+                                    var pos = owire.Edges[0].Start;
+                                    if (!double.IsNaN(normal.X))
+                                        face = new BRepPlaneFace()
+                                        {
+                                            Surface = new BRepPlane()
+                                            {
+                                                Normal = normal,
+                                                Location = pos
+                                            }
+                                        };
+                                }
                             }
 
                             if (face != null)

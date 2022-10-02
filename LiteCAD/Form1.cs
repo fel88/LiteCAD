@@ -1696,7 +1696,7 @@ namespace LiteCAD
         private void partToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "STEP files (*.stp;*.step)|*.stp;*.step|IGES files (*.igs;*.iges)|*.igs;*.iges|All files (*.*)|*.*";
+            ofd.Filter = "All BREP formats (*.stp;*.step;*.igs;*.iges)|*.stp;*.step;*.igs;*.iges|STEP files (*.stp;*.step)|*.stp;*.step|IGES files (*.igs;*.iges)|*.igs;*.iges|All files (*.*)|*.*";
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 loaded = false;

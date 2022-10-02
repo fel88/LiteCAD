@@ -278,7 +278,7 @@
       <Name>clipperLib</Name>
     </ProjectReference>
     <ProjectReference Include="..\IxMilia.Iges\IxMilia.Iges.csproj">
-      <Project>{e3606bfc-8f90-45e8-818d-b0e74020c656}</Project>
+      <Project>{d8a1faf5-4eb0-41af-847e-4300e5b49fff}</Project>
       <Name>IxMilia.Iges</Name>
     </ProjectReference>
     <ProjectReference Include="..\Triangle\Triangle.csproj">

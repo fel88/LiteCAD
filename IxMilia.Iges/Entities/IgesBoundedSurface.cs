@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace IxMilia.Iges.Entities
 {
-    public class IgesBoundedSurface : IgesEntity
+    public class IgesBoundedSurface : IgesEntity, IIgesSurface
     {
         public override IgesEntityType EntityType { get { return IgesEntityType.BoundedSurface; } }
 

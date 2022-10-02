@@ -24,7 +24,7 @@ namespace LiteCAD.Common
             return dist * norm + loc;
 
         }
-        public static Line3D[] SplitByPlane(this MeshNode mn, Matrix4d matrix, PlaneHelper pl)
+        public static Line3D[] SplitByPlane(this MeshNode mn, Matrix4d matrix, Plane pl)
         {
             List<Line3D> vv = new List<Line3D>();
             List<TriangleInfo> trianglesModifed = new List<TriangleInfo>();

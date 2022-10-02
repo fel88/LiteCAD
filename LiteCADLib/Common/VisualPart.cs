@@ -1,5 +1,6 @@
 ﻿using BREP.BRep;
 using BREP.BRep.Faces;
+using BREP.BRep.Outlines;
 using BREP.BRep.Surfaces;
 using BREP.Common;
 using LiteCAD.BRep;
@@ -13,14 +14,14 @@ using System.Linq;
 
 namespace LiteCAD.Common
 {
-    public class BREPPart : AbstractDrawable, IBREPPartContainer, IPlaneSplittable
+    public class VisualPart : AbstractDrawable, IVisualPartContainer, IPlaneSplittable, IMeshNodesContainer
     {
-        public BREPPart(Part p)
+        public VisualPart(Part p)
         {
             Part = p;
         }
         public Part Part { get; private set; }
-        BREPPart IBREPPartContainer.Part => this;
+        VisualPart IVisualPartContainer.Part => this;
 
         public List<BRepFace> Faces => Part.Faces;
         public MeshNode[] Nodes
@@ -222,6 +223,8 @@ namespace LiteCAD.Common
                 if (!item.Visible) continue;
                 foreach (var pitem in item.Items)
                 {
+                    if (pitem is LineItem ll)
+                        new OutlineItemHelper(ll).Draw();
                     //pitem.Draw();
                 }
             }
@@ -271,7 +274,7 @@ namespace LiteCAD.Common
             }
         }
 
-        public Line3D[] SplitPyPlane(PlaneHelper ph)
+        public Line3D[] SplitPyPlane(Plane ph)
         {
             var mm = Matrix.Calc();
             var ret = Nodes.SelectMany(z => z.SplitByPlane(mm, ph)).ToArray();

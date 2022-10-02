@@ -150,7 +150,7 @@ namespace LiteCAD
 
         }
 
-        public Line3D[] SplitPyPlane(PlaneHelper ph)
+        public Line3D[] SplitPyPlane(Plane ph)
         {
             var mm = Matrix.Calc();
             var ret = Nodes.SelectMany(z => z.SplitByPlane(mm, ph)).ToArray();

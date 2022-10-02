@@ -97,7 +97,7 @@
     <Compile Include="Common\IXmlStorable.cs" />
     <Compile Include="Common\Line3D.cs" />
     <Compile Include="Common\NFP.cs" />
-    <Compile Include="Common\PlaneHelper.cs" />
+    <Compile Include="Common\Plane.cs" />
     <Compile Include="Common\DebugHelpers.cs" />
     <Compile Include="Common\Extensions.cs" />
     <Compile Include="BRep\MeshNode.cs" />

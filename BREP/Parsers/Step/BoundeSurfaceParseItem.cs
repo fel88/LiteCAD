@@ -22,7 +22,7 @@ namespace BREP.Parsers.Step
             int vDegree = degs[1];
             if (vDegree == 1 && uDegree == 1)
             {
-                Plane p = new Plane();
+                PlaneSurface p = new PlaneSurface();
                 throw new NotImplementedException();
             }
 

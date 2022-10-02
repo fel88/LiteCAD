@@ -15,7 +15,7 @@ using BREP.BRep.Surfaces;
 
 namespace LiteCAD
 {
-    public class ExtrudeModifier : IDrawable, IEconomicsDetail, IMesh, IBREPPartContainer, IMeshNodesContainer, ICommandsContainer
+    public class ExtrudeModifier : IDrawable, IEconomicsDetail, IMesh, IVisualPartContainer, IMeshNodesContainer, ICommandsContainer
     {
         public ICommand[] Commands => new ICommand[] { new ExtractDraftCommand() };
         public class ExtractDraftCommand : ICommand
@@ -63,7 +63,7 @@ namespace LiteCAD
 
         }
 
-        BREPPart IBREPPartContainer.Part => _part;
+        VisualPart IVisualPartContainer.Part => _part;
 
         public ExtrudeModifier(XElement item)
         {
@@ -104,7 +104,7 @@ namespace LiteCAD
         public void CreatePart()
         {
             //draft->brep
-            _part = new BREPPart(new Part());
+            _part = new VisualPart(new Part());
             var bottomFace = new BRepPlaneFace(_part.Part)
             {                
                 Surface = new BRepPlane() { Normal = Source.Plane.Normal, Location = Source.Plane.Position }
@@ -424,10 +424,10 @@ namespace LiteCAD
         }
 
         Draft Source;
-        BREPPart _part;
+        VisualPart _part;
 
 
-        public BREPPart Part => _part;
+        public VisualPart Part => _part;
 
         public int Id { get; set; }
 

@@ -73,14 +73,14 @@ namespace BREP.BRep
             ret.Add(new Line3D() { Start = V2, End = V0 });
             return ret.ToArray();
         }
-        public PlaneHelper GetPlane()
+        public Plane GetPlane()
         {
             var n0 = V2 - V0;
             var n1 = V1 - V0;
             var normal = Vector3d.Cross(n0, n1).Normalized();
-            return (new PlaneHelper() { Position = V0, Normal = normal });
+            return (new Plane() { Position = V0, Normal = normal });
         }
-        public Line3D[] SplitByPlane(PlaneHelper pl)
+        public Line3D[] SplitByPlane(Plane pl)
         {
 
             List<Vector3d> ret = new List<Vector3d>();

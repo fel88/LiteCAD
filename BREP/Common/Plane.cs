@@ -1,18 +1,13 @@
 ﻿using OpenTK;
-using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 
 namespace BREP.Common
 {
-    public class PlaneHelper
+    public class Plane
     {
-        public PlaneHelper()
+        public Plane()
         {
 
         }
@@ -72,7 +67,7 @@ namespace BREP.Common
             return proj;
         }
 
-        public Line3D Intersect(PlaneHelper ps)
+        public Line3D Intersect(Plane ps)
         {
             Line3D ret = new Line3D();
 

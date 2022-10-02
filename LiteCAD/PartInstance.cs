@@ -13,7 +13,7 @@ using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class PartInstance : AbstractDrawable, IPlaneSplittable, IMesh, IMeshNodesContainer, IBREPPartContainer
+    public class PartInstance : AbstractDrawable, IPlaneSplittable, IMesh, IMeshNodesContainer, IVisualPartContainer
     {
         /*public PartInstance(Part part)
         {
@@ -22,7 +22,7 @@ namespace LiteCAD
         }*/
 
 
-        public PartInstance(IBREPPartContainer part)
+        public PartInstance(IVisualPartContainer part)
         {
             Part = part;
             Name = Part.Part.Name;
@@ -52,7 +52,7 @@ namespace LiteCAD
                 Frozen = bool.Parse(xitem.Attribute("frozen").Value);
             }
             var partId = int.Parse(xitem.Attribute("partId").Value);
-            var ps = scene.GetAll(z => z is IBREPPartContainer).OfType<IBREPPartContainer>().First(z => z.Id == partId);
+            var ps = scene.GetAll(z => z is IVisualPartContainer).OfType<IVisualPartContainer>().First(z => z.Id == partId);
             Part = ps;
         }
 
@@ -65,7 +65,7 @@ namespace LiteCAD
             writer.WriteLine("</instance>");
         }
 
-        public readonly IBREPPartContainer Part;
+        public readonly IVisualPartContainer Part;
         public Color Color { get; set; } = Color.LightGray;
 
         public MeshNode[] Nodes
@@ -92,7 +92,7 @@ namespace LiteCAD
             }
         }
 
-        BREPPart IBREPPartContainer.Part => Part.Part;
+        VisualPart IVisualPartContainer.Part => Part.Part;
 
         public override void Draw()
         {
@@ -108,7 +108,7 @@ namespace LiteCAD
             GL.Disable(EnableCap.ColorMaterial);
         }
 
-        public Line3D[] SplitPyPlane(PlaneHelper ph)
+        public Line3D[] SplitPyPlane(Plane ph)
         {
             //convert to mesh
             var tr = Part.Part.Nodes.SelectMany(z => z.SplitByPlane(Matrix.Calc(), ph)).ToArray();

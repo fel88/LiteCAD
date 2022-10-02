@@ -115,7 +115,7 @@ namespace LiteCAD.Tools
 
         BRepFace getFace(IntersectInfo pick)
         {
-            if (!(pick.Model is IBREPPartContainer part && pick.Target != null)) return null;
+            if (!(pick.Model is IVisualPartContainer part && pick.Target != null)) return null;
             MeshNode frr = null;
             if (part is PartInstance pii)
             {

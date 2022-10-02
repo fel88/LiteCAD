@@ -1,11 +1,18 @@
-﻿using OpenTK;
+﻿using BREP.BRep.Outlines;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
 
 namespace LiteCAD.BRep
 {
-    public class LineItem : DrawItem
+    public class OutlineItemHelper : DrawItem
     {
+
+        readonly LineItem _lineItem;
+        public OutlineItemHelper(LineItem l)
+        {
+            _lineItem = l;
+        }
         public override void Draw()
         {
             GL.Color3(Color.Blue);
@@ -18,7 +25,7 @@ namespace LiteCAD.BRep
             GL.Vertex3(End);
             GL.End();
         }
-        public Vector3d Start;
-        public Vector3d End;
+        public Vector3d Start => _lineItem.Start;
+        public Vector3d End => _lineItem.End;
     }
 }

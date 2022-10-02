@@ -4,6 +4,6 @@ namespace LiteCAD.Common
 {
     public interface IPlaneSplittable
     {
-        Line3D[] SplitPyPlane(PlaneHelper ph);
+        Line3D[] SplitPyPlane(Plane ph);
     }
 }

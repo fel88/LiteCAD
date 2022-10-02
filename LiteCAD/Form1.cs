@@ -34,8 +34,8 @@ namespace LiteCAD
         static Form1()
         {
             //add new commands 
-            BREPPlaneHelper.Commands.Add(new CutByPlaneCommand());
-            BREPPart.SelectManager = new DefaultSelectManager();
+            PlaneHelper.Commands.Add(new CutByPlaneCommand());
+            VisualPart.SelectManager = new DefaultSelectManager();
         }
 
         public class CutByPlaneCommand : ICommand
@@ -50,7 +50,7 @@ namespace LiteCAD
                 var ph = form.treeListView1.SelectedObjects.OfType<PlaneHelper>().FirstOrDefault();
                 if (ph == null) return;
 
-                var pnts = models.SelectMany(z => z.SplitPyPlane(ph));
+                var pnts = models.SelectMany(z => z.SplitPyPlane(ph.GetPlane()));
 
                 //project all to ph
                 //var proj = pnts.Select(ph.ProjPoint).ToList();
@@ -315,7 +315,7 @@ namespace LiteCAD
                     GL.Enable(EnableCap.DepthTest);
                 }
                 //select plane
-                else if (pick.Model is IBREPPartContainer part && pick.Target != null)
+                else if (pick.Model is IVisualPartContainer part && pick.Target != null)
                 {
                     MeshNode frr = null;
                     Matrix4d hm = Matrix4d.Identity;
@@ -431,7 +431,7 @@ namespace LiteCAD
             if (objs.Count < 2) return;
             var target = objs[0] as IPartContainer;
             var adder = objs[1] as IPartContainer;
-            var newPart = new BREPPart(new Part()) { Name = "merge01" };
+            var newPart = new VisualPart(new Part()) { Name = "merge01" };
             lock (Parts)
             {
                 Parts.Add(newPart);
@@ -826,9 +826,9 @@ namespace LiteCAD
                 var dr = draggedNode.Data as IDrawable;
                 if (targetNode is PartAssembly pas)
                 {
-                    if (dr is IBREPPartContainer pc)
+                    if (dr is IVisualPartContainer pc)
                         pas.AddPart(new PartInstance(pc));
-                    if (dr is BREPPart p)
+                    if (dr is VisualPart p)
                         pas.AddPart(new PartInstance(p));//create LinkReference to part instance
                     if (dr is Group g)
                         pas.AddGroup(new GroupInstance(g));
@@ -943,7 +943,7 @@ namespace LiteCAD
         }
         private void planeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            BREPPlaneHelper ph = new BREPPlaneHelper() { Normal = Vector3d.UnitZ };
+            PlaneHelper ph = new PlaneHelper() { Normal = Vector3d.UnitZ };
             Parts.Add(ph);
             ph.Name = "plane01";
             updateList();
@@ -1168,7 +1168,7 @@ namespace LiteCAD
 
         public void ShowNormalsToggle(bool v)
         {
-            foreach (var item in Parts.OfType<BREPPart>())
+            foreach (var item in Parts.OfType<VisualPart>())
             {
                 item.ShowNormals = v;
             }
@@ -1575,7 +1575,7 @@ namespace LiteCAD
             propertyGrid1.SelectedObject = nearest;
         }
 
-        void exportObj(BREPPart part)
+        void exportObj(VisualPart part)
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "OBJ model (*.obj)|*.obj";
@@ -1589,7 +1589,7 @@ namespace LiteCAD
                 }
             }
         }
-        void exportStl(BREPPart part)
+        void exportStl(VisualPart part)
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "STL model (*.stl)|*.stl";
@@ -1720,7 +1720,7 @@ namespace LiteCAD
                         loaded = true;
                         lock (Parts)
                         {
-                            BREPPart pp = new BREPPart(prt);
+                            VisualPart pp = new VisualPart(prt);
                             Parts.Add(pp);
                         }
                         infoPanel.AddInfo($"model loaded succesfully: {fi.Name}");
@@ -1843,7 +1843,7 @@ namespace LiteCAD
         private void objToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;
-            var vv = treeListView1.SelectedObjects.OfType<BREPPart>().ToArray();
+            var vv = treeListView1.SelectedObjects.OfType<VisualPart>().ToArray();
             if (vv.Any())
             {
                 exportObj(vv[0]);
@@ -2121,7 +2121,7 @@ namespace LiteCAD
         private void stlToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;
-            var vv = treeListView1.SelectedObjects.OfType<BREPPart>().ToArray();
+            var vv = treeListView1.SelectedObjects.OfType<VisualPart>().ToArray();
             if (vv.Any())
             {
                 exportStl(vv[0]);

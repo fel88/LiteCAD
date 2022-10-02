@@ -52,7 +52,7 @@ namespace LiteCAD
                 }
                 if (item.Name == "plane")
                 {
-                    BREPPlaneHelper d = new BREPPlaneHelper(item);
+                    PlaneHelper d = new PlaneHelper(item);
                     Parts.Add(d);
                 }
                 if (item.Name == "group")

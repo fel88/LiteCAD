@@ -113,7 +113,7 @@
     <Compile Include="Common\DraftLine.cs" />
     <Compile Include="Common\DraftPoint.cs" />
     <Compile Include="Common\HorizontalConstraint.cs" />
-    <Compile Include="Common\IBREPPartContainer.cs" />
+    <Compile Include="Common\IVisualPartContainer.cs" />
     <Compile Include="Common\IDraftConstraintHelper.cs" />
     <Compile Include="Common\IDraftHelper.cs" />
     <Compile Include="Common\IMessageReporter.cs" />
@@ -157,7 +157,7 @@
     <Compile Include="Common\IName.cs" />
     <Compile Include="Common\IntFieldEditor.cs" />
     <Compile Include="Common\LiteCadException.cs" />
-    <Compile Include="Common\Part.cs" />
+    <Compile Include="Common\VisualPart.cs" />
     <Compile Include="Common\PlaneHelper.cs" />
     <Compile Include="Common\Segment3d.cs" />
     <Compile Include="Common\StringFieldEditor.cs" />
@@ -195,10 +195,6 @@
     <ProjectReference Include="..\clipper\clipperLib.csproj">
       <Project>{9b062971-a88e-4a3d-b3c9-12b78d15fa66}</Project>
       <Name>clipperLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\IxMilia.Iges\IxMilia.Iges.csproj">
-      <Project>{d8a1faf5-4eb0-41af-847e-4300e5b49fff}</Project>
-      <Name>IxMilia.Iges</Name>
     </ProjectReference>
     <ProjectReference Include="..\Triangle\Triangle.csproj">
       <Project>{5a12c4a1-bc07-4f18-82b5-b08e150025df}</Project>

@@ -14,7 +14,7 @@ namespace BREP.Parsers.Step
 
         public override object Parse(StepParseContext ctx, StepLineItem item)
         {
-            Plane ret = new Plane();
+            PlaneSurface ret = new PlaneSurface();
             var spl = item.Value.Split(new char[] { '\'', ',', '(', ')', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
             var aa = spl.Skip(1).Select(z => z.Trim()).ToArray();            
             var refs = aa.Where(z=>z.StartsWith("#")).Select(z => int.Parse(z.TrimStart('#'))).ToArray();

@@ -14,7 +14,7 @@ namespace BREP.Parsers.Step
         public StepParseContext()
         {
             binds = new Type[][] {
-                new[] { typeof(Plane), typeof(BRepPlaneFace) } ,
+                new[] { typeof(PlaneSurface), typeof(BRepPlaneFace) } ,
                 new[] { typeof(CylindricalSurface), typeof(BRepCylinderSurfaceFace) } ,
                 new[] { typeof(LinearExtrusionSurface), typeof(BRepLinearExtrusionFace) } ,
                 new[] { typeof(ConicalSurface), typeof(BRepConicalSurfaceFace) } ,
@@ -180,7 +180,7 @@ namespace BREP.Parsers.Step
         public double Length;
     }
 
-    public class Plane : Surface
+    public class PlaneSurface : Surface
     {
 
     }

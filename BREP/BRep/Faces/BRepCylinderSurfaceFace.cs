@@ -654,7 +654,7 @@ namespace BREP.BRep.Faces
                     var mtr = Matrix4d.CreateFromAxisAngle(cl.Axis, -ang);
 
                     var rot0 = Vector3d.Transform(vec0 + cl.Axis * d.Y, mtr);
-                    PlaneHelper ph = new PlaneHelper();
+                    Plane ph = new Plane();
                     //ph.Position = cl.Location;
                     ph.Normal = cl.Axis;
                     var projn = ph.GetProjPoint(rot0);

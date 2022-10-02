@@ -11,14 +11,14 @@ using System.Xml.Linq;
 
 namespace LiteCAD.Common
 {
-    public class BREPPlaneHelper : AbstractDrawable, IEditFieldsContainer, ICommandsContainer
+    public class PlaneHelper : AbstractDrawable, IEditFieldsContainer, ICommandsContainer
     {
-        public BREPPlaneHelper()
+        public PlaneHelper()
         {
 
         }
         
-        public BREPPlaneHelper(XElement elem)
+        public PlaneHelper(XElement elem)
         {
             if (elem.Attribute("name") != null)
             {
@@ -32,6 +32,11 @@ namespace LiteCAD.Common
             Position = new Vector3d(pos[0], pos[1], pos[2]);
             var normal = elem.Attribute("normal").Value.Split(';').Select(z => double.Parse(z.Replace(",", "."), CultureInfo.InvariantCulture)).ToArray();
             Normal = new Vector3d(normal[0], normal[1], normal[2]);
+        }
+
+        public Plane GetPlane()
+        {
+            return new Plane() { Normal = Normal, Position = Position };
         }
 
         [EditField]
@@ -95,7 +100,7 @@ namespace LiteCAD.Common
             return proj;
         }
 
-        public Line3D Intersect(BREPPlaneHelper ps)
+        public Line3D Intersect(PlaneHelper ps)
         {
             Line3D ret = new Line3D();
 

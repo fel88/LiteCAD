@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiteCAD.Lib", "LiteCADLib\L
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IxMilia.Iges", "IxMilia.Iges\IxMilia.Iges.csproj", "{D8A1FAF5-4EB0-41AF-847E-4300E5B49FFF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BREP", "BREP\BREP.csproj", "{B8D3FC7A-18BC-487B-8A02-EB446A2C6079}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{D8A1FAF5-4EB0-41AF-847E-4300E5B49FFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8A1FAF5-4EB0-41AF-847E-4300E5B49FFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8A1FAF5-4EB0-41AF-847E-4300E5B49FFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8D3FC7A-18BC-487B-8A02-EB446A2C6079}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8D3FC7A-18BC-487B-8A02-EB446A2C6079}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8D3FC7A-18BC-487B-8A02-EB446A2C6079}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8D3FC7A-18BC-487B-8A02-EB446A2C6079}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

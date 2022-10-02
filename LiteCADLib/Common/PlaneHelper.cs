@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using BREP.Common;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
@@ -10,14 +11,14 @@ using System.Xml.Linq;
 
 namespace LiteCAD.Common
 {
-    public class PlaneHelper : AbstractDrawable, IEditFieldsContainer, ICommandsContainer
+    public class BREPPlaneHelper : AbstractDrawable, IEditFieldsContainer, ICommandsContainer
     {
-        public PlaneHelper()
+        public BREPPlaneHelper()
         {
 
         }
         
-        public PlaneHelper(XElement elem)
+        public BREPPlaneHelper(XElement elem)
         {
             if (elem.Attribute("name") != null)
             {
@@ -94,7 +95,7 @@ namespace LiteCAD.Common
             return proj;
         }
 
-        public Line3D Intersect(PlaneHelper ps)
+        public Line3D Intersect(BREPPlaneHelper ps)
         {
             Line3D ret = new Line3D();
 

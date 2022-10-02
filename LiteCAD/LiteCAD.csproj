@@ -118,6 +118,7 @@
     <Compile Include="Camera.cs" />
     <Compile Include="CameraViewManager.cs" />
     <Compile Include="DefaultCameraViewManager.cs" />
+    <Compile Include="DefaultSelectManager.cs" />
     <Compile Include="Dialogs\ArrayDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -319,6 +320,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BREP\BREP.csproj">
+      <Project>{b8d3fc7a-18bc-487b-8a02-eb446a2c6079}</Project>
+      <Name>BREP</Name>
+    </ProjectReference>
     <ProjectReference Include="..\clipper\clipperLib.csproj">
       <Project>{9b062971-a88e-4a3d-b3c9-12b78d15fa66}</Project>
       <Name>clipperLib</Name>

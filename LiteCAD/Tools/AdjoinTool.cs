@@ -1,5 +1,8 @@
-﻿using LiteCAD.BRep;
-using LiteCAD.BRep.Faces;
+﻿using BREP.BRep;
+using BREP.BRep.Faces;
+using BREP.BRep.Surfaces;
+using BREP.Common;
+using LiteCAD.BRep;
 using LiteCAD.Common;
 using OpenTK;
 using System;
@@ -26,7 +29,7 @@ namespace LiteCAD.Tools
 
         }
 
-        BRep.BRepFace lastPickedFace;
+        BRepFace lastPickedFace;
         IntersectInfo inter1;
         IntersectInfo inter2;
         public override void MouseDown(MouseEventArgs e)
@@ -54,8 +57,8 @@ namespace LiteCAD.Tools
                     //calc adjoint matrix
                     if (drw1 != null && drw2 != null)
                     {
-                        var plane1 = pf1.Surface as BRep.Surfaces.BRepPlane;
-                        var plane2 = pf2.Surface as BRep.Surfaces.BRepPlane;
+                        var plane1 = pf1.Surface as BRepPlane;
+                        var plane2 = pf2.Surface as BRepPlane;
                         var ploc1 = Vector3d.Transform(plane1.Location, drw1.Matrix.Calc());
                         var ploc2 = Vector3d.Transform(plane2.Location, drw2.Matrix.Calc());
                         var q1 = drw1.Matrix.Calc();
@@ -73,7 +76,7 @@ namespace LiteCAD.Tools
                           
                             if (!drw1.Frozen)
                             {
-                                BRep.Surfaces.BRepPlane temp = new BRep.Surfaces.BRepPlane() { Location = ploc2, Normal = pnrm2 };
+                                BRepPlane temp = new BRepPlane() { Location = ploc2, Normal = pnrm2 };
                                 var proj = temp.GetProjPoint(ploc1);
                                 proj = proj - ploc1;//shift
                                 if (proj.Length > eps)
@@ -84,7 +87,7 @@ namespace LiteCAD.Tools
                             }
                             else if (!drw2.Frozen)
                             {
-                                BRep.Surfaces.BRepPlane temp = new BRep.Surfaces.BRepPlane() { Location = ploc1, Normal = pnrm1 };
+                                BRepPlane temp = new BRepPlane() { Location = ploc1, Normal = pnrm1 };
                                 var proj = temp.GetProjPoint(ploc2);
                                 proj = proj - ploc2;//shift
                                 if (proj.Length > eps)
@@ -110,9 +113,9 @@ namespace LiteCAD.Tools
             }
         }
 
-        BRep.BRepFace getFace(IntersectInfo pick)
+        BRepFace getFace(IntersectInfo pick)
         {
-            if (!(pick.Model is IPartContainer part && pick.Target != null)) return null;
+            if (!(pick.Model is IBREPPartContainer part && pick.Target != null)) return null;
             MeshNode frr = null;
             if (part is PartInstance pii)
             {

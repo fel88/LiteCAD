@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B8D3FC7A-18BC-487B-8A02-EB446A2C6079}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BREP</RootNamespace>
+    <AssemblyName>BREP</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="OpenTK, Version=3.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.3.1.0\lib\net20\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Common, Version=4.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Drawing.Common.4.5.1\lib\net461\System.Drawing.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.3\lib\netstandard2.0\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.4.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.2\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\net47\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BRep\Curves\BRepBSplineWithKnotsCurve.cs" />
+    <Compile Include="BRep\Outlines\LineItem.cs" />
+    <Compile Include="BRep\Outlines\OutlineItem.cs" />
+    <Compile Include="Common\BrepException.cs" />
+    <Compile Include="Common\FactoryHelper.cs" />
+    <Compile Include="Common\Helpers.cs" />
+    <Compile Include="BRep\ProjectPolygon.cs" />
+    <Compile Include="BRep\Faces\BRepBSplineWithKnotsSurfaceFace.cs" />
+    <Compile Include="BRep\Curves\BRepCircleCurve.cs" />
+    <Compile Include="BRep\Faces\BRepConicalSurfaceFace.cs" />
+    <Compile Include="BRep\Surfaces\BRepBSplineWithKnotsSurface.cs" />
+    <Compile Include="BRep\Surfaces\BRepConicalSurface.cs" />
+    <Compile Include="BRep\Surfaces\BRepCylinder.cs" />
+    <Compile Include="BRep\Faces\BRepCylinderSurfaceFace.cs" />
+    <Compile Include="BRep\Curves\BRepEllipseCurve.cs" />
+    <Compile Include="BRep\Faces\BRepLinearExtrusionFace.cs" />
+    <Compile Include="BRep\Surfaces\BRepLinearExtrusionSurface.cs" />
+    <Compile Include="BRep\Surfaces\BRepPlane.cs" />
+    <Compile Include="BRep\Faces\BRepPlaneFace.cs" />
+    <Compile Include="BRep\Curves\BRepSeamCurve.cs" />
+    <Compile Include="BRep\BRepSurface.cs" />
+    <Compile Include="BRep\Surfaces\BRepToroidalSurface.cs" />
+    <Compile Include="BRep\Faces\BRepToroidalSurfaceFace.cs" />
+    <Compile Include="BRep\Contour.cs" />
+    <Compile Include="BRep\CylinderMeshNode.cs" />
+    <Compile Include="BRep\UnsupportedCurveException.cs" />
+    <Compile Include="Common\IXmlStorable.cs" />
+    <Compile Include="Common\Line3D.cs" />
+    <Compile Include="Common\NFP.cs" />
+    <Compile Include="Common\PlaneHelper.cs" />
+    <Compile Include="Common\DebugHelpers.cs" />
+    <Compile Include="Common\Extensions.cs" />
+    <Compile Include="BRep\MeshNode.cs" />
+    <Compile Include="BRep\Segment.cs" />
+    <Compile Include="BRep\TriangleInfo.cs" />
+    <Compile Include="Parsers\Step\AdvancedFace.cs" />
+    <Compile Include="Parsers\Step\AdvancedFaceParseItem.cs" />
+    <Compile Include="Parsers\Step\Axis2Placement3d.cs" />
+    <Compile Include="Parsers\Step\Axis2Placement3dParseItem.cs" />
+    <Compile Include="Parsers\Step\BoundedCurve.cs" />
+    <Compile Include="Parsers\Step\BoundedCurveParseItem.cs" />
+    <Compile Include="Parsers\Step\BoundeSurfaceParseItem.cs" />
+    <Compile Include="Parsers\Step\BSplineCurve.cs" />
+    <Compile Include="Parsers\Step\BSplineCurveWithKnots.cs" />
+    <Compile Include="Parsers\Step\BSplineCurveWithKnotsParseItem.cs" />
+    <Compile Include="Parsers\Step\BSplineSurface.cs" />
+    <Compile Include="Parsers\Step\BSplineSurfaceWithKnots.cs" />
+    <Compile Include="Parsers\Step\BSplineSurfaceWithKnotsParseItem.cs" />
+    <Compile Include="Parsers\Step\CartesianPointParseItem.cs" />
+    <Compile Include="Parsers\Step\CircleParseItem.cs" />
+    <Compile Include="Parsers\Step\ClosedShell.cs" />
+    <Compile Include="Parsers\Step\ColourRGBParseItem.cs" />
+    <Compile Include="Parsers\Step\ConicalSurfaceParseItem.cs" />
+    <Compile Include="Parsers\Step\CylindricalSurfaceParseItem.cs" />
+    <Compile Include="Parsers\Step\DefinitionalRepresentation.cs" />
+    <Compile Include="Parsers\Step\DefinitionalRepresentationParseItem.cs" />
+    <Compile Include="Parsers\Step\DirectionParseItem.cs" />
+    <Compile Include="Parsers\Step\EdgeCurve.cs" />
+    <Compile Include="Parsers\Step\EdgeCurveParseItem.cs" />
+    <Compile Include="Parsers\Step\EdgeLoopParseItem.cs" />
+    <Compile Include="Parsers\Step\EllipseParseItem.cs" />
+    <Compile Include="Parsers\Step\FaceBoundParseItem.cs" />
+    <Compile Include="Parsers\Step\FaceOuterBoundParseItem.cs" />
+    <Compile Include="Parsers\Iges\IgesParser.cs" />
+    <Compile Include="Parsers\Step\ITokenItem.cs" />
+    <Compile Include="Parsers\Step\LinearExtrusionSurfaceParseItem.cs" />
+    <Compile Include="Parsers\Step\LineParseItem.cs" />
+    <Compile Include="NURBS\NURBS.cs" />
+    <Compile Include="Parsers\Step\ListTokenItem.cs" />
+    <Compile Include="Parsers\Step\OpenShellParseItem.cs" />
+    <Compile Include="Parsers\Step\OrientedEdge.cs" />
+    <Compile Include="Parsers\Step\OrientedEdgeParseItem.cs" />
+    <Compile Include="Parsers\Step\ParserItem.cs" />
+    <Compile Include="Parsers\Step\PCurve.cs" />
+    <Compile Include="Parsers\Step\PCurveParseItem.cs" />
+    <Compile Include="Parsers\Step\PlaneSurfaceParseItem.cs" />
+    <Compile Include="NURBS\RationalBSplinePoint.cs" />
+    <Compile Include="Parsers\Step\RationalBSplineSurface.cs" />
+    <Compile Include="Parsers\Step\SeamCurve.cs" />
+    <Compile Include="Parsers\Step\SeamCurveParseItem.cs" />
+    <Compile Include="Parsers\Step\ShellParseItem.cs" />
+    <Compile Include="BRep\Curves\BRepSpline.cs" />
+    <Compile Include="Parsers\Step\StepParser.cs" />
+    <Compile Include="Parsers\Step\StepLineItem.cs" />
+    <Compile Include="Parsers\Step\StepParseContext.cs" />
+    <Compile Include="Parsers\Step\StepParserException.cs" />
+    <Compile Include="Parsers\Step\StringTokenItem.cs" />
+    <Compile Include="Parsers\Step\SurfaceCurve.cs" />
+    <Compile Include="Parsers\Step\SurfaceCurveParseItem.cs" />
+    <Compile Include="Parsers\Step\TokenList.cs" />
+    <Compile Include="Parsers\Step\VectorParseItem.cs" />
+    <Compile Include="Parsers\Step\VertexPointParseItem.cs" />
+    <Compile Include="Parsers\Step\WrongArgumentsException.cs" />
+    <Compile Include="PolyBool.cs" />
+    <Compile Include="BRep\BRepCurve.cs" />
+    <Compile Include="BRep\BRepEdge.cs" />
+    <Compile Include="BRep\BRepFace.cs" />
+    <Compile Include="BRep\Curves\BRepLineCurve.cs" />
+    <Compile Include="BRep\BRepWire.cs" />
+    <Compile Include="Common\GeometryUtils.cs" />
+    <Compile Include="Common\Part.cs" />
+    <Compile Include="Common\Segment3d.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="OpenTK.dll.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\clipper\clipperLib.csproj">
+      <Project>{9b062971-a88e-4a3d-b3c9-12b78d15fa66}</Project>
+      <Name>clipperLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\IxMilia.Iges\IxMilia.Iges.csproj">
+      <Project>{d8a1faf5-4eb0-41af-847e-4300e5b49fff}</Project>
+      <Name>IxMilia.Iges</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Triangle\Triangle.csproj">
+      <Project>{5a12c4a1-bc07-4f18-82b5-b08e150025df}</Project>
+      <Name>Triangle</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -1,6 +1,8 @@
-﻿using LiteCAD.BRep;
-using LiteCAD.BRep.Curves;
-using LiteCAD.BRep.Surfaces;
+﻿using BREP.BRep;
+using BREP.BRep.Curves;
+using BREP.BRep.Surfaces;
+using BREP.Common;
+using LiteCAD.BRep;
 using OpenTK;
 using System;
 using System.Collections.Generic;
@@ -11,7 +13,7 @@ using TriangleNet.Meshing;
 
 namespace LiteCAD.Common
 {
-    public class GeometryUtils
+    public static class GeometryUtils
     {
         public static Vector2d GetProjPoint(Vector2d point, Vector2d loc, Vector2d norm)
         {
@@ -21,6 +23,27 @@ namespace LiteCAD.Common
             //return proj;
             return dist * norm + loc;
 
+        }
+        public static Line3D[] SplitByPlane(this MeshNode mn, Matrix4d matrix, PlaneHelper pl)
+        {
+            List<Line3D> vv = new List<Line3D>();
+            List<TriangleInfo> trianglesModifed = new List<TriangleInfo>();
+            foreach (var item in mn.Triangles)
+            {
+                trianglesModifed.Add(item.Multiply(matrix));
+            }
+            foreach (var item in trianglesModifed)
+            {
+                try
+                {
+                    vv.AddRange(item.SplitByPlane(pl));
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+            return vv.ToArray();
         }
         public static bool IntersectSegments(Vector2d p0, Vector2d p1, Vector2d q0, Vector2d q1, ref Vector2d c0)
         {
@@ -345,12 +368,12 @@ namespace LiteCAD.Common
             return (int)(z.X * v) + ";" + (int)(z.Y * v);
         }
 
-        internal static string SegmentHashKey(BRep.Segment z, int v)
+        internal static string SegmentHashKey(BREP.BRep.Segment z, int v)
         {
             return PointHashKey(z.Start, v) + ";" + PointHashKey(z.End, v);
         }
 
-        internal static string SegmentHashKeyInvariant(BRep.Segment z, int v)
+        internal static string SegmentHashKeyInvariant(BREP.BRep.Segment z, int v)
         {
             var str1 = PointHashKey(z.Start, v);
             var str2 = PointHashKey(z.End, v);

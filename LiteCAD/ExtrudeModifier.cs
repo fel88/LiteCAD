@@ -1,6 +1,4 @@
 ﻿using LiteCAD.BRep;
-using LiteCAD.BRep.Faces;
-using LiteCAD.BRep.Surfaces;
 using LiteCAD.Common;
 using OpenTK;
 using System;
@@ -10,10 +8,14 @@ using System.Linq;
 using System.Xml.Linq;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
+using BREP.BRep;
+using BREP.BRep.Curves;
+using BREP.BRep.Faces;
+using BREP.BRep.Surfaces;
 
 namespace LiteCAD
 {
-    public class ExtrudeModifier : IDrawable, IEconomicsDetail, IMesh, IPartContainer, IMeshNodesContainer, ICommandsContainer
+    public class ExtrudeModifier : IDrawable, IEconomicsDetail, IMesh, IBREPPartContainer, IMeshNodesContainer, ICommandsContainer
     {
         public ICommand[] Commands => new ICommand[] { new ExtractDraftCommand() };
         public class ExtractDraftCommand : ICommand
@@ -61,7 +63,7 @@ namespace LiteCAD
 
         }
 
-        Part IPartContainer.Part => _part;
+        BREPPart IBREPPartContainer.Part => _part;
 
         public ExtrudeModifier(XElement item)
         {
@@ -102,10 +104,9 @@ namespace LiteCAD
         public void CreatePart()
         {
             //draft->brep
-            _part = new Part();
-            var bottomFace = new BRepPlaneFace(_part)
-            {
-                Parent = _part,
+            _part = new BREPPart(new Part());
+            var bottomFace = new BRepPlaneFace(_part.Part)
+            {                
                 Surface = new BRepPlane() { Normal = Source.Plane.Normal, Location = Source.Plane.Position }
             };
             _part.Faces.Add(bottomFace);
@@ -117,7 +118,7 @@ namespace LiteCAD
             var wires = Source.GetWires();
             foreach (var wire in wires)
             {
-                List<BRep.BRepEdge> edges = new List<BRep.BRepEdge>();
+                List<BRepEdge> edges = new List<BRepEdge>();
 
                 if (wire.Any(z => z is DraftLine))
                 {
@@ -126,9 +127,9 @@ namespace LiteCAD
                         var diff = item.V0.Location - item.V1.Location;
                         var p = new OpenTK.Vector3d(item.V0.Location.X, item.V0.Location.Y, 0);
                         var pe = new OpenTK.Vector3d(item.V1.Location.X, item.V1.Location.Y, 0);
-                        edges.Add(new BRep.BRepEdge()
+                        edges.Add(new BRepEdge()
                         {
-                            Curve = new BRep.Curves.BRepLineCurve()
+                            Curve = new BRepLineCurve()
                             {
                                 Point = p,
                                 Vector = new OpenTK.Vector3d(diff.X, diff.Y, 0)
@@ -154,7 +155,7 @@ namespace LiteCAD
                                 var pe = new Vector3d(p1.X, p1.Y, 0);
                                 edges.Add(new BRepEdge()
                                 {
-                                    Curve = new BRep.Curves.BRepLineCurve()
+                                    Curve = new BRepLineCurve()
                                     {
                                         Point = p,
                                         Vector = new Vector3d(diff.X, diff.Y, 0)
@@ -170,9 +171,9 @@ namespace LiteCAD
                             var dir2 = (p.Xy - item.Center.Location);
                             var dir3 = new Vector3d(dir2.X, dir2.Y, 0);
 
-                            edges.Add(new BRep.BRepEdge()
+                            edges.Add(new BRepEdge()
                             {
-                                Curve = new BRep.Curves.BRepCircleCurve()
+                                Curve = new BRepCircleCurve()
                                 {
                                     Dir = dir3,
                                     Radius = (double)item.Radius,
@@ -186,35 +187,35 @@ namespace LiteCAD
                         }
                     }
                 }
-                bottomFace.Wires.Add(new BRep.BRepWire() { Edges = edges });
+                bottomFace.Wires.Add(new BRepWire() { Edges = edges });
             }
 
             var shift = Source.Plane.Normal * (double)Height;
-            var topFace = new BRepPlaneFace(_part)
+            var topFace = new BRepPlaneFace(_part.Part)
             {
-                Parent = _part,
+                Parent = _part.Part,
                 Surface = new BRepPlane() { Normal = -Source.Plane.Normal, Location = Source.Plane.Position + Source.Plane.Normal * (double)Height }
             };
 
             foreach (var item in bottomFace.Wires)
             {
-                List<BRep.BRepEdge> edges = new List<BRep.BRepEdge>();
+                List<BRepEdge> edges = new List<BRepEdge>();
                 foreach (var edge in item.Edges)
                 {
-                    var ne = new BRep.BRepEdge();
+                    var ne = new BRepEdge();
                     edges.Add(ne);
                     ne.Start = edge.Start + shift;
                     ne.End = edge.End + shift;
-                    if (edge.Curve is BRep.Curves.BRepLineCurve)
+                    if (edge.Curve is BRepLineCurve)
                     {
-                        var cc = edge.Curve as BRep.Curves.BRepLineCurve;
-                        ne.Curve = new BRep.Curves.BRepLineCurve() { Point = cc.Point + shift, Vector = cc.Vector };
+                        var cc = edge.Curve as BRepLineCurve;
+                        ne.Curve = new BRepLineCurve() { Point = cc.Point + shift, Vector = cc.Vector };
                     }
-                    else if (edge.Curve is BRep.Curves.BRepCircleCurve)
+                    else if (edge.Curve is BRepCircleCurve)
                     {
-                        var cc = edge.Curve as BRep.Curves.BRepCircleCurve;
+                        var cc = edge.Curve as BRepCircleCurve;
 
-                        ne.Curve = new BRep.Curves.BRepCircleCurve()
+                        ne.Curve = new BRepCircleCurve()
                         {
                             Dir = cc.Dir,
                             Radius = cc.Radius,
@@ -224,11 +225,11 @@ namespace LiteCAD
                         };
                     }
                 }
-                topFace.Wires.Add(new BRep.BRepWire() { Edges = edges });
+                topFace.Wires.Add(new BRepWire() { Edges = edges });
             }
             //side faces 
 
-            List<BRep.BRepWire> outter = new List<BRep.BRepWire>();
+            List<BRepWire> outter = new List<BRepWire>();
             foreach (var item in bottomFace.Wires)
             {
                 var pp = item.Edges.SelectMany(z => new[] { z.End }).ToArray();
@@ -252,24 +253,24 @@ namespace LiteCAD
             foreach (var wire in bottomFace.Wires)
                 foreach (var item in wire.Edges)
                 {
-                    if ((item.Curve is BRep.Curves.BRepLineCurve))
+                    if ((item.Curve is BRepLineCurve))
                     {
-                        List<BRep.BRepEdge> edges2 = new List<BRep.BRepEdge>();
+                        List<BRepEdge> edges2 = new List<BRepEdge>();
 
                         var dir = (item.End - item.Start).Normalized();
                         dir = new Vector3d(-dir.Y, dir.X, 0);
-                        var sideFace = new BRepPlaneFace(_part)
+                        var sideFace = new BRepPlaneFace(_part.Part)
                         {
-                            Parent = _part,
+                            Parent = _part.Part,
                             Surface = new BRepPlane()
                             {
                                 Normal = -dir,
                                 Location = item.Start
                             }
                         };
-                        edges2.Add(new BRep.BRepEdge()
+                        edges2.Add(new BRepEdge()
                         {
-                            Curve = new BRep.Curves.BRepLineCurve()
+                            Curve = new BRepLineCurve()
                             {
                                 Point = item.Start,
                                 Vector = (item.End - item.Start).Normalized()
@@ -278,9 +279,9 @@ namespace LiteCAD
                             End = item.End
                         });
 
-                        edges2.Add(new BRep.BRepEdge()
+                        edges2.Add(new BRepEdge()
                         {
-                            Curve = new BRep.Curves.BRepLineCurve()
+                            Curve = new BRepLineCurve()
                             {
                                 Point = item.Start,
                                 Vector = (item.End - item.Start).Normalized()
@@ -288,9 +289,9 @@ namespace LiteCAD
                             Start = item.End,
                             End = item.End + shift
                         });
-                        edges2.Add(new BRep.BRepEdge()
+                        edges2.Add(new BRepEdge()
                         {
-                            Curve = new BRep.Curves.BRepLineCurve()
+                            Curve = new BRepLineCurve()
                             {
                                 Point = item.Start,
                                 Vector = (item.End - item.Start).Normalized()
@@ -298,9 +299,9 @@ namespace LiteCAD
                             Start = item.End + shift,
                             End = item.Start + shift
                         });
-                        edges2.Add(new BRep.BRepEdge()
+                        edges2.Add(new BRepEdge()
                         {
-                            Curve = new BRep.Curves.BRepLineCurve()
+                            Curve = new BRepLineCurve()
                             {
                                 Point = item.Start,
                                 Vector = (item.End - item.Start).Normalized()
@@ -308,15 +309,15 @@ namespace LiteCAD
                             Start = item.Start + shift,
                             End = item.Start
                         });
-                        sideFace.Wires.Add(new BRep.BRepWire() { Edges = edges2 });
+                        sideFace.Wires.Add(new BRepWire() { Edges = edges2 });
                         _part.Faces.Add(sideFace);
                     }
                     else
-                    if ((item.Curve is BRep.Curves.BRepCircleCurve cc))
+                    if ((item.Curve is BRepCircleCurve cc))
                     {
                         //4 edges required. 2 circle+2 seam
-                        List<BRep.BRepEdge> edges2 = new List<BRep.BRepEdge>();
-                        var sideFace = new BRepCylinderSurfaceFace(_part)
+                        List<BRepEdge> edges2 = new List<BRepEdge>();
+                        var sideFace = new BRepCylinderSurfaceFace(_part.Part)
                         {
                             Surface = new BRepCylinder()
                             {
@@ -328,9 +329,9 @@ namespace LiteCAD
                         };
 
 
-                        edges2.Add(new BRep.BRepEdge()
+                        edges2.Add(new BRepEdge()
                         {
-                            Curve = new BRep.Curves.BRepCircleCurve()
+                            Curve = new BRepCircleCurve()
                             {
                                 Dir = cc.Dir,
                                 SweepAngle = cc.SweepAngle,
@@ -342,9 +343,9 @@ namespace LiteCAD
                             End = item.End + shift
                         });
 
-                        edges2.Add(new BRep.BRepEdge()
+                        edges2.Add(new BRepEdge()
                         {
-                            Curve = new BRep.Curves.BRepLineCurve()
+                            Curve = new BRepLineCurve()
                             {
                                 Point = item.Start + shift,
                                 Vector = cc.Axis
@@ -353,9 +354,9 @@ namespace LiteCAD
                             End = item.End
                         });
 
-                        edges2.Add(new BRep.BRepEdge()
+                        edges2.Add(new BRepEdge()
                         {
-                            Curve = new BRep.Curves.BRepCircleCurve()
+                            Curve = new BRepCircleCurve()
                             {
                                 Dir = cc.Dir,
                                 SweepAngle = cc.SweepAngle,
@@ -367,9 +368,9 @@ namespace LiteCAD
                             End = item.End
                         });
 
-                        edges2.Add(new BRep.BRepEdge()
+                        edges2.Add(new BRepEdge()
                         {
-                            Curve = new BRep.Curves.BRepLineCurve()
+                            Curve = new BRepLineCurve()
                             {
                                 Point = item.Start,
                                 Vector = cc.Axis
@@ -378,7 +379,7 @@ namespace LiteCAD
                             End = item.Start + shift
                         });
 
-                        sideFace.Wires.Add(new BRep.BRepWire() { Edges = edges2 });
+                        sideFace.Wires.Add(new BRepWire() { Edges = edges2 });
                         _part.Faces.Add(sideFace);
                     }
                 }
@@ -423,10 +424,10 @@ namespace LiteCAD
         }
 
         Draft Source;
-        Part _part;
+        BREPPart _part;
 
 
-        public Part Part => _part;
+        public BREPPart Part => _part;
 
         public int Id { get; set; }
 

@@ -92,7 +92,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BRep\Curves\BRepBSplineWithKnotsCurve.cs" />
     <Compile Include="BRep\Editor\AbstractDrawingContext.cs" />
     <Compile Include="BRep\Editor\SkiaGLDrawingContext.cs" />
     <Compile Include="BRep\Editor\EventWrapperPictureBox.cs" />
@@ -108,39 +107,19 @@
     </Compile>
     <Compile Include="Common\ChangeCand.cs" />
     <Compile Include="Common\EqualsConstraint.cs" />
-    <Compile Include="Common\FactoryHelper.cs" />
-    <Compile Include="Common\Helpers.cs" />
-    <Compile Include="BRep\ProjectPolygon.cs" />
-    <Compile Include="BRep\Faces\BRepBSplineWithKnotsSurfaceFace.cs" />
-    <Compile Include="BRep\Curves\BRepCircleCurve.cs" />
-    <Compile Include="BRep\Faces\BRepConicalSurfaceFace.cs" />
-    <Compile Include="BRep\Surfaces\BRepBSplineWithKnotsSurface.cs" />
-    <Compile Include="BRep\Surfaces\BRepConicalSurface.cs" />
-    <Compile Include="BRep\Surfaces\BRepCylinder.cs" />
-    <Compile Include="BRep\Faces\BRepCylinderSurfaceFace.cs" />
-    <Compile Include="BRep\Curves\BRepEllipseCurve.cs" />
-    <Compile Include="BRep\Faces\BRepLinearExtrusionFace.cs" />
-    <Compile Include="BRep\Surfaces\BRepLinearExtrusionSurface.cs" />
-    <Compile Include="BRep\Surfaces\BRepPlane.cs" />
-    <Compile Include="BRep\Faces\BRepPlaneFace.cs" />
-    <Compile Include="BRep\Curves\BRepSeamCurve.cs" />
-    <Compile Include="BRep\BRepSurface.cs" />
-    <Compile Include="BRep\Surfaces\BRepToroidalSurface.cs" />
-    <Compile Include="BRep\Faces\BRepToroidalSurfaceFace.cs" />
-    <Compile Include="BRep\Contour.cs" />
-    <Compile Include="BRep\CylinderMeshNode.cs" />
-    <Compile Include="BRep\UnsupportedCurveException.cs" />
     <Compile Include="Common\DraftConstraint.cs" />
     <Compile Include="Common\DraftElement.cs" />
     <Compile Include="Common\DraftEllipse.cs" />
     <Compile Include="Common\DraftLine.cs" />
     <Compile Include="Common\DraftPoint.cs" />
     <Compile Include="Common\HorizontalConstraint.cs" />
+    <Compile Include="Common\IBREPPartContainer.cs" />
     <Compile Include="Common\IDraftConstraintHelper.cs" />
     <Compile Include="Common\IDraftHelper.cs" />
     <Compile Include="Common\IMessageReporter.cs" />
+    <Compile Include="Common\IPlaneSplittable.cs" />
+    <Compile Include="Common\ISelectManager.cs" />
     <Compile Include="Common\IXmlStorable.cs" />
-    <Compile Include="Common\Line3D.cs" />
     <Compile Include="Common\LinearConstaint.cs" />
     <Compile Include="Common\LineHelper.cs" />
     <Compile Include="Common\NFP.cs" />
@@ -164,78 +143,14 @@
     <Compile Include="CSP\CSPVarInfo.cs" />
     <Compile Include="CSP\Token.cs" />
     <Compile Include="MessageFilter.cs" />
-    <Compile Include="Common\DebugHelpers.cs" />
     <Compile Include="BRep\DrawItem.cs" />
     <Compile Include="Common\Extensions.cs" />
     <Compile Include="BRep\LineItem.cs" />
-    <Compile Include="BRep\MeshNode.cs" />
     <Compile Include="BRep\PlaneItem.cs" />
     <Compile Include="BRep\PointItem.cs" />
-    <Compile Include="BRep\Segment.cs" />
-    <Compile Include="BRep\TriangleInfo.cs" />
     <Compile Include="Common\PlyStuff.cs" />
-    <Compile Include="Parsers\Step\AdvancedFace.cs" />
-    <Compile Include="Parsers\Step\AdvancedFaceParseItem.cs" />
-    <Compile Include="Parsers\Step\Axis2Placement3d.cs" />
-    <Compile Include="Parsers\Step\Axis2Placement3dParseItem.cs" />
-    <Compile Include="Parsers\Step\BoundedCurve.cs" />
-    <Compile Include="Parsers\Step\BoundedCurveParseItem.cs" />
-    <Compile Include="Parsers\Step\BoundeSurfaceParseItem.cs" />
-    <Compile Include="Parsers\Step\BSplineCurve.cs" />
-    <Compile Include="Parsers\Step\BSplineCurveWithKnots.cs" />
-    <Compile Include="Parsers\Step\BSplineCurveWithKnotsParseItem.cs" />
-    <Compile Include="Parsers\Step\BSplineSurface.cs" />
-    <Compile Include="Parsers\Step\BSplineSurfaceWithKnots.cs" />
-    <Compile Include="Parsers\Step\BSplineSurfaceWithKnotsParseItem.cs" />
-    <Compile Include="Parsers\Step\CartesianPointParseItem.cs" />
-    <Compile Include="Parsers\Step\CircleParseItem.cs" />
-    <Compile Include="Parsers\Step\ClosedShell.cs" />
-    <Compile Include="Parsers\Step\ColourRGBParseItem.cs" />
-    <Compile Include="Parsers\Step\ConicalSurfaceParseItem.cs" />
-    <Compile Include="Parsers\Step\CylindricalSurfaceParseItem.cs" />
-    <Compile Include="Parsers\Step\DefinitionalRepresentation.cs" />
-    <Compile Include="Parsers\Step\DefinitionalRepresentationParseItem.cs" />
-    <Compile Include="Parsers\Step\DirectionParseItem.cs" />
-    <Compile Include="Parsers\Step\EdgeCurve.cs" />
-    <Compile Include="Parsers\Step\EdgeCurveParseItem.cs" />
-    <Compile Include="Parsers\Step\EdgeLoopParseItem.cs" />
-    <Compile Include="Parsers\Step\EllipseParseItem.cs" />
-    <Compile Include="Parsers\Step\FaceBoundParseItem.cs" />
-    <Compile Include="Parsers\Step\FaceOuterBoundParseItem.cs" />
-    <Compile Include="Parsers\Iges\IgesParser.cs" />
-    <Compile Include="Parsers\Step\LinearExtrusionSurfaceParseItem.cs" />
-    <Compile Include="Parsers\Step\LineParseItem.cs" />
-    <Compile Include="NURBS\NURBS.cs" />
-    <Compile Include="Parsers\Step\OpenShellParseItem.cs" />
-    <Compile Include="Parsers\Step\OrientedEdge.cs" />
-    <Compile Include="Parsers\Step\OrientedEdgeParseItem.cs" />
-    <Compile Include="Parsers\Step\ParserItem.cs" />
-    <Compile Include="Parsers\Step\PCurve.cs" />
-    <Compile Include="Parsers\Step\PCurveParseItem.cs" />
-    <Compile Include="Parsers\Step\PlaneSurfaceParseItem.cs" />
-    <Compile Include="NURBS\RationalBSplinePoint.cs" />
-    <Compile Include="Parsers\Step\RationalBSplineSurface.cs" />
-    <Compile Include="Parsers\Step\SeamCurveParseItem.cs" />
-    <Compile Include="Parsers\Step\ShellParseItem.cs" />
-    <Compile Include="BRep\Curves\BRepSpline.cs" />
-    <Compile Include="Parsers\Step\StepParser.cs" />
-    <Compile Include="Parsers\Step\StepLineItem.cs" />
-    <Compile Include="Parsers\Step\StepParseContext.cs" />
-    <Compile Include="Parsers\Step\StepParserException.cs" />
-    <Compile Include="Parsers\Step\SurfaceCurve.cs" />
-    <Compile Include="Parsers\Step\SurfaceCurveParseItem.cs" />
-    <Compile Include="Parsers\Step\VectorParseItem.cs" />
-    <Compile Include="Parsers\Step\VertexPointParseItem.cs" />
-    <Compile Include="Parsers\Step\WrongArgumentsException.cs" />
-    <Compile Include="PolyBool.cs" />
     <Compile Include="Common\AbstractDrawable.cs" />
-    <Compile Include="BRep\BRepCurve.cs" />
-    <Compile Include="BRep\BRepEdge.cs" />
-    <Compile Include="BRep\BRepFace.cs" />
-    <Compile Include="BRep\Curves\BRepLineCurve.cs" />
-    <Compile Include="BRep\BRepWire.cs" />
     <Compile Include="Common\Draft.cs" />
-    <Compile Include="Common\EditFieldAttribute.cs" />
     <Compile Include="Common\GeometryUtils.cs" />
     <Compile Include="Common\IDrawable.cs" />
     <Compile Include="Common\IEditFieldsContainer.cs" />
@@ -273,6 +188,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BREP\BREP.csproj">
+      <Project>{b8d3fc7a-18bc-487b-8a02-eb446a2c6079}</Project>
+      <Name>BREP</Name>
+    </ProjectReference>
     <ProjectReference Include="..\clipper\clipperLib.csproj">
       <Project>{9b062971-a88e-4a3d-b3c9-12b78d15fa66}</Project>
       <Name>clipperLib</Name>

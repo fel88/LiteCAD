@@ -22,10 +22,5 @@ namespace LiteCAD.Common
         int Z { get; set; }
     }    
 
-    public interface IPartContainer
-    {
-        int Id { get; }
-        Part Part { get; }
-
-    }
+    
 }

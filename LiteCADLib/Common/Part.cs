@@ -1,6 +1,8 @@
-﻿using LiteCAD.BRep;
-using LiteCAD.BRep.Faces;
-using LiteCAD.BRep.Surfaces;
+﻿using BREP.BRep;
+using BREP.BRep.Faces;
+using BREP.BRep.Surfaces;
+using BREP.Common;
+using LiteCAD.BRep;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
@@ -11,11 +13,16 @@ using System.Linq;
 
 namespace LiteCAD.Common
 {
-    public class Part : AbstractDrawable, IPartContainer, IMesh, IMeshNodesContainer, IPlaneSplittable
-    {        
-        Part IPartContainer.Part => this;
+    public class BREPPart : AbstractDrawable, IBREPPartContainer, IPlaneSplittable
+    {
+        public BREPPart(Part p)
+        {
+            Part = p;
+        }
+        public Part Part { get; private set; }
+        BREPPart IBREPPartContainer.Part => this;
 
-        public List<BRepFace> Faces = new List<BRepFace>();
+        public List<BRepFace> Faces => Part.Faces;
         public MeshNode[] Nodes
         {
             get
@@ -46,7 +53,7 @@ namespace LiteCAD.Common
             }
             DebugHelpers.Progress(true, 100);
         }
-                
+
 
         public static bool AutoExtractMeshOnLoad = true;
 
@@ -204,18 +211,18 @@ namespace LiteCAD.Common
                 }
             } while (true);
         }
-
+        public static ISelectManager SelectManager;
         public bool ShowNormals = false;
         public override void Draw()
         {
             if (!Visible) return;
             GL.Disable(EnableCap.Lighting);
-            foreach (var item in Faces.OrderByDescending(z => z.Selected))
+            foreach (var item in Faces.OrderByDescending(z => SelectManager.IsSelected(z)))
             {
                 if (!item.Visible) continue;
                 foreach (var pitem in item.Items)
                 {
-                    pitem.Draw();
+                    //pitem.Draw();
                 }
             }
             GL.Enable(EnableCap.Lighting);
@@ -225,17 +232,17 @@ namespace LiteCAD.Common
                 if (!item.Parent.Visible) continue;
                 GL.Enable(EnableCap.Lighting);
 
-                if (item.Parent.Selected)
+                /*if (item.Parent.Selected)
                 {
                     GL.Disable(EnableCap.Lighting);
                     GL.Color3(Color.LightGreen);
-                }
+                }*/
                 GL.Begin(PrimitiveType.Triangles);
-                
+
                 foreach (var zitem in item.Triangles)
-                {                    
+                {
                     foreach (var vv in zitem.Vertices)
-                    {                                    
+                    {
                         GL.Normal3(vv.Normal);
                         GL.Vertex3(vv.Position);
                     }
@@ -279,17 +286,5 @@ namespace LiteCAD.Common
             }
             return ret;
         }
-    }
-    public interface IMesh
-    {
-        IEnumerable<Vector3d> GetPoints();
-    }
-    public interface IMeshNodesContainer
-    {
-        MeshNode[] Nodes { get; }
-    }
-    public interface IPlaneSplittable
-    {
-        Line3D[] SplitPyPlane(PlaneHelper ph);
     }
 }

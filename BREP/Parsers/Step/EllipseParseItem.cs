@@ -1,0 +1,33 @@
+﻿using System;
+using System.Globalization;
+using System.Linq;
+
+namespace BREP.Parsers.Step
+{
+    public class EllipseParseItem : ParserItem
+    {
+        public override string Key => "ELLIPSE";
+
+        public override bool IsApplicable(StepLineItem item)
+        {
+            return item.Value.Contains(Key);
+        }
+
+        public override object Parse(StepParseContext ctx, StepLineItem item)
+        {
+            Ellipse ret = new Ellipse();
+            var spl = item.Value.Split(new char[] { ',', '(', ')', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
+            spl = spl.Where(z => !z.Contains('\'')).ToArray();
+            var zz = spl.Skip(2).Select(z => double.Parse(z, CultureInfo.InvariantCulture)).ToArray();
+            var refs = spl.Skip(1).Take(1).Select(z => int.Parse(z.TrimStart('#'))).ToArray();
+
+            var objs = refs.Select(z => ctx.GetRefObj(z)).ToArray();
+
+            ret.Axis = (Axis2Placement3d)objs[0];
+            ret.MinorRadius = zz[0];
+            ret.MajorRadius = zz[1];
+
+            return ret;
+        }
+    }
+}

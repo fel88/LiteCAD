@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using BREP.BRep;
+using OpenTK;
 
 namespace LiteCAD.BRep.Editor
 {

@@ -1,4 +1,6 @@
-﻿using LiteCAD.BRep;
+﻿using BREP.BRep;
+using BREP.Common;
+using LiteCAD.BRep;
 using LiteCAD.Common;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;

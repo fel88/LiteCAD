@@ -1,4 +1,5 @@
-﻿using LiteCAD.CSP;
+﻿using BREP.Common;
+using LiteCAD.CSP;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
@@ -17,7 +18,7 @@ namespace LiteCAD.Common
 
         public Draft()
         {
-            Plane = new PlaneHelper() { Normal = Vector3d.UnitZ, Position = Vector3d.Zero };
+            Plane = new BREPPlaneHelper() { Normal = Vector3d.UnitZ, Position = Vector3d.Zero };
             _inited = true;
         }
 
@@ -35,7 +36,7 @@ namespace LiteCAD.Common
         public void Restore(XElement el)
         {
             Clear();
-            Plane = new PlaneHelper(el.Element("plane"));
+            Plane = new BREPPlaneHelper(el.Element("plane"));
             Name = el.Attribute("name").Value;
             foreach (var item2 in el.Elements())
             {
@@ -562,7 +563,7 @@ namespace LiteCAD.Common
             return ret;
         }
 
-        public PlaneHelper Plane;
+        public BREPPlaneHelper Plane;
 
         public decimal CalcArea()
         {

@@ -1,4 +1,6 @@
-﻿using LiteCAD.BRep;
+﻿using BREP.BRep;
+using BREP.Common;
+using LiteCAD.BRep;
 using LiteCAD.Common;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
@@ -11,7 +13,7 @@ using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class PartInstance : AbstractDrawable, IPlaneSplittable, IMesh, IMeshNodesContainer, IPartContainer
+    public class PartInstance : AbstractDrawable, IPlaneSplittable, IMesh, IMeshNodesContainer, IBREPPartContainer
     {
         /*public PartInstance(Part part)
         {
@@ -20,7 +22,7 @@ namespace LiteCAD
         }*/
 
 
-        public PartInstance(IPartContainer part)
+        public PartInstance(IBREPPartContainer part)
         {
             Part = part;
             Name = Part.Part.Name;
@@ -50,7 +52,7 @@ namespace LiteCAD
                 Frozen = bool.Parse(xitem.Attribute("frozen").Value);
             }
             var partId = int.Parse(xitem.Attribute("partId").Value);
-            var ps = scene.GetAll(z => z is IPartContainer).OfType<IPartContainer>().First(z => z.Id == partId);
+            var ps = scene.GetAll(z => z is IBREPPartContainer).OfType<IBREPPartContainer>().First(z => z.Id == partId);
             Part = ps;
         }
 
@@ -63,10 +65,10 @@ namespace LiteCAD
             writer.WriteLine("</instance>");
         }
 
-        public readonly IPartContainer Part;
+        public readonly IBREPPartContainer Part;
         public Color Color { get; set; } = Color.LightGray;
 
-        public BRep.MeshNode[] Nodes
+        public MeshNode[] Nodes
         {
             get
             {
@@ -90,7 +92,7 @@ namespace LiteCAD
             }
         }
 
-        Part IPartContainer.Part => Part.Part;
+        BREPPart IBREPPartContainer.Part => Part.Part;
 
         public override void Draw()
         {

@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using BREP.Common;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
 namespace LiteCAD.Common

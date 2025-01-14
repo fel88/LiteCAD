@@ -53,14 +53,14 @@ namespace LiteCAD
             }
         }
 
-        public ExtrudeModifier(Draft draft)
-        {
+        public ExtrudeModifier(Draft draft, decimal heigth)
+        {            
+            _height = heigth;
             Source = draft;
             Source.Parent = this;
             CreatePart();
             Childs.Add(draft);
             Id = FactoryHelper.NewId++;
-
         }
 
         VisualPart IVisualPartContainer.Part => _part;
@@ -390,6 +390,7 @@ namespace LiteCAD
 
         decimal _height = 10;
         bool ctor = false;
+
         public decimal Height
         {
             get => _height;

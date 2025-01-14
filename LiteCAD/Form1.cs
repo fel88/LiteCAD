@@ -1767,18 +1767,28 @@ namespace LiteCAD
             treeListView1.SetObjects(new[] { grp});*/
             treeListView1.SetObjects(Parts);
         }
+
         private void toolStripButton6_Click(object sender, EventArgs e)
         {
             Extrude();
         }
+
         public void Extrude()
         {
-            if (treeListView1.SelectedObject is Draft dd)
-            {
-                Parts.Remove(dd);
-                Parts.Add(new ExtrudeModifier(dd) { });
-                updateList();
-            }
+            if (!(treeListView1.SelectedObject is Draft dd))
+                return;
+
+            var d = AutoDialog.DialogHelpers.StartDialog();
+            d.AddNumericField("height", "Height", 10, max: 100000, min: 0.0001m);
+            if (!d.ShowDialog())
+                return;
+
+            var h = (decimal)d.GetNumericField("height");
+
+            Parts.Remove(dd);
+            Parts.Add(new ExtrudeModifier(dd, h) { });
+            updateList();
+
         }
 
         private void partToolStripMenuItem_Click(object sender, EventArgs e)

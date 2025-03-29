@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace LiteCAD.Common
 {
-    public class VisualPart : AbstractDrawable, IVisualPartContainer, IPlaneSplittable, IMeshNodesContainer
+    public class VisualPart : AbstractDrawable, IVisualPartContainer, IPlaneSplittable, IMeshNodesContainer, IMesh
     {
         public VisualPart(Part p)
         {

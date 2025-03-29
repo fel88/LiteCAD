@@ -463,8 +463,12 @@ namespace LiteCAD
                     if (!(face is BRepPlaneFace p1)) continue;
                     foreach (var face2 in newPart.Faces)
                     {
-                        if (face == face2) continue;
-                        if (!(face2 is BRepPlaneFace p2)) continue;
+                        if (face == face2)
+                            continue;
+
+                        if (!(face2 is BRepPlaneFace p2))
+                            continue;
+
                         //check normals colliniear
                         var cross = Vector3d.Dot(p1.Plane.Normal, p2.Plane.Normal);
                         if (Math.Abs(Math.Abs(cross) - 1) < 1e-5f && p2.Plane.IsOnSurface(p1.Plane.Location))
@@ -484,9 +488,11 @@ namespace LiteCAD
                             break;
                         }
                     }
-                    if (was) break;
+                    if (was)
+                        break;
                 }
-                if (!was) break;
+                if (!was) 
+                    break;
             }
             newPart.ExtractMesh();
         }
@@ -1014,11 +1020,12 @@ namespace LiteCAD
 
             cam.OrthoWidth = (float)Math.Max(dx, dy);
         }
+
         Vector3d[] getAllPoints()
         {
-            var t1 = Parts.OfType<IMesh>().ToArray();
+            var t1 = Parts.OfType<IMesh>().ToArray();            
             var ad = Parts.OfType<AbstractDrawable>().Where(z => z.Visible).ToArray();
-            var t2 = ad.SelectMany(z => z.GetAll((xx) => xx is IMesh)).OfType<IMesh>();
+            var t2 = ad.SelectMany(z => z.GetAll((xx) => xx is IMesh)).OfType<IMesh>().ToArray();
 
             var p1 = getAllPoints(t1.Union(t2).ToArray());
 
@@ -1035,7 +1042,8 @@ namespace LiteCAD
             List<Vector3d> vv = new List<Vector3d>();
             foreach (var p in parts)
             {
-                if (p is IDrawable dd && !dd.Visible) continue;
+                if (p is IDrawable dd && !dd.Visible)
+                    continue;
 
                 vv.AddRange(p.GetPoints());
                 /*var nn = p.Nodes.SelectMany(z => z.Triangles.SelectMany(u => u.Vertices.Select(zz => zz.Position))).ToArray();
@@ -1064,7 +1072,10 @@ namespace LiteCAD
             }
             if (vv == null)
                 vv = getAllPoints();
-            if (vv.Length == 0) return;
+
+            if (vv.Length == 0)
+                return;
+
             FitToPoints(vv, camera1);
         }
 
@@ -1691,6 +1702,7 @@ namespace LiteCAD
         {
             exportDxf(editedDraft);
         }
+
         private void toolStripButton7_Click(object sender, EventArgs e)
         {
             ExportDraftToDxf();
@@ -1700,64 +1712,66 @@ namespace LiteCAD
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "All BREP formats (*.stp;*.step;*.igs;*.iges)|*.stp;*.step;*.igs;*.iges|STEP files (*.stp;*.step)|*.stp;*.step|IGES files (*.igs;*.iges)|*.igs;*.iges|All files (*.*)|*.*";
-            if (ofd.ShowDialog() == DialogResult.OK)
+
+            if (ofd.ShowDialog() != DialogResult.OK)
+                return;
+
+            loaded = false;
+            Thread th = new Thread(() =>
             {
-                loaded = false;
-                Thread th = new Thread(() =>
+                try
                 {
-                    try
-                    {
-                        var lw = ofd.FileName.ToLower();
-                        Part prt = null;
+                    var lw = ofd.FileName.ToLower();
+                    Part prt = null;
 
-                        if (lw.EndsWith(".stp") || lw.EndsWith(".step"))
-                            prt = StepParser.Parse(ofd.FileName);
+                    if (lw.EndsWith(".stp") || lw.EndsWith(".step"))
+                        prt = StepParser.Parse(ofd.FileName);
 
-                        if (lw.EndsWith(".igs") || lw.EndsWith(".iges"))
-                            prt = IgesParser.Parse(ofd.FileName);
+                    if (lw.EndsWith(".igs") || lw.EndsWith(".iges"))
+                        prt = IgesParser.Parse(ofd.FileName);
 
-                        var fi = new FileInfo(ofd.FileName);
-                        loaded = true;
-                        lock (Parts)
-                        {
-                            VisualPart pp = new VisualPart(prt);
-                            Parts.Add(pp);
-                        }
-                        infoPanel.AddInfo($"model loaded succesfully: {fi.Name}");
-                        updateList();
-                        var vv = getAllPoints();
-                        fitAll(vv);
-                        camToSelected(vv);
-                    }
-                    catch (Exception ex)
+                    var fi = new FileInfo(ofd.FileName);
+                    loaded = true;
+                    lock (Parts)
                     {
-                        loaded = true;
-                        DebugHelpers.Exception(ex);
+                        VisualPart pp = new VisualPart(prt);
+                        Parts.Add(pp);
                     }
-                });
-                Thread th2 = new Thread(() =>
-                {
-                    Stopwatch sw = Stopwatch.StartNew();
-                    while (true)
-                    {
-                        if (!Debugger.IsAttached && sw.Elapsed.TotalSeconds > PartLoadTimeout)
-                        {
-                            th.Abort();
-                            DebugHelpers.Error("load timeout");
-                            break;
-                        }
-                        Thread.Sleep(1000);
-                        if (loaded) break;
-                    }
-                });
-                if (!Debugger.IsAttached && AllowPartLoadTimeout)
-                {
-                    th2.IsBackground = true;
-                    th2.Start();
+                    infoPanel.AddInfo($"model loaded succesfully: {fi.Name}");
+                    updateList();
+                    var vv = getAllPoints();
+                    fitAll(vv);
+                    camToSelected(vv);
                 }
-                th.IsBackground = true;
-                th.Start();
+                catch (Exception ex)
+                {
+                    loaded = true;
+                    DebugHelpers.Exception(ex);
+                }
+            });
+            Thread th2 = new Thread(() =>
+            {
+                Stopwatch sw = Stopwatch.StartNew();
+                while (true)
+                {
+                    if (!Debugger.IsAttached && sw.Elapsed.TotalSeconds > PartLoadTimeout)
+                    {
+                        th.Abort();
+                        DebugHelpers.Error("load timeout");
+                        break;
+                    }
+                    Thread.Sleep(1000);
+                    if (loaded) break;
+                }
+            });
+            if (!Debugger.IsAttached && AllowPartLoadTimeout)
+            {
+                th2.IsBackground = true;
+                th2.Start();
             }
+            th.IsBackground = true;
+            th.Start();
+
         }
 
         public void updateList()

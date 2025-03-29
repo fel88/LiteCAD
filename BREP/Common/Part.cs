@@ -208,19 +208,4 @@ namespace LiteCAD.Common
 
         
     }
-    public interface IMesh
-    {
-        IEnumerable<Vector3d> GetPoints();
-    }
-    public interface IMeshNodesContainer
-    {
-        MeshNode[] Nodes { get; }
-    }
-    
-    public interface IPartContainer
-    {
-        int Id { get; }
-        Part Part { get; }
-
-    }
 }

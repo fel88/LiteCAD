@@ -624,7 +624,8 @@ namespace LiteCAD.DraftEditor
 
         public void FitAll()
         {
-            if (_draft == null || _draft.Elements.Count() == 0) return;
+            if (_draft == null || _draft.Elements.Count() == 0) 
+                return;
 
             var t = _draft.DraftPoints.Select(z => z.Location).ToArray();
             var t2 = _draft.DraftEllipses.SelectMany(z => new[] {
@@ -636,6 +637,7 @@ namespace LiteCAD.DraftEditor
 
             ctx.FitToPoints(t.Select(z => z.ToPointF()).ToArray(), 5);
         }
+
         public static Type DrawerType = typeof(SkiaGLDrawingContext);
         IDrawingContext ctx;
         public object nearest { get; private set; }

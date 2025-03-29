@@ -94,6 +94,9 @@
     <Compile Include="BRep\Contour.cs" />
     <Compile Include="BRep\CylinderMeshNode.cs" />
     <Compile Include="BRep\UnsupportedCurveException.cs" />
+    <Compile Include="Common\IMesh.cs" />
+    <Compile Include="Common\IMeshNodesContainer.cs" />
+    <Compile Include="Common\IPartContainer.cs" />
     <Compile Include="Common\IXmlStorable.cs" />
     <Compile Include="Common\Line3D.cs" />
     <Compile Include="Common\NFP.cs" />

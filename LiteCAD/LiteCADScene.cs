@@ -47,7 +47,7 @@ namespace LiteCAD
                 }
                 if (item.Name == "mesh")
                 {
-                    MeshModel d = new MeshModel(this, item);
+                    MeshSceneObject d = new MeshSceneObject(this, item);
                     Parts.Add(d);
                 }
                 if (item.Name == "plane")

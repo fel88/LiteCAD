@@ -11,10 +11,9 @@ namespace LiteCAD
 {
     public static class STLLoader
     {
-        public static MeshModel LoadFromFile(string path)
+        public static MeshSceneObject LoadFromFile(string path)
         {
-            MeshModel mm = null;
-            mm = new MeshModel() { Name = Path.GetFileNameWithoutExtension(path) };
+            MeshSceneObject mm = new MeshSceneObject() { Name = Path.GetFileNameWithoutExtension(path) };
             MeshNode node = new MeshNode();
             mm.Nodes.Add(node);
             var txt = File.ReadAllLines(path);

@@ -7,7 +7,11 @@
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <PlatformTarget>x64</PlatformTarget>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
+   <PropertyGroup>
+        <NoWarn>$(NoWarn);1591</NoWarn>
+    </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>ruler-triangle.ico</ApplicationIcon>
   </PropertyGroup>
@@ -45,6 +49,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BREP\BREP.csproj" />
     <ProjectReference Include="..\clipper\clipperLib.csproj" />
+    <ProjectReference Include="..\LiteCAD.Graphics\LiteCAD.Graphics.csproj" />
     <ProjectReference Include="..\LiteCADLib\LiteCAD.Lib.csproj" />
     <ProjectReference Include="..\Triangle\Triangle.csproj" />
   </ItemGroup>
@@ -90,6 +95,8 @@
       <Version>0.8.4</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="SharpFont.Dependencies" Version="2.6.0" />
+    <PackageReference Include="SpaceWizards.SharpFont" Version="1.0.2" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
@@ -97,5 +104,10 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="freetype6.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

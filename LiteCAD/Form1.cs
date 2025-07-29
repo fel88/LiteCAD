@@ -8,6 +8,7 @@ using LiteCAD.BRep;
 using LiteCAD.BRep.Editor;
 using LiteCAD.Common;
 using LiteCAD.DraftEditor;
+using LiteCAD.Graphics;
 using LiteCAD.Parsers.Iges;
 using LiteCAD.PropEditors;
 using LiteCAD.Tools;
@@ -15,6 +16,7 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
@@ -110,6 +112,7 @@ namespace LiteCAD
         public EventWrapperGlControl evwrapper;
         public Camera camera1 = new Camera() { IsOrtho = true };
         public CameraViewManager ViewManager;
+        bool first = true;
         private void Gl_Paint(object sender, PaintEventArgs e)
         {
             //if (!loaded)
@@ -118,10 +121,20 @@ namespace LiteCAD
             {
                 glControl.MakeCurrent();
             }
+            if (first)
+            {
+                // build and compile our shader zprogram
+                // ------------------------------------                
+                //lightingShader = new Shader("2.2.basic_lighting.vs", "2.2.basic_lighting.fs");
 
+                first = false;
+                textRenderer.Init(glControl.Width, glControl.Height);
+
+
+            }
             Redraw();
         }
-
+        LiteCAD.Graphics.TextRenderer textRenderer = new Graphics.TextRenderer();
         public IntersectInfo Pick => pick;
         IntersectInfo pick;
 
@@ -422,7 +435,25 @@ namespace LiteCAD
             }
             GL.Disable(EnableCap.Lighting);
 
+            DrawTextOverlay();
             glControl.SwapBuffers();
+        }
+
+        private void DrawTextOverlay()
+        {
+            GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.Disable(EnableCap.DepthTest);
+
+            //textRenderer.RenderText("This is sample text", 25.0f, 25.0f, 1.0f, new Vector3(0.5f, 0.8f, 0.2f));
+            //textRenderer.RenderText("(C) LearnOpenGL.com", 10.0f, glControl.Height - 30, 0.5f, new Vector3(0.3f, 0.7f, 0.9f));
+            if (hovered != null)
+                textRenderer.RenderText(toolStripStatusLabel3.Text, 10.0f, glControl.Height - 30, 0.5f, new Vector3(0.3f, 0.7f, 0.9f));
+
+            GL.Enable(EnableCap.DepthTest);
+            GL.Disable(EnableCap.CullFace);
+            GL.Disable(EnableCap.Blend);
         }
 
         internal void Merge()
@@ -491,7 +522,7 @@ namespace LiteCAD
                     if (was)
                         break;
                 }
-                if (!was) 
+                if (!was)
                     break;
             }
             newPart.ExtractMesh();
@@ -1023,7 +1054,7 @@ namespace LiteCAD
 
         Vector3d[] getAllPoints()
         {
-            var t1 = Parts.OfType<IMesh>().ToArray();            
+            var t1 = Parts.OfType<IMesh>().ToArray();
             var ad = Parts.OfType<AbstractDrawable>().Where(z => z.Visible).ToArray();
             var t2 = ad.SelectMany(z => z.GetAll((xx) => xx is IMesh)).OfType<IMesh>().ToArray();
 
@@ -1590,7 +1621,8 @@ namespace LiteCAD
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "OBJ model (*.obj)|*.obj";
-            if (sfd.ShowDialog() != DialogResult.OK) return;
+            if (sfd.ShowDialog() != DialogResult.OK)
+                return;
 
             using (var fs = new FileStream(sfd.FileName, FileMode.CreateNew))
             {
@@ -1604,7 +1636,10 @@ namespace LiteCAD
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "STL model (*.stl)|*.stl";
-            if (sfd.ShowDialog() != DialogResult.OK) return;
+
+            if (sfd.ShowDialog() != DialogResult.OK)
+                return;
+
             Thread th = new Thread(() =>
             {
                 StringBuilder sb = new StringBuilder();
@@ -1920,7 +1955,10 @@ namespace LiteCAD
             //obj or stl
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "STL file (*.stl)|*.stl";
-            if (ofd.ShowDialog() != DialogResult.OK) return;
+
+            if (ofd.ShowDialog() != DialogResult.OK)
+                return;
+
             var mesh = STLLoader.LoadFromFile(ofd.FileName);
             Parts.Add(mesh);
             updateList();
@@ -2174,16 +2212,74 @@ namespace LiteCAD
         {
             infoPanel.AddInfo(text);
         }
+
+        private void meshgpuToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "All mesh formats|*.obj;*.off;*.stl";
+            if (ofd.ShowDialog() != DialogResult.OK)
+                return;
+
+            var ext = Path.GetExtension(ofd.FileName).ToLower();
+            /*IMeshLoader loader = null;
+            if (ext == ".off")
+            {
+                loader = new OffLoader();
+            }
+            else if (ext == ".stl")
+            {
+                loader = new StlLoader();
+            }
+            else if (ext == ".obj")
+            {
+                loader = new ObjLoader();
+            }
+            var models = loader.Load(ofd.FileName);
+            foreach (var model in models)
+            {
+                var g = new MeshGpuHelper(model);
+                g.Camera = camera1;
+                AddHelper(g);
+            }*/
+            updateList();
+        }
     }
 
-    public enum EditModeEnum
+    public class MeshModel
     {
-        Part, Draft, Assembly
-    }
+        public class Face
+        {
+            public Face(MeshModel parent, int[] indices)
+            {
+                Indices = indices;
+                Parent = parent;
+                Points = indices.Select(z => parent.Points[z]).ToArray();
+                Normals = indices.Select(z => parent.Normals[z]).ToArray();
+            }
 
-    public interface IPropEditor
-    {
-        void Init(object o);
-        object ReturnValue { get; }
+            public Vector3d[] Points { get; private set; }
+            public Vector3d[] Normals { get; private set; }
+            public int[] Indices;
+            public MeshModel Parent;
+        }
+
+        public List<Face> Faces = new List<Face>();
+        public List<Vector3d> Points = new List<Vector3d>();
+        public List<Vector3d> Normals = new List<Vector3d>();
+
+        public GpuObject ToGpuObject()
+        {
+            List<Vector3d> triags = new List<Vector3d>();
+            List<Vector3d> norms = new List<Vector3d>();
+            foreach (var item in Faces)
+            {
+                for (int i = 0; i < item.Indices.Length; i++)
+                {
+                    triags.Add(Points[item.Indices[i]]);
+                    norms.Add(Normals[item.Indices[i]]);
+                }
+            }
+            return new GpuObject(triags.ToArray(), norms.ToArray());
+        }
     }
 }

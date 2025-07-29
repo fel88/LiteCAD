@@ -13,7 +13,7 @@ using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class MeshModel : AbstractDrawable, IPlaneSplittable, IMesh, IMeshNodesContainer
+    public class MeshSceneObject : AbstractDrawable, IPlaneSplittable, IMesh, IMeshNodesContainer
     {
         public List<MeshNode> Nodes = new List<MeshNode>();
         
@@ -61,14 +61,15 @@ namespace LiteCAD
             writer.WriteLine("</mesh>");
         }
 
-        public MeshModel()
+        public MeshSceneObject()
         {
 
         }
-        public MeshModel(LiteCADScene liteCADScene, XElement item) : base(item)
+        public MeshSceneObject(LiteCADScene liteCADScene, XElement item) : base(item)
         {
             if (item.Attribute("name") != null)
                 Name = item.Attribute("name").Value;
+
             RestoreXml(item);
         }
 
@@ -77,7 +78,8 @@ namespace LiteCAD
 
         public override void Draw()
         {
-            if (!Visible) return;
+            if (!Visible) 
+                return;
 
             GL.PushMatrix();
             if (Parent != null)

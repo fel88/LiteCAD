@@ -19,7 +19,8 @@ namespace BREP.Common
         public static Action<bool, float> Progress;
         public static void ToBitmap(Contour[] cntrs, Vector2d[][] triangls, float mult = 1, bool withTriang = false)
         {
-            if (!Debugger.IsAttached) return;
+            if (!Debugger.IsAttached) 
+                return;
 
 
             var maxx = cntrs.SelectMany(z => z.Elements).Max(z => Math.Max(z.Start.X, z.End.X));

@@ -27,7 +27,7 @@ namespace LiteCAD
             {
                 if (item.Name == "mesh")
                 {
-                    MeshModel d = new MeshModel(scene, item);
+                    MeshSceneObject d = new MeshSceneObject(scene, item);
                     Childs.Add(d);
                     d.Parent = this;
                 }

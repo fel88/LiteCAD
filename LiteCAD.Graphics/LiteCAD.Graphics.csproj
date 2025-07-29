@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="fonts\Antonio-Bold.ttf" />
+    <EmbeddedResource Include="fonts\Antonio-Light.ttf" />
+    <EmbeddedResource Include="fonts\Antonio-Regular.ttf" />
+    <EmbeddedResource Include="fonts\OCRAEXT.TTF" />
+    <EmbeddedResource Include="shaders\text.fs" />
+    <EmbeddedResource Include="shaders\text.vs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenTK" Version="3.3.3" />
+    <PackageReference Include="SharpFont.Dependencies" Version="2.6.0" />
+    <PackageReference Include="SpaceWizards.SharpFont" Version="1.0.2" />
+  </ItemGroup>
+
+</Project>

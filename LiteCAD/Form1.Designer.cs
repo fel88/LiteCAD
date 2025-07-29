@@ -140,6 +140,7 @@
             toolStripButton18 = new System.Windows.Forms.ToolStripButton();
             toolStripButton6 = new System.Windows.Forms.ToolStripButton();
             toolStripButton17 = new System.Windows.Forms.ToolStripButton();
+            meshgpuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)treeListView1).BeginInit();
@@ -255,52 +256,52 @@
             // partToolStripMenuItem
             // 
             partToolStripMenuItem.Name = "partToolStripMenuItem";
-            partToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            partToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             partToolStripMenuItem.Text = "part";
             partToolStripMenuItem.Click += partToolStripMenuItem_Click;
             // 
             // assemblyToolStripMenuItem
             // 
             assemblyToolStripMenuItem.Name = "assemblyToolStripMenuItem";
-            assemblyToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            assemblyToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             assemblyToolStripMenuItem.Text = "assembly";
             assemblyToolStripMenuItem.Click += assemblyToolStripMenuItem_Click;
             // 
             // groupToolStripMenuItem
             // 
             groupToolStripMenuItem.Name = "groupToolStripMenuItem";
-            groupToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            groupToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             groupToolStripMenuItem.Text = "group";
             groupToolStripMenuItem.Click += groupToolStripMenuItem_Click;
             // 
             // toolStripSeparator4
             // 
             toolStripSeparator4.Name = "toolStripSeparator4";
-            toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
+            toolStripSeparator4.Size = new System.Drawing.Size(120, 6);
             // 
             // draftToolStripMenuItem
             // 
             draftToolStripMenuItem.Name = "draftToolStripMenuItem";
-            draftToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            draftToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             draftToolStripMenuItem.Text = "draft";
             draftToolStripMenuItem.Click += draftToolStripMenuItem_Click;
             // 
             // planeToolStripMenuItem
             // 
             planeToolStripMenuItem.Name = "planeToolStripMenuItem";
-            planeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            planeToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             planeToolStripMenuItem.Text = "plane";
             planeToolStripMenuItem.Click += planeToolStripMenuItem_Click;
             // 
             // cubeToolStripMenuItem
             // 
             cubeToolStripMenuItem.Name = "cubeToolStripMenuItem";
-            cubeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            cubeToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             cubeToolStripMenuItem.Text = "cube";
             // 
             // importToolStripMenuItem
             // 
-            importToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { partToolStripMenuItem1, meshToolStripMenuItem1 });
+            importToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { partToolStripMenuItem1, meshToolStripMenuItem1, meshgpuToolStripMenuItem });
             importToolStripMenuItem.Name = "importToolStripMenuItem";
             importToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             importToolStripMenuItem.Text = "import";
@@ -1156,6 +1157,13 @@
             toolStripButton17.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             toolStripButton17.Click += toolStripButton17_Click_1;
             // 
+            // meshgpuToolStripMenuItem
+            // 
+            meshgpuToolStripMenuItem.Name = "meshgpuToolStripMenuItem";
+            meshgpuToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            meshgpuToolStripMenuItem.Text = "mesh (gpu)";
+            meshgpuToolStripMenuItem.Click += meshgpuToolStripMenuItem_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1311,6 +1319,7 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;
         private System.Windows.Forms.ToolStripMenuItem matrixEditToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem stlToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem meshgpuToolStripMenuItem;
     }
 }
 

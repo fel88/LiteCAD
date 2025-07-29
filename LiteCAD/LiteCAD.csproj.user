@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Update="AboutBox1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dialogs\ArrayDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dialogs\OffsetDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="DraftEditor\LinearConstraintLengthDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="ExportDxfDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>

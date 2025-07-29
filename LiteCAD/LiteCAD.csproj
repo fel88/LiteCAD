@@ -1,294 +1,54 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C61F402E-9B03-435A-A819-B3E277E53514}</ProjectGuid>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>LiteCAD</RootNamespace>
-    <AssemblyName>LiteCAD</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <PlatformTarget>x64</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>ruler-triangle.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Windows.Controls.Ribbon" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-    <Reference Include="UIAutomationProvider" />
-    <Reference Include="WindowsBase" />
-    <Reference Include="WindowsFormsIntegration" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AboutBox1.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AboutBox1.Designer.cs">
-      <DependentUpon>AboutBox1.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AbstractDraftTool.cs" />
-    <Compile Include="AbstractTool.cs" />
-    <Compile Include="Camera.cs" />
-    <Compile Include="CameraViewManager.cs" />
-    <Compile Include="DefaultCameraViewManager.cs" />
-    <Compile Include="DefaultSelectManager.cs" />
-    <Compile Include="Dialogs\ArrayDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\ArrayDialog.Designer.cs">
-      <DependentUpon>ArrayDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\OffsetDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\OffsetDialog.Designer.cs">
-      <DependentUpon>OffsetDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DraftEditor\ClipperHelper.cs" />
-    <Compile Include="ComboBoxItem.cs" />
-    <Compile Include="DraftEditor\DraftEditor.cs">
+    <Compile Update="DraftEditor\DraftEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="DraftEditor\DraftEditor.Designer.cs">
-      <DependentUpon>DraftEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DraftEditor\EqualsConstraintHelper.cs" />
-    <Compile Include="DraftEditor\EventWrapperPictureBox.cs" />
-    <Compile Include="DraftEditor\HorizontalConstraintHelper.cs" />
-    <Compile Include="DraftEditor\IDraftEditor.cs" />
-    <Compile Include="DraftEditor\ImageDraftHelper.cs" />
-    <Compile Include="DraftEditor\LinearConstraintHelper.cs" />
-    <Compile Include="DraftEditor\LinearConstraintLengthDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="DraftEditor\LinearConstraintLengthDialog.Designer.cs">
-      <DependentUpon>LinearConstraintLengthDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DraftEditor\ParallelConstraintHelper.cs" />
-    <Compile Include="DraftEditor\PerpendicularConstraintHelper.cs" />
-    <Compile Include="DraftEditor\VerticalConstraintHelper.cs" />
-    <Compile Include="ExportDxfDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ExportDxfDialog.Designer.cs">
-      <DependentUpon>ExportDxfDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ExtrudeModifier.cs" />
-    <Compile Include="Group.cs" />
-    <Compile Include="GroupInstance.cs" />
-    <Compile Include="IEconomicsDetail.cs" />
-    <Compile Include="IEditor.cs" />
-    <Compile Include="Info.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Info.Designer.cs">
-      <DependentUpon>Info.cs</DependentUpon>
-    </Compile>
-    <Compile Include="IntersectInfo.cs" />
-    <Compile Include="Intersection.cs" />
-    <Compile Include="ITool.cs" />
-    <Compile Include="LiteCADScene.cs" />
-    <Compile Include="MeshModel.cs" />
-    <Compile Include="PartAssembly.cs" />
-    <Compile Include="PartInstance.cs" />
-    <Compile Include="ProductionStuff.cs" />
-    <Compile Include="PropEditors\ColorPickerDialog.cs">
+    <Compile Update="PropEditors\ColorPickerDialog.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="PropEditors\ColorPickerDialog.Designer.cs">
-      <DependentUpon>ColorPickerDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="PropEditors\DoublePropEditor.cs">
+    <Compile Update="PropEditors\DoublePropEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="PropEditors\DoublePropEditor.Designer.cs">
-      <DependentUpon>DoublePropEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="PropEditors\Matrix4dPropEditor.cs">
+    <Compile Update="PropEditors\Matrix4dPropEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="PropEditors\Matrix4dPropEditor.Designer.cs">
-      <DependentUpon>Matrix4dPropEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="PropEditors\RPNCalc.cs" />
-    <Compile Include="PropEditors\Vector2dPropEditor.cs">
+    <Compile Update="PropEditors\Vector2dPropEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="PropEditors\Vector2dPropEditor.Designer.cs">
-      <DependentUpon>Vector2dPropEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="PropEditors\Vector3dPropEditor.cs">
+    <Compile Update="PropEditors\Vector3dPropEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="PropEditors\Vector3dPropEditor.Designer.cs">
-      <DependentUpon>Vector3dPropEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="RibbonMenu.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="RibbonMenu.Designer.cs">
-      <DependentUpon>RibbonMenu.cs</DependentUpon>
-    </Compile>
-    <Compile Include="RibbonMenuWpf.xaml.cs">
-      <DependentUpon>RibbonMenuWpf.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="STLLoader.cs" />
-    <Compile Include="Tools\AdjoinTool.cs" />
-    <Compile Include="Tools\CutEdgeTool.cs" />
-    <Compile Include="Tools\DraftEllipseTool.cs" />
-    <Compile Include="Tools\DraftLineTool.cs" />
-    <Compile Include="EventWrapperGlControl.cs" />
-    <Compile Include="Form1.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Helpers.cs" />
-    <Compile Include="InfoPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="InfoPanel.Designer.cs">
-      <DependentUpon>InfoPanel.cs</DependentUpon>
-    </Compile>
-    <Compile Include="MouseRay.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tools\EqualsConstraintTool.cs" />
-    <Compile Include="Tools\HorizontalConstraintTool.cs" />
-    <Compile Include="Tools\LinearConstraintTool.cs" />
-    <Compile Include="Tools\ParallelConstraintTool.cs" />
-    <Compile Include="Tools\PerpendicularConstraintTool.cs" />
-    <Compile Include="Tools\RectDraftTool.cs" />
-    <Compile Include="Tools\SelectionTool.cs" />
-    <Compile Include="Tools\VerticalConstraintTool.cs" />
-    <EmbeddedResource Include="AboutBox1.resx">
-      <DependentUpon>AboutBox1.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\ArrayDialog.resx">
-      <DependentUpon>ArrayDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\OffsetDialog.resx">
-      <DependentUpon>OffsetDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DraftEditor\DraftEditor.resx">
-      <DependentUpon>DraftEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DraftEditor\LinearConstraintLengthDialog.resx">
-      <DependentUpon>LinearConstraintLengthDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ExportDxfDialog.resx">
-      <DependentUpon>ExportDxfDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Info.resx">
-      <DependentUpon>Info.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="InfoPanel.resx">
-      <DependentUpon>InfoPanel.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="PropEditors\ColorPickerDialog.resx">
-      <DependentUpon>ColorPickerDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="PropEditors\DoublePropEditor.resx">
-      <DependentUpon>DoublePropEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="PropEditors\Matrix4dPropEditor.resx">
-      <DependentUpon>Matrix4dPropEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="PropEditors\Vector2dPropEditor.resx">
-      <DependentUpon>Vector2dPropEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="PropEditors\Vector3dPropEditor.resx">
-      <DependentUpon>Vector3dPropEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="RibbonMenu.resx">
-      <DependentUpon>RibbonMenu.cs</DependentUpon>
-    </EmbeddedResource>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    <Compile Update="RibbonMenu.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="InfoPanel.cs">
+      <SubType>UserControl</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <ProjectReference Include="..\BREP\BREP.csproj" />
+    <ProjectReference Include="..\clipper\clipperLib.csproj" />
+    <ProjectReference Include="..\LiteCADLib\LiteCAD.Lib.csproj" />
+    <ProjectReference Include="..\Triangle\Triangle.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BREP\BREP.csproj">
-      <Project>{b8d3fc7a-18bc-487b-8a02-eb446a2c6079}</Project>
-      <Name>BREP</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\clipper\clipperLib.csproj">
-      <Project>{9b062971-a88e-4a3d-b3c9-12b78d15fa66}</Project>
-      <Name>clipperLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\LiteCADLib\LiteCAD.Lib.csproj">
-      <Project>{05537b4a-4a48-403c-a61b-9eca33ef559b}</Project>
-      <Name>LiteCAD.Lib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Triangle\Triangle.csproj">
-      <Project>{5a12c4a1-bc07-4f18-82b5-b08e150025df}</Project>
-      <Name>Triangle</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\cursor.ico" />
     <Resource Include="Icons\magnet.ico" />
     <Resource Include="Icons\arrow-skip-090.ico" />
     <Resource Include="Icons\cursor.ico" />
@@ -325,27 +85,17 @@
     <Content Include="ruler-triangle.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="RibbonMenuWpf.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
+    <PackageReference Include="AutoDialog" Version="1.0.0.7" />
+    <PackageReference Include="IxMilia.Dxf">
+      <Version>0.8.4</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AutoDialog">
-      <Version>1.0.0.7</Version>
-    </PackageReference>
-    <PackageReference Include="IxMilia.Dxf">
-      <Version>0.7.5</Version>
-    </PackageReference>
-    <PackageReference Include="ObjectListView.Official">
-      <Version>2.9.1</Version>
-    </PackageReference>
-    <PackageReference Include="SkiaSharp.Views">
-      <Version>2.88.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.ValueTuple">
-      <Version>4.4.0</Version>
-    </PackageReference>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

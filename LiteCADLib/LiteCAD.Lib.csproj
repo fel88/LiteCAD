@@ -1,178 +1,39 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{05537B4A-4A48-403C-A61B-9ECA33EF559B}</ProjectGuid>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LiteCADLib</RootNamespace>
     <AssemblyName>LiteCADLib</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="BRep\Editor\AbstractDrawingContext.cs" />
-    <Compile Include="BRep\Editor\SkiaGLDrawingContext.cs" />
-    <Compile Include="BRep\Editor\EventWrapperPictureBox.cs" />
-    <Compile Include="BRep\Editor\GdiDrawingContext.cs" />
-    <Compile Include="BRep\Editor\IDrawingContext.cs" />
-    <Compile Include="BRep\Editor\IUndoItem.cs" />
-    <Compile Include="BRep\Editor\PointUndoItem.cs" />
-    <Compile Include="BRep\Editor\ProjectMapEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="BRep\Editor\ProjectMapEditor.Designer.cs">
-      <DependentUpon>ProjectMapEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Common\ChangeCand.cs" />
-    <Compile Include="Common\EqualsConstraint.cs" />
-    <Compile Include="Common\DraftConstraint.cs" />
-    <Compile Include="Common\DraftElement.cs" />
-    <Compile Include="Common\DraftEllipse.cs" />
-    <Compile Include="Common\DraftLine.cs" />
-    <Compile Include="Common\DraftPoint.cs" />
-    <Compile Include="Common\HorizontalConstraint.cs" />
-    <Compile Include="Common\IVisualPartContainer.cs" />
-    <Compile Include="Common\IDraftConstraintHelper.cs" />
-    <Compile Include="Common\IDraftHelper.cs" />
-    <Compile Include="Common\IMessageReporter.cs" />
-    <Compile Include="Common\IPlaneSplittable.cs" />
-    <Compile Include="Common\ISelectManager.cs" />
-    <Compile Include="Common\IXmlStorable.cs" />
-    <Compile Include="Common\LinearConstaint.cs" />
-    <Compile Include="Common\LineHelper.cs" />
-    <Compile Include="Common\NFP.cs" />
-    <Compile Include="Common\ParallelConstraint.cs" />
-    <Compile Include="Common\PerpendicularConstraint.cs" />
-    <Compile Include="Common\PlaneDataTransferObject.cs" />
-    <Compile Include="Common\PointPositionConstraint.cs" />
-    <Compile Include="Common\PolylineHelper.cs" />
-    <Compile Include="Common\TopologyConstraint.cs" />
-    <Compile Include="Common\TopologyDraftLineInfo.cs" />
-    <Compile Include="Common\TransformationChain.cs" />
-    <Compile Include="Common\VerticalConstraint.cs" />
-    <Compile Include="Common\XmlNameAttribute.cs" />
-    <Compile Include="CSP\CSPConstr.cs" />
-    <Compile Include="CSP\CSPConstrEqualExpression.cs" />
-    <Compile Include="CSP\CSPConstrEqualTwoVars.cs" />
-    <Compile Include="CSP\CSPConstrEqualVarValue.cs" />
-    <Compile Include="CSP\CSPTask.cs" />
-    <Compile Include="CSP\CSPVar.cs" />
-    <Compile Include="CSP\CSPVarContext.cs" />
-    <Compile Include="CSP\CSPVarInfo.cs" />
-    <Compile Include="CSP\Token.cs" />
-    <Compile Include="MessageFilter.cs" />
-    <Compile Include="BRep\DrawItem.cs" />
-    <Compile Include="Common\Extensions.cs" />
-    <Compile Include="BRep\LineItem.cs" />
-    <Compile Include="BRep\PlaneItem.cs" />
-    <Compile Include="BRep\PointItem.cs" />
-    <Compile Include="Common\PlyStuff.cs" />
-    <Compile Include="Common\AbstractDrawable.cs" />
-    <Compile Include="Common\Draft.cs" />
-    <Compile Include="Common\GeometryUtils.cs" />
-    <Compile Include="Common\IDrawable.cs" />
-    <Compile Include="Common\IEditFieldsContainer.cs" />
-    <Compile Include="Common\IName.cs" />
-    <Compile Include="Common\IntFieldEditor.cs" />
-    <Compile Include="Common\LiteCadException.cs" />
-    <Compile Include="Common\VisualPart.cs" />
-    <Compile Include="Common\PlaneHelper.cs" />
-    <Compile Include="Common\Segment3d.cs" />
-    <Compile Include="Common\StringFieldEditor.cs" />
-    <Compile Include="Common\VectorEditor.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Common\RotationTransformChainItem.cs" />
-    <Compile Include="Common\ScaleTransformChainItem.cs" />
-    <Compile Include="Tools\CylinderProjectionPointEditorToolPanel.cs">
+    <Compile Update="Tools\CylinderProjectionPointEditorToolPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Tools\CylinderProjectionPointEditorToolPanel.Designer.cs">
-      <DependentUpon>CylinderProjectionPointEditorToolPanel.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\ToolHeader.cs">
+    <Compile Update="Tools\ToolHeader.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Tools\ToolPanel.cs">
+    <Compile Update="Tools\ToolPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Tools\ToolPanel.Designer.cs">
-      <DependentUpon>ToolPanel.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Common\TransformationChainItem.cs" />
-    <Compile Include="Common\TranslateTransformChainItem.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BREP\BREP.csproj">
-      <Project>{b8d3fc7a-18bc-487b-8a02-eb446a2c6079}</Project>
-      <Name>BREP</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\clipper\clipperLib.csproj">
-      <Project>{9b062971-a88e-4a3d-b3c9-12b78d15fa66}</Project>
-      <Name>clipperLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Triangle\Triangle.csproj">
-      <Project>{5a12c4a1-bc07-4f18-82b5-b08e150025df}</Project>
-      <Name>Triangle</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="BRep\Editor\ProjectMapEditor.resx">
-      <DependentUpon>ProjectMapEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Tools\CylinderProjectionPointEditorToolPanel.resx">
-      <DependentUpon>CylinderProjectionPointEditorToolPanel.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Tools\ToolPanel.resx">
-      <DependentUpon>ToolPanel.cs</DependentUpon>
-    </EmbeddedResource>
+    <ProjectReference Include="..\BREP\BREP.csproj" />
+    <ProjectReference Include="..\clipper\clipperLib.csproj" />
+    <ProjectReference Include="..\Triangle\Triangle.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics">
       <Version>5.0.0</Version>
     </PackageReference>
-    <PackageReference Include="SkiaSharp.Views">
-      <Version>2.88.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.ValueTuple">
-      <Version>4.4.0</Version>
-    </PackageReference>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="SkiaSharp" Version="3.119.0" />
+    <PackageReference Include="SkiaSharp.Views.WindowsForms" Version="3.119.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Compile Remove="Common\EditFieldAttribute.cs" />
+  </ItemGroup>
 </Project>

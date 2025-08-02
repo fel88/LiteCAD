@@ -8,10 +8,11 @@ namespace LiteCAD.Common
 {
     public static class Helpers
     {
-        public static double ParseDouble(string v)
+        public static double ParseDouble(this string v)
         {
             return double.Parse(v.Replace(",", "."), CultureInfo.InvariantCulture);
         }
+        public static double ToDouble(this string v) => double.Parse(v.Replace(",", "."), CultureInfo.InvariantCulture);
         public static decimal ParseDecimal(string v)
         {
             return decimal.Parse(v.Replace(",", "."), CultureInfo.InvariantCulture);

@@ -16,6 +16,16 @@ namespace LiteCAD
     public class MeshSceneObject : AbstractDrawable, IPlaneSplittable, IMesh, IMeshNodesContainer
     {
         public List<MeshNode> Nodes = new List<MeshNode>();
+
+        public GpuMeshSceneObject ToGpuSceneObject()
+        {
+            MeshModel g = new MeshModel();
+            
+            
+            GpuMeshSceneObject ret = new GpuMeshSceneObject(g.ToGpuObject());
+            
+            return ret;
+        }
         
         MeshNode[] IMeshNodesContainer.Nodes
         {

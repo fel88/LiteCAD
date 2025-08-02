@@ -28,6 +28,7 @@ using System.Windows.Controls.Ribbon;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 using System.Xml.Linq;
+using TriangleNet;
 
 namespace LiteCAD
 {
@@ -2217,10 +2218,30 @@ namespace LiteCAD
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "All mesh formats|*.obj;*.off;*.stl";
+
             if (ofd.ShowDialog() != DialogResult.OK)
                 return;
 
             var ext = Path.GetExtension(ofd.FileName).ToLower();
+            switch (ext)
+            {
+                case ".obj":
+                    {
+                        var gpuObj = ObjFile.Parse(File.ReadAllText(ofd.FileName)).ToGpuObject();
+                        Parts.Add(new GpuMeshSceneObject(gpuObj));
+                        break;
+                    }
+
+                case ".stl":
+                    {
+                        var gpuObj = StlFile.ParseFile(ofd.FileName).ToGpuObject();
+                        Parts.Add(new GpuMeshSceneObject(gpuObj));
+                        break;
+                    }
+            }
+
+            //var mesh = STLLoader.LoadFromFile(ofd.FileName);
+            //Parts.Add(mesh);
             /*IMeshLoader loader = null;
             if (ext == ".off")
             {
@@ -2242,44 +2263,6 @@ namespace LiteCAD
                 AddHelper(g);
             }*/
             updateList();
-        }
-    }
-
-    public class MeshModel
-    {
-        public class Face
-        {
-            public Face(MeshModel parent, int[] indices)
-            {
-                Indices = indices;
-                Parent = parent;
-                Points = indices.Select(z => parent.Points[z]).ToArray();
-                Normals = indices.Select(z => parent.Normals[z]).ToArray();
-            }
-
-            public Vector3d[] Points { get; private set; }
-            public Vector3d[] Normals { get; private set; }
-            public int[] Indices;
-            public MeshModel Parent;
-        }
-
-        public List<Face> Faces = new List<Face>();
-        public List<Vector3d> Points = new List<Vector3d>();
-        public List<Vector3d> Normals = new List<Vector3d>();
-
-        public GpuObject ToGpuObject()
-        {
-            List<Vector3d> triags = new List<Vector3d>();
-            List<Vector3d> norms = new List<Vector3d>();
-            foreach (var item in Faces)
-            {
-                for (int i = 0; i < item.Indices.Length; i++)
-                {
-                    triags.Add(Points[item.Indices[i]]);
-                    norms.Add(Normals[item.Indices[i]]);
-                }
-            }
-            return new GpuObject(triags.ToArray(), norms.ToArray());
         }
     }
 }

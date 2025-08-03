@@ -4,7 +4,7 @@ using System.Drawing;
 
 namespace LiteCAD.Common
 {
-    public class PolylineHelper : AbstractDrawable
+    public class PolylineHelper : AbstractSceneObject
     {
         public PolylineHelper()
         {
@@ -19,7 +19,7 @@ namespace LiteCAD.Common
         }
         public Line3D[] Lines { get; set; }
 
-        public override void Draw()
+        public override void Draw(GpuDrawingContext ctx)
         {
             GL.Disable(EnableCap.Lighting);
             GL.Color3(Color.Blue);

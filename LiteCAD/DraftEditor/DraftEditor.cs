@@ -473,7 +473,7 @@ namespace LiteCAD.DraftEditor
                     {
                         _draft.AddConstraint(cc);
                         _draft.AddHelper(new PerpendicularConstraintHelper(cc));
-                        _draft.Childs.Add(_draft.Helpers.Last());
+                        _draft.DraftChilds.Add(_draft.Helpers.Last());
                     }
                     else
                     {
@@ -498,7 +498,7 @@ namespace LiteCAD.DraftEditor
                     {
                         _draft.AddConstraint(cc);
                         _draft.AddHelper(new ParallelConstraintHelper(cc));
-                        _draft.Childs.Add(_draft.Helpers.Last());
+                        _draft.DraftChilds.Add(_draft.Helpers.Last());
                     }
                     else
                     {
@@ -603,15 +603,17 @@ namespace LiteCAD.DraftEditor
         }
 
         public List<string> Undos = new List<string>();
+
         public void Undo()
         {
-            if (Undos.Count == 0) return;
+            if (Undos.Count == 0)
+                return;
+
             var el = XElement.Parse(Undos.Last());
             _draft.Restore(el);
             Undos.RemoveAt(Undos.Count - 1);
             SetDraft(_draft);
             UndosChanged?.Invoke();
-
         }
 
         public void Backup()
@@ -792,14 +794,17 @@ namespace LiteCAD.DraftEditor
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (selected == null || selected.Length == 0) return;
+            if (selected == null || selected.Length == 0) 
+                return;
+
             Backup();
+
             foreach (var item in selected)
             {
                 if (item is DraftElement de)
                     _draft.RemoveElement(de);
 
-                if (item is IDrawable dd)
+                if (item is IDraftHelper dd)
                 {
                     _draft.RemoveChild(dd);
                 }

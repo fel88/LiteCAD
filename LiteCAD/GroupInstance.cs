@@ -9,7 +9,7 @@ using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class GroupInstance : AbstractDrawable
+    public class GroupInstance : AbstractSceneObject
     {
         public Group Group;
         public GroupInstance(Group group)
@@ -17,12 +17,15 @@ namespace LiteCAD
             Group = group;
             Name = group.Name;
         }
+
         public Color Color { get; set; } = Color.LightGray;
-        public override IDrawable[] GetAll(Predicate<IDrawable> p)
+
+        public override ISceneObject[] GetAll(Predicate<ISceneObject> p)
         {
-            var ret = Childs.SelectMany(z => z.GetAll(p)).OfType<IDrawable>().Where(zz => p(zz)).ToArray();
+            var ret = Childs.SelectMany(z => z.GetAll(p)).OfType<ISceneObject>().Where(zz => p(zz)).ToArray();
             return ret;
         }
+
         public GroupInstance(LiteCADScene scene, XElement xitem) : base(xitem)
         {
             Name = xitem.Attribute("name").Value;
@@ -48,7 +51,8 @@ namespace LiteCAD
             writer.WriteLine("</transform>");
             writer.WriteLine("</instance>");
         }
-        public override void Draw()
+
+        public override void Draw(GpuDrawingContext ctx)
         {
             if (!Visible) return;
             GL.Color3(Color);
@@ -60,7 +64,7 @@ namespace LiteCAD
             {
                 var v = item.Visible;
                 item.Visible = true;
-                item.Draw();
+                item.Draw(ctx);
                 item.Visible = v;
             }
             GL.PopMatrix();

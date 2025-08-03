@@ -1,8 +1,8 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using System;
+using System.Drawing;
 
-namespace LiteCAD
+namespace LiteCAD.Graphics
 {
     public class Camera
     {
@@ -78,7 +78,7 @@ namespace LiteCAD
         public float OrthoWidth { get; set; } = 1000;
         public float Fov { get; set; } = 60;
 
-        public void UpdateMatricies(GLControl glControl)
+        public void UpdateMatricies(Size glControl)
         {
 
             viewport[0] = 0;
@@ -106,7 +106,7 @@ namespace LiteCAD
             Matrix4 modelview = Matrix4.LookAt(CamFrom, CamTo, CamUp);
             ViewMatrix = modelview;
         }
-        public void Setup(GLControl glControl)
+        public void Setup(Size glControl)
         {
             GL.Viewport(0, 0, glControl.Width, glControl.Height);
             viewport[0] = 0;
@@ -160,4 +160,3 @@ namespace LiteCAD
         }
     }
 }
-

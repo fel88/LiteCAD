@@ -1,7 +1,5 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 
 namespace LiteCAD.Graphics
@@ -20,13 +18,25 @@ namespace LiteCAD.Graphics
             }
         }
 
-        public Shader(string v1, string v2)
+        public Shader()
+        { 
+
+        }
+
+        public Shader InitFromResources(string vShaderResourceName, string fShaderResourceName)
+        {
+            var vShader = ReadResourceTxt(vShaderResourceName);
+            var fShader = ReadResourceTxt(fShaderResourceName);
+            InitFromShaderCodes(vShader, fShader);
+            return this;
+        }
+
+        public Shader InitFromShaderCodes(string vShaderCode, string fShaderCode)
         {
             // 2. compile shaders
             int vertex, fragment;
             // vertex shader
-            string vShaderCode = ReadResourceTxt(v1);
-            string fShaderCode = ReadResourceTxt(v2);
+        
             vertex = GL.CreateShader(ShaderType.VertexShader);
 
             GL.ShaderSource(vertex, vShaderCode);
@@ -46,8 +56,11 @@ namespace LiteCAD.Graphics
             // delete the shaders as they're linked into our program now and no longer necessary
             GL.DeleteShader(vertex);
             GL.DeleteShader(fragment);
+            return this;
         }
+
         int ID;
+
         void checkCompileErrors(int shader, string type)
         {
             int success;

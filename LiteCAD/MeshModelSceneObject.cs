@@ -13,7 +13,7 @@ using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class MeshSceneObject : AbstractDrawable, IPlaneSplittable, IMesh, IMeshNodesContainer
+    public class MeshSceneObject : AbstractSceneObject, IPlaneSplittable, IMesh, IMeshNodesContainer
     {
         public List<MeshNode> Nodes = new List<MeshNode>();
 
@@ -86,7 +86,7 @@ namespace LiteCAD
         public bool Wireframe { get; set; }
         public bool Fill { get; set; } = true;
 
-        public override void Draw()
+        public override void Draw(GpuDrawingContext ctx)
         {
             if (!Visible) 
                 return;

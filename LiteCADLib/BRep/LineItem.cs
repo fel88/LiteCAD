@@ -1,4 +1,5 @@
 ﻿using BREP.BRep.Outlines;
+using LiteCAD.Common;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
@@ -13,7 +14,7 @@ namespace LiteCAD.BRep
         {
             _lineItem = l;
         }
-        public override void Draw()
+        public override void Draw(GpuDrawingContext ctx)
         {
             GL.Color3(Color.Blue);
             if (Selected)

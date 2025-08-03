@@ -10,9 +10,9 @@ namespace LiteCAD
 {
     public class LiteCADScene
     {
-        public List<IDrawable> Parts = new List<IDrawable>();
+        public List<ISceneObject> Parts = new List<ISceneObject>();
 
-        public IDrawable[] GetAll(Predicate<IDrawable> p)
+        public ISceneObject[] GetAll(Predicate<ISceneObject> p)
         {
             var t = Parts.Union(Parts.SelectMany(z => z.GetAll(p))).ToArray();
             return t;

@@ -4,7 +4,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace LiteCAD.Common
 {
-    public class LineHelper : AbstractDrawable
+    public class LineHelper : AbstractSceneObject
     {
         public LineHelper()
         {
@@ -17,7 +17,7 @@ namespace LiteCAD.Common
         }
         public Vector3d Start { get; set; }
         public Vector3d End { get; set; }
-        public override void Draw()
+        public override void Draw(GpuDrawingContext ctx)
         {
             GL.Begin(PrimitiveType.Lines);
             GL.Vertex3(Start);

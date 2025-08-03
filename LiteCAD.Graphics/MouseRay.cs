@@ -2,7 +2,7 @@
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
 
-namespace LiteCAD
+namespace LiteCAD.Graphics
 {
     public class MouseRay
     {
@@ -159,4 +159,3 @@ namespace LiteCAD
 
     }
 }
-

@@ -12,7 +12,7 @@ using SkiaSharp;
 namespace LiteCAD.DraftEditor
 {
     [XmlName(XmlName = "linearConstraintHelper")]
-    public class LinearConstraintHelper : AbstractDrawable, IDraftConstraintHelper
+    public class LinearConstraintHelper : AbstractDraftObject, IDraftConstraintHelper
     {
         public readonly LinearConstraint constraint;
         public LinearConstraintHelper(Draft parent, LinearConstraint c)
@@ -72,7 +72,7 @@ namespace LiteCAD.DraftEditor
             return path;
         }
 
-        public void Draw(IDrawingContext ctx)
+        public override void Draw(IDrawingContext ctx)
         {
             var editor = ctx.Tag as IDraftEditor;
             var elems = new[] { constraint.Element1, constraint.Element2 };
@@ -150,10 +150,6 @@ namespace LiteCAD.DraftEditor
                 ctx.DrawLine( tr1, tr3);
             }
         }
-
-        public override void Draw()
-        {
-
-        }
+        
     }
 }

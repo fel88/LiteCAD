@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using LiteCAD.Common;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
 
@@ -6,9 +7,8 @@ namespace LiteCAD.BRep
 {
     public class PointItem : DrawItem
     {
-
         public Vector3d Position;
-        public override void Draw()
+        public override void Draw(GpuDrawingContext ctx)
         {
             GL.Color3(Color.Yellow);
             GL.PointSize(4);

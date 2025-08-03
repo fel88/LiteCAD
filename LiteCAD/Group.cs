@@ -5,19 +5,21 @@ using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class Group : AbstractDrawable
+    public class Group : AbstractSceneObject
     {        
         public Group()
         {
             Name = "group";
         }
-        public override void Draw()
+
+        public override void Draw(GpuDrawingContext ctx)
         {
             foreach (var item in Childs)
             {
-                item.Draw();
+                item.Draw(ctx);
             }
         }
+
         public Group(LiteCADScene scene, XElement e)
         {
             Name = e.Attribute("name").Value;

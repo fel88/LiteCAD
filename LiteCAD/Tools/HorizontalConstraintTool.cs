@@ -32,7 +32,7 @@ namespace LiteCAD.Tools
                 {
                     Editor.Draft.AddConstraint(cc);
                     Editor.Draft.AddHelper(new HorizontalConstraintHelper(cc));
-                    Editor.Draft.Childs.Add(Editor.Draft.Helpers.Last());
+                    Editor.Draft.DraftChilds.Add(Editor.Draft.Helpers.Last());
                 }
                 else
                 {

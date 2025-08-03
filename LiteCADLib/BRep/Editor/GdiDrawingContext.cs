@@ -8,7 +8,7 @@ namespace LiteCAD.BRep.Editor
 {
     public class GdiDrawingContext : AbstractDrawingContext
     {
-        public Graphics gr;
+        public System.Drawing.Graphics gr;
         public Bitmap Bmp;
         public override void InitGraphics()
         {

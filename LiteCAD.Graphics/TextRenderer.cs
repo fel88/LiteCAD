@@ -13,7 +13,7 @@ namespace LiteCAD.Graphics
         Shader shader;
         public void Init(int width, int height)
         {
-            shader = new Shader("text.vs", "text.fs");
+            shader = new DefaultTextShader();
 
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.Blend);

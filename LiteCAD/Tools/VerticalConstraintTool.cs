@@ -34,7 +34,7 @@ namespace LiteCAD.Tools
                     {
                         _draft.AddConstraint(cc);
                         _draft.AddHelper(new VerticalConstraintHelper(cc));
-                        _draft.Childs.Add(_draft.Helpers.Last());
+                        _draft.DraftChilds.Add(_draft.Helpers.Last());
                     }
                     else
                     {

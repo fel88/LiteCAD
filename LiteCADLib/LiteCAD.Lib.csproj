@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BREP\BREP.csproj" />
     <ProjectReference Include="..\clipper\clipperLib.csproj" />
+    <ProjectReference Include="..\LiteCAD.Graphics\LiteCAD.Graphics.csproj" />
     <ProjectReference Include="..\Triangle\Triangle.csproj" />
   </ItemGroup>
   <ItemGroup>

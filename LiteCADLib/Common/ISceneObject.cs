@@ -1,26 +1,24 @@
-﻿using LiteCAD.BRep.Editor;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 
 namespace LiteCAD.Common
 {
-    public interface IDrawable
+    public interface ISceneObject 
     {
+        void Draw(GpuDrawingContext ctx);
         int Id { get; set; }
-        IDrawable Parent { get; set; }
-        ISceneObject SceneParent { get; set; }
-
-        List<IDrawable> Childs { get; }
+        ISceneObject Parent { get; set; }
+        List<ISceneObject> Childs { get; }
         string Name { get; set; }
         bool Visible { get; set; }
         bool Frozen { get; set; }
-       
+
         bool Selected { get; set; }
         TransformationChain Matrix { get; }
 
-        IDrawable[] GetAll(Predicate<IDrawable> p);
-        void RemoveChild(IDrawable dd);
+        ISceneObject[] GetAll(Predicate<ISceneObject> p);
+        void RemoveChild(ISceneObject dd);
         void Store(TextWriter writer);
         int Z { get; set; }
     }

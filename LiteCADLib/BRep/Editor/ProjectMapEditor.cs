@@ -147,8 +147,10 @@ namespace LiteCAD.BRep.Editor
         {
             Recreate();
         }
+
         Bitmap bmp;
-        Graphics gr;
+        System.Drawing.Graphics gr;
+
         void Recreate()
         {
             /*bmp = new Bitmap(Width, Height);
@@ -156,11 +158,13 @@ namespace LiteCAD.BRep.Editor
             dc.gr = gr;
             gr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;*/
         }
+
         double xxScale = 20;
         double yyScale = 100;
         public int sindex = -1;
         public int lastEditedPointIndex = -1;
         public ProjectPolygon sp = null;
+
         public void UpdateNearest()
         {
 

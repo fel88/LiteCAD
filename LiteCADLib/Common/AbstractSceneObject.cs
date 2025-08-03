@@ -6,16 +6,16 @@ using System.Xml.Linq;
 
 namespace LiteCAD.Common
 {
-    public abstract class AbstractDrawable : IDrawable
+    public abstract class AbstractSceneObject : ISceneObject
     {
         public static IMessageReporter MessageReporter;
-        public AbstractDrawable()
+        public AbstractSceneObject()
         {
             Id = FactoryHelper.NewId++;
         }
         public bool Frozen { get; set; }
 
-        public AbstractDrawable(XElement item)
+        public AbstractSceneObject(XElement item)
         {
             if (item.Attribute("id") != null)
             {
@@ -27,11 +27,12 @@ namespace LiteCAD.Common
                 Id = FactoryHelper.NewId++;
             }
         }
+
         public string Name { get; set; }
 
-        public abstract void Draw();
+        public abstract void Draw(GpuDrawingContext ctx);
 
-        public virtual void RemoveChild(IDrawable dd)
+        public virtual void RemoveChild(ISceneObject dd)
         {
             Childs.Remove(dd);
         }
@@ -41,19 +42,20 @@ namespace LiteCAD.Common
 
         }
 
-        public virtual IDrawable[] GetAll(Predicate<IDrawable> p)
+        public virtual ISceneObject[] GetAll(Predicate<ISceneObject> p)
         {
             if (Childs.Count == 0)
-                return new[] { this };
+                return [this];
+
             return new[] { this }.Union(Childs.SelectMany(z => z.GetAll(p))).ToArray();
         }
 
         public bool Visible { get; set; } = true;
         public bool Selected { get; set; }
 
-        public List<IDrawable> Childs { get; set; } = new List<IDrawable>();
+        public List<ISceneObject> Childs { get; set; } = new List<ISceneObject>();
 
-        public IDrawable Parent { get; set; }
+        public ISceneObject Parent { get; set; }
         public int Id { get; set; }
 
         protected TransformationChain _matrix = new TransformationChain();

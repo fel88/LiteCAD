@@ -11,6 +11,7 @@
   </PropertyGroup>
    <PropertyGroup>
         <NoWarn>$(NoWarn);1591</NoWarn>
+        <NoWarn>$(NoWarn);1416</NoWarn>
     </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>ruler-triangle.ico</ApplicationIcon>

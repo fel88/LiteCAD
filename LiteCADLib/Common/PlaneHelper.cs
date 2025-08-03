@@ -11,7 +11,7 @@ using System.Xml.Linq;
 
 namespace LiteCAD.Common
 {
-    public class PlaneHelper : AbstractDrawable, IEditFieldsContainer, ICommandsContainer
+    public class PlaneHelper : AbstractSceneObject, IEditFieldsContainer, ICommandsContainer
     {
         public PlaneHelper()
         {
@@ -190,7 +190,7 @@ namespace LiteCAD.Common
             return ret;
         }
 
-        public override void Draw()
+        public override void Draw(GpuDrawingContext ctx)
         {
             if (!Visible) return;
             GL.Disable(EnableCap.Lighting);

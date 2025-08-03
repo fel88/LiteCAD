@@ -5,7 +5,7 @@ namespace LiteCAD
 {
     public interface IEditor 
     {
-        IDrawable[] Parts { get; }
+        ISceneObject[] Parts { get; }
         ITool CurrentTool { get; }
         event Action<ITool> ToolChanged;
         IntersectInfo Pick { get; }

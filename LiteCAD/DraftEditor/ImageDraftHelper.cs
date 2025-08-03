@@ -10,7 +10,7 @@ using System.Drawing.Imaging;
 namespace LiteCAD.DraftEditor
 {
     [XmlName(XmlName = "imageDraftHelper")]
-    public class ImageDraftHelper : AbstractDrawable, IDraftHelper
+    public class ImageDraftHelper : AbstractDraftObject, IDraftHelper
     {
         public ImageDraftHelper(Draft parent, Bitmap bmp)
         {
@@ -54,13 +54,8 @@ namespace LiteCAD.DraftEditor
         public bool DrawBound { get; set; }
 
         public Draft DraftParent { get; private set; }
-
-        public override void Draw()
-        {
-
-        }
-
-        public void Draw(IDrawingContext ctx)
+        
+        public override void Draw(IDrawingContext ctx)
         {
             var editor = ctx.Tag as IDraftEditor;
             var tr0 = ctx.Transform(X, Y);

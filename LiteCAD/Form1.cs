@@ -111,7 +111,7 @@ namespace LiteCAD
         MessageFilter mf = null;
         GLControl glControl;
         public EventWrapperGlControl evwrapper;
-        public Camera camera1 = new Camera() { IsOrtho = true };
+        public Camera camera1;
         public CameraViewManager ViewManager;
         bool first = true;
         private void Gl_Paint(object sender, PaintEventArgs e)
@@ -122,19 +122,29 @@ namespace LiteCAD
             {
                 glControl.MakeCurrent();
             }
+
             if (first)
-            {
+            {          
+                camera1 = new Camera() { IsOrtho = true };
+                gpuCtx = new GpuDrawingContext()
+                {
+                    Camera = camera1,
+                    ModelShader = new DefaultModelShader()
+                };
+
+                ViewManager = new DefaultCameraViewManager();
+                ViewManager.Attach(evwrapper, camera1);
+
                 // build and compile our shader zprogram
                 // ------------------------------------                
                 //lightingShader = new Shader("2.2.basic_lighting.vs", "2.2.basic_lighting.fs");
-
                 first = false;
                 textRenderer.Init(glControl.Width, glControl.Height);
 
-
             }
             Redraw();
-        }
+        }        
+
         LiteCAD.Graphics.TextRenderer textRenderer = new Graphics.TextRenderer();
         public IntersectInfo Pick => pick;
         IntersectInfo pick;
@@ -153,11 +163,13 @@ namespace LiteCAD
             {
                 if (item is IDrawable d)
                 {
-                    if (!d.Visible) continue;
-                    if (d.Parent != null)
-                    {
-                        if (!d.Parent.Visible) continue;//todo: check all tree up
-                    }
+                    if (!d.Visible) 
+                        continue;
+
+                    if (d.Parent != null)                    
+                        if (!d.Parent.Visible) 
+                            continue;//todo: check all tree up
+                    
                 }
                 var r = UpdatePickTriangle(item);
                 if (r != null)
@@ -190,12 +202,15 @@ namespace LiteCAD
             return rpick;
         }
 
+        GpuDrawingContext gpuCtx = new GpuDrawingContext();
+
         bool pickEnable = true;
 
         bool drawAxes = true;
         Vector3d lastHovered;
         object hovered;
         Matrix4d hoveredMatrix;
+
         void Redraw()
         {
             UpdatePickTriangle();
@@ -255,7 +270,7 @@ namespace LiteCAD
             GL.Vertex3(0, 0, 100);
             GL.End();
             GL.PopMatrix();
-            camera1.Setup(glControl);
+            camera1.Setup(glControl.Size);
 
             if (drawAxes)
             {
@@ -288,7 +303,7 @@ namespace LiteCAD
 
             GL.ShadeModel(ShadingModel.Smooth);
 
-            IDrawable[] parts = null;
+            ISceneObject[] parts = null;
             lock (Parts)
             {
                 parts = Parts.ToArray();
@@ -296,8 +311,10 @@ namespace LiteCAD
 
             foreach (var item in parts)
             {
-                if (!item.Visible) continue;
-                item.Draw();
+                if (!item.Visible)
+                    continue;
+
+                item.Draw(gpuCtx);
             }
 
             CurrentTool.Draw();
@@ -631,7 +648,7 @@ namespace LiteCAD
         {
             InitializeComponent();
             LoadSettings();
-            AbstractDrawable.MessageReporter = this;
+            AbstractSceneObject.MessageReporter = this;
 
             _currentTool = new SelectionTool(this);
             foreach (Control c in propertyGrid1.Controls)
@@ -752,9 +769,7 @@ namespace LiteCAD
             glControl.MouseUp += GlControl_MouseUp;
 
             glControl.Paint += Gl_Paint;
-            ViewManager = new DefaultCameraViewManager();
-            ViewManager.Attach(evwrapper, camera1);
-
+           
             panel2.Controls.Add(glControl);
             panel2.Controls.Add(de);
             panel2.Controls.Add(infoPanel);
@@ -861,7 +876,7 @@ namespace LiteCAD
             var draggedNode = (MyDraggedData)e.Data.GetData(typeof(MyDraggedData));
             if (draggedNode != null)
             {
-                var dr = draggedNode.Data as IDrawable;
+                var dr = draggedNode.Data as ISceneObject;
                 if (targetNode is PartAssembly pas)
                 {
                     if (dr is IVisualPartContainer pc)
@@ -970,15 +985,20 @@ namespace LiteCAD
         {
             openUI();
         }
+
         public void openUI()
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "LiteCAD scene (*.lcs)|*.lcs";
-            if (ofd.ShowDialog() != DialogResult.OK) return;
+
+            if (ofd.ShowDialog() != DialogResult.OK) 
+                return;
+
             Scene = new LiteCADScene();
             Scene.FromXml(ofd.FileName);
             updateList();
         }
+
         private void planeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             PlaneHelper ph = new PlaneHelper() { Normal = Vector3d.UnitZ };
@@ -986,7 +1006,9 @@ namespace LiteCAD
             ph.Name = "plane01";
             updateList();
         }
+
         Part selectedPart;
+
         private void treeListView1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (treeListView1.SelectedObject == null) return;
@@ -1056,7 +1078,7 @@ namespace LiteCAD
         Vector3d[] getAllPoints()
         {
             var t1 = Parts.OfType<IMesh>().ToArray();
-            var ad = Parts.OfType<AbstractDrawable>().Where(z => z.Visible).ToArray();
+            var ad = Parts.OfType<AbstractSceneObject>().Where(z => z.Visible).ToArray();
             var t2 = ad.SelectMany(z => z.GetAll((xx) => xx is IMesh)).OfType<IMesh>().ToArray();
 
             var p1 = getAllPoints(t1.Union(t2).ToArray());
@@ -1151,11 +1173,11 @@ namespace LiteCAD
                 {
                     dh.DraftParent.RemoveElement(dh);
                 }
-                if (item is IDrawable dd)
+                if (item is ISceneObject dd)
                 {
                     if (dd.Parent == null)
                     {
-                        Parts.Remove(item as IDrawable);
+                        Parts.Remove(dd);
                     }
                     else
                     {
@@ -1565,7 +1587,7 @@ namespace LiteCAD
             if (treeListView1.SelectedObjects.Count <= 0) return;
             //var vv = getAllPoints(treeListView1.SelectedObjects.OfType<IMesh>().ToArray());
             var t1 = treeListView1.SelectedObjects.OfType<IMesh>().ToArray();
-            var ad = treeListView1.SelectedObjects.OfType<AbstractDrawable>().ToArray();
+            var ad = treeListView1.SelectedObjects.OfType<AbstractSceneObject>().ToArray();
             var t2 = ad.SelectMany(z => z.GetAll((xx) => xx is IMesh)).OfType<IMesh>();
             var vv = getAllPoints(t1.Union(t2).ToArray());
 
@@ -1847,9 +1869,9 @@ namespace LiteCAD
         }
 
         public LiteCADScene Scene = new LiteCADScene();
-        public List<IDrawable> Parts => Scene.Parts;
+        public List<ISceneObject> Parts => Scene.Parts;
 
-        IDrawable[] IEditor.Parts => Parts.ToArray();
+        ISceneObject[] IEditor.Parts => Parts.ToArray();
 
         private void assemblyToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -2022,7 +2044,7 @@ namespace LiteCAD
         {
             if (treeListView1.SelectedObjects.Count <= 0) return;
             var t1 = treeListView1.SelectedObjects.OfType<IMesh>().ToArray();
-            var ad = treeListView1.SelectedObjects.OfType<AbstractDrawable>().ToArray();
+            var ad = treeListView1.SelectedObjects.OfType<AbstractSceneObject>().ToArray();
             var t2 = ad.SelectMany(z => z.GetAll((xx) => xx is IMesh)).OfType<IMesh>();
             var vv = getAllPoints(t1.Union(t2).ToArray());
             camToSelected(vv);

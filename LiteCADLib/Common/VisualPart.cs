@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace LiteCAD.Common
 {
-    public class VisualPart : AbstractDrawable, IVisualPartContainer, IPlaneSplittable, IMeshNodesContainer, IMesh
+    public class VisualPart : AbstractSceneObject, IVisualPartContainer, IPlaneSplittable, IMeshNodesContainer, IMesh
     {
         public VisualPart(Part p)
         {
@@ -214,7 +214,7 @@ namespace LiteCAD.Common
         }
         public static ISelectManager SelectManager;
         public bool ShowNormals = false;
-        public override void Draw()
+        public override void Draw(GpuDrawingContext ctx)
         {
             if (!Visible) return;
             GL.Disable(EnableCap.Lighting);
@@ -224,7 +224,7 @@ namespace LiteCAD.Common
                 foreach (var pitem in item.Items)
                 {
                     if (pitem is LineItem ll)
-                        new OutlineItemHelper(ll).Draw();
+                        new OutlineItemHelper(ll).Draw(ctx);
                     //pitem.Draw();
                 }
             }

@@ -13,7 +13,7 @@ using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class PartInstance : AbstractDrawable, IPlaneSplittable, IMesh, IMeshNodesContainer, IVisualPartContainer
+    public class PartInstance : AbstractSceneObject, IPlaneSplittable, IMesh, IMeshNodesContainer, IVisualPartContainer
     {
         /*public PartInstance(Part part)
         {
@@ -32,9 +32,9 @@ namespace LiteCAD
             }
         }
 
-        public override IDrawable[] GetAll(Predicate<IDrawable> p)
+        public override ISceneObject[] GetAll(Predicate<ISceneObject> p)
         {
-            var ret = Childs.SelectMany(z => z.GetAll(p)).Union(new object[] { this, Part }).OfType<IDrawable>().Where(zz => p(zz)).ToArray();
+            var ret = Childs.SelectMany(z => z.GetAll(p)).Union(new object[] { this, Part }).OfType<ISceneObject>().Where(zz => p(zz)).ToArray();
             return ret;
         }
 
@@ -94,7 +94,7 @@ namespace LiteCAD
 
         VisualPart IVisualPartContainer.Part => Part.Part;
 
-        public override void Draw()
+        public override void Draw(GpuDrawingContext ctx)
         {
             if (!Visible) return;
             GL.Color3(Color);
@@ -103,7 +103,7 @@ namespace LiteCAD
             Matrix4d dd = _matrix.Calc();
             GL.MultMatrix(ref dd);
 
-            Part.Part.Draw();
+            Part.Part.Draw(ctx);
             GL.PopMatrix();
             GL.Disable(EnableCap.ColorMaterial);
         }

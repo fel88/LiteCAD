@@ -6,7 +6,7 @@ using System.Drawing.Drawing2D;
 
 namespace LiteCAD.DraftEditor
 {
-    public class PerpendicularConstraintHelper : AbstractDrawable, IDraftConstraintHelper
+    public class PerpendicularConstraintHelper : AbstractDraftObject, IDraftConstraintHelper
     {
         public readonly PerpendicularConstraint constraint;
         public PerpendicularConstraintHelper(PerpendicularConstraint c)
@@ -21,7 +21,7 @@ namespace LiteCAD.DraftEditor
 
         public Draft DraftParent => throw new System.NotImplementedException();
 
-        public void Draw(IDrawingContext ctx)
+        public override void Draw(IDrawingContext ctx)
         {
             var dp0 = constraint.Element1.Center;
             var dp1 = constraint.Element2.Center;
@@ -39,11 +39,6 @@ namespace LiteCAD.DraftEditor
 
             //create bezier here
             ctx.DrawPolygon(p, new PointF[] { tr0, tr1 });
-        }
-
-        public override void Draw()
-        {
-
-        }
+        }        
     }
 }

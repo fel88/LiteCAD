@@ -5,7 +5,7 @@ using System.Drawing;
 
 namespace LiteCAD.DraftEditor
 {
-    public class VerticalConstraintHelper : AbstractDrawable, IDraftConstraintHelper
+    public class VerticalConstraintHelper : AbstractDraftObject, IDraftConstraintHelper
     {
         public readonly VerticalConstraint constraint;
         public VerticalConstraintHelper(VerticalConstraint c)
@@ -20,7 +20,7 @@ namespace LiteCAD.DraftEditor
 
         public Draft DraftParent { get; private set; }
 
-        public void Draw(IDrawingContext ctx)
+        public override void Draw(IDrawingContext ctx)
         {
             var dp0 = constraint.Line.Center;
             var perp = new Vector2d(-constraint.Line.Dir.Y, constraint.Line.Dir.X);
@@ -35,9 +35,6 @@ namespace LiteCAD.DraftEditor
             ctx.DrawLine( tr0.X, tr0.Y + 5, tr0.X, tr0.Y - 5);
         }
 
-        public override void Draw()
-        {
-
-        }
+        
     }
 }

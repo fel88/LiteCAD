@@ -5,7 +5,7 @@ using System.Drawing;
 
 namespace LiteCAD.DraftEditor
 {
-    public class EqualsConstraintHelper : AbstractDrawable, IDraftConstraintHelper
+    public class EqualsConstraintHelper : AbstractDraftObject, IDraftConstraintHelper
     {
         public readonly EqualsConstraint constraint;
 
@@ -21,7 +21,7 @@ namespace LiteCAD.DraftEditor
 
         public bool Enabled { get => constraint.Enabled; set => constraint.Enabled = value; }
 
-        public void Draw(IDrawingContext ctx)
+        public override void Draw(IDrawingContext ctx)
         {
             var editor = ctx.Tag as IDraftEditor;
 
@@ -59,10 +59,6 @@ namespace LiteCAD.DraftEditor
                 ctx.FillCircle(Brushes.Red, tr1.X , tr1.Y , 5);
             }
         }
-
-        public override void Draw()
-        {
-
-        }
+       
     }
 }

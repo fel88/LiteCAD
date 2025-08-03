@@ -48,9 +48,10 @@ namespace LiteCAD.Tools
 				Invalidate();
 			}
 		}
+
 		protected override void OnPaint(PaintEventArgs pe)
         {
-            Graphics g = pe.Graphics;
+            var g = pe.Graphics;
             Brush brushBack = new LinearGradientBrush(new Point(0, 0), new Point(0, Height), TopColor, BackColor);
             Brush brushText = new SolidBrush(ForeColor);
             StringFormat sf = new StringFormat();

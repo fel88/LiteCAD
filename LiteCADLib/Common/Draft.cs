@@ -12,7 +12,7 @@ using System.Xml.Linq;
 
 namespace LiteCAD.Common
 {
-    public class Draft : AbstractDrawable
+    public class Draft : AbstractSceneObject
     {
         public List<Vector3d> Points3D = new List<Vector3d>();
 
@@ -536,7 +536,7 @@ namespace LiteCAD.Common
         public void AddHelper(IDraftHelper h)
         {
             Helpers.Add(h);
-            h.Parent = this;
+            h.SceneParent = this;
         }
 
         public Action<DraftConstraint> ConstraintAdded;
@@ -577,6 +577,7 @@ namespace LiteCAD.Common
         public DraftPoint[] DraftPoints => Elements.OfType<DraftPoint>().ToArray();
         public DraftLine[] DraftLines => Elements.OfType<DraftLine>().ToArray();
         public DraftEllipse[] DraftEllipses => Elements.OfType<DraftEllipse>().ToArray();
+
         public void EndEdit()
         {
             //2d->3d
@@ -588,7 +589,8 @@ namespace LiteCAD.Common
                 Points3D.Add(basis[0] * item.V1.X + basis[1] * item.V1.Y + Plane.Position);
             }
         }
-        public override void Draw()
+
+        public override void Draw(GpuDrawingContext ctx)
         {
             GL.Begin(PrimitiveType.Lines);
             foreach (var item in Points3D)
@@ -597,15 +599,28 @@ namespace LiteCAD.Common
             }
             GL.End();
         }
-        public override void RemoveChild(IDrawable dd)
+
+        public List<IDraftHelper> DraftChilds = new List<IDraftHelper>();
+        public override void RemoveChild(ISceneObject dd)
         {
             if (dd is IDraftConstraintHelper dh)
             {
-                Helpers.Remove(dh);
-                Constraints.Remove(dh.Constraint);
+                RemoveChild(dh);
             }
 
             Childs.Remove(dd);
+        }
+
+        public void RemoveChild(IDraftHelper dh)
+        {
+            Helpers.Remove(dh);            
+            DraftChilds.Remove(dh);
+        }
+        public void RemoveChild(IDraftConstraintHelper dh)
+        {
+            Helpers.Remove(dh);
+            Constraints.Remove(dh.Constraint);
+            DraftChilds.Remove(dh);
         }
 
         public void AddElement(DraftElement h)

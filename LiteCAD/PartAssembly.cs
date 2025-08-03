@@ -9,7 +9,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace LiteCAD
 {
-    public class PartAssembly : AbstractDrawable
+    public class PartAssembly : AbstractSceneObject
     {
         public PartAssembly()
         {
@@ -35,9 +35,9 @@ namespace LiteCAD
         public PartInstance[] Parts => Childs.OfType<PartInstance>().ToArray();
         public GroupInstance[] Groups => Childs.OfType<GroupInstance>().ToArray();
 
-        public override IDrawable[] GetAll(Predicate<IDrawable> p)
+        public override ISceneObject[] GetAll(Predicate<ISceneObject> p)
         {
-            List<IDrawable> ret = new List<IDrawable>();
+            List<ISceneObject> ret = new List<ISceneObject>();
             ret.Add(this);
             foreach (var item in Parts)
             {
@@ -70,18 +70,18 @@ namespace LiteCAD
             writer.WriteLine("</assembly>");
         }
 
-        public override void Draw()
+        public override void Draw(GpuDrawingContext ctx)
         {
             GL.PushMatrix();
             Matrix4d dd = _matrix.Calc();
             GL.MultMatrix(ref dd);
             foreach (var item in Parts)
             {
-                item.Draw();
+                item.Draw(ctx);
             }
             foreach (var item in Groups)
             {
-                item.Draw();
+                item.Draw(ctx);
             }
             GL.PopMatrix();
         }

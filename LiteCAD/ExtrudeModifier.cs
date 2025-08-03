@@ -15,7 +15,7 @@ using BREP.BRep.Surfaces;
 
 namespace LiteCAD
 {
-    public class ExtrudeModifier : IDrawable, IEconomicsDetail, IMesh, IVisualPartContainer, IMeshNodesContainer, ICommandsContainer
+    public class ExtrudeModifier : ISceneObject, IEconomicsDetail, IMesh, IVisualPartContainer, IMeshNodesContainer, ICommandsContainer
     {
         public ICommand[] Commands => new ICommand[] { new ExtractDraftCommand() };
         public class ExtractDraftCommand : ICommand
@@ -406,9 +406,9 @@ namespace LiteCAD
         public bool Selected { get; set; }
         public string Name { get; set; } = "extrude";
 
-        public List<IDrawable> Childs { get; set; } = new List<IDrawable>();
+        public List<ISceneObject> Childs { get; set; } = new List<ISceneObject>();
 
-        public IDrawable Parent { get; set; }
+        public ISceneObject Parent { get; set; }        
 
         public decimal TotalCutLength => Source.CalcTotalCutLength();
 
@@ -439,24 +439,30 @@ namespace LiteCAD
         public int Z { get; set; }
         public bool Frozen { get; set; }
 
-        public void Draw()
+        public void Draw(GpuDrawingContext ctx)
         {
-            if (!Visible) return;
-            if (Part == null) return;
+            if (!Visible)
+                return;
+
+            if (Part == null) 
+                return;
+
             GL.Color3(Color);
             GL.Enable(EnableCap.ColorMaterial);
             GL.PushMatrix();
             Matrix4d dd = _matrix.Calc();
             GL.MultMatrix(ref dd);
-            Part.Draw();
+            Part.Draw(ctx);
 
             GL.PopMatrix();
             GL.Disable(EnableCap.ColorMaterial);
         }
 
-        public void RemoveChild(IDrawable dd)
+        public void RemoveChild(ISceneObject dd)
         {
-            if (Source != dd) return;
+            if (Source != dd)
+                return;
+
             Childs.Remove(dd);
             Source = null;
             _part = null;
@@ -473,9 +479,9 @@ namespace LiteCAD
             writer.WriteLine("</source></extrude>");
         }
 
-        public IDrawable[] GetAll(Predicate<IDrawable> p)
+        public ISceneObject[] GetAll(Predicate<ISceneObject> p)
         {
-            return Childs.SelectMany(z => z.GetAll(p)).Union(new[] { this }).ToArray();
+            return Childs.SelectMany(z => z.GetAll(p)).Union([this]).ToArray();
         }
 
         public IEnumerable<Vector3d> GetPoints()

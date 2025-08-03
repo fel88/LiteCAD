@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using LiteCAD.Common;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
 
@@ -8,7 +9,7 @@ namespace LiteCAD.BRep
     {
         public Vector3d Dir;
         public Vector3d Position;
-        public override void Draw()
+        public override void Draw(GpuDrawingContext ctx)
         {
             GL.Color3(Color.Red);
             GL.Begin(PrimitiveType.Lines);

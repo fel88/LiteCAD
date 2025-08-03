@@ -3,6 +3,7 @@ using BREP.Common;
 using LiteCAD.Common;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -11,7 +12,7 @@ using System.Xml.Linq;
 
 namespace LiteCAD
 {
-    public class GpuMeshSceneObject : AbstractDrawable
+    public class GpuMeshSceneObject : AbstractSceneObject
     {
         
         public void RestoreXml(XElement elem)
@@ -45,7 +46,7 @@ namespace LiteCAD
         public bool Wireframe { get; set; }
         public bool Fill { get; set; } = true;
 
-        public override void Draw()
+        public override void Draw(GpuDrawingContext ctx)
         {
             if (!Visible)
                 return;
@@ -56,10 +57,15 @@ namespace LiteCAD
                 var dd2 = Parent.Matrix.Calc();
                 GL.MultMatrix(ref dd2);
             }
+
             Matrix4d dd = _matrix.Calc();
             GL.MultMatrix(ref dd);
+            ctx.SetModelShader();
 
             gpuObject.Draw();
+
+            GL.UseProgram(0);
+            GL.Disable(EnableCap.Lighting);
 
             if (Fill)
             {
@@ -71,10 +77,6 @@ namespace LiteCAD
             }
             GL.PopMatrix();
 
-        }
-
-        
-
-       
+        }        
     }
 }

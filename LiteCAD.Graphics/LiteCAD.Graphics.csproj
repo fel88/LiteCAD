@@ -11,6 +11,8 @@
     <EmbeddedResource Include="fonts\Antonio-Light.ttf" />
     <EmbeddedResource Include="fonts\Antonio-Regular.ttf" />
     <EmbeddedResource Include="fonts\OCRAEXT.TTF" />
+    <EmbeddedResource Include="shaders\cam_space_shader.fs" />
+    <EmbeddedResource Include="shaders\cam_space_shader.vs" />
     <EmbeddedResource Include="shaders\text.fs" />
     <EmbeddedResource Include="shaders\text.vs" />
   </ItemGroup>

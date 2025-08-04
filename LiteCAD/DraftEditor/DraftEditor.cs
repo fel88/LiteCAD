@@ -641,8 +641,8 @@ namespace LiteCAD.DraftEditor
             ctx.FitToPoints(t.Select(z => z.ToPointF()).ToArray(), 5);
         }
 
-        //public static Type DrawerType = typeof(SkiaGLDrawingContext);
-        public static Type DrawerType = typeof(GdiDrawingContext);
+        public static Type DrawerType = typeof(SkiaGLDrawingContext);
+        //public static Type DrawerType = typeof(GdiDrawingContext);
         IDrawingContext ctx;
         public object nearest { get; private set; }
         public object startMiddleDragNearest;

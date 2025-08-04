@@ -262,8 +262,8 @@ namespace LiteCAD.BRep.Editor
             Control co = null;
             if (GlSupport)
             {
-                //co = new SKGLControl();
-               // ((SKGLControl)co).PaintSurface += Co_PaintSurface;
+                co = new SKGLControl();
+                ((SKGLControl)co).PaintSurface += Co_PaintSurface;
             }
             else
             {

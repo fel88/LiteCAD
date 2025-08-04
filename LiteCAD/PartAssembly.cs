@@ -6,6 +6,7 @@ using System.Linq;
 using System.Xml.Linq;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
 
 namespace LiteCAD
 {

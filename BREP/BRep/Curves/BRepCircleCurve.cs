@@ -1,4 +1,5 @@
 ﻿using OpenTK;
+using OpenTK.Mathematics;
 
 namespace BREP.BRep.Curves
 {
@@ -29,7 +30,7 @@ namespace BREP.BRep.Curves
             var rot = mtr4.ExtractRotation();
             Axis = Vector3d.Transform(Axis, rot); ;
             Dir = Vector3d.Transform(Dir, rot);
-            Location = Vector3d.Transform(Location, mtr4);
+            Location = Vector3d.TransformVector(Location, mtr4);
             
         }
     }

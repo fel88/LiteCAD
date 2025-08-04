@@ -5,6 +5,7 @@ using BREP.Common;
 using BREP.Parsers.Step;
 using LiteCAD.Common;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -108,11 +109,11 @@ namespace BREP.BRep.Faces
                     for (double i = 0; i < elc.SweepAngle; i += step)
                     {
                         var mtr4 = Matrix4d.CreateFromAxisAngle(elc.Axis, i);
-                        var res = Vector4d.Transform(new Vector4d(norm), mtr4);
-                        var realAng = Vector3d.CalculateAngle(res.Xyz, elc.RefDir);
+                        var res = Vector3d.TransformVector( (norm), mtr4);
+                        var realAng = Vector3d.CalculateAngle(res, elc.RefDir);
                         var rad = elc.SemiAxis1 * elc.SemiAxis2 / (Math.Sqrt(Math.Pow(elc.SemiAxis1 * Math.Sin(realAng), 2) + Math.Pow(elc.SemiAxis2 * Math.Cos(realAng), 2)));
                         res *= rad;
-                        pnts.Add(elc.Location + res.Xyz);
+                        pnts.Add(elc.Location + res);
                     }
                     pnts.Add(item.End);
                     for (int i = 1; i < pnts.Count; i++)

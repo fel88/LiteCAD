@@ -3,6 +3,7 @@ using BREP.BRep.Curves;
 using BREP.BRep.Surfaces;
 using LiteCAD.Common;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -267,8 +268,8 @@ namespace BREP.Common
 
             //check
             var mtr44 = Matrix4d.CreateFromAxisAngle(cc.Axis, cc.SweepAngle);
-            var res44 = Vector4d.Transform(new Vector4d(cc.Dir), mtr44);
-            var checkPoint = (cc.Location + res44.Xyz);
+            var res44 = Vector3d.TransformVector(cc.Dir, mtr44);
+            var checkPoint = (cc.Location + res44);
             var realAxis = cc.Axis;
             if ((checkPoint - edge.End).Length > 1e-5)
             {
@@ -279,14 +280,14 @@ namespace BREP.Common
             for (double i = 0; i < cc.SweepAngle; i += step)
             {
                 var mtr4 = Matrix4d.CreateFromAxisAngle(realAxis, i);
-                var res = Vector4d.Transform(new Vector4d(cc.Dir), mtr4);
-                pnts.Add(cc.Location + res.Xyz);
+                var res = Vector3d.TransformVector( (cc.Dir), mtr4);
+                pnts.Add(cc.Location + res);
             }
 
             //check #2
             mtr44 = Matrix4d.CreateFromAxisAngle(realAxis, cc.SweepAngle);
-            res44 = Vector4d.Transform(new Vector4d(cc.Dir), mtr44);
-            checkPoint = (cc.Location + res44.Xyz);
+            res44 = Vector3d.TransformVector((cc.Dir), mtr44);
+            checkPoint = (cc.Location + res44);
 
             if ((checkPoint - edge.End).Length > 1e-5)
             {
@@ -303,7 +304,7 @@ namespace BREP.Common
         public static bool Contains(BRepWire bRepWire, TriangleInfo target, Matrix4d matrix4d)
         {
             var pnts = bRepWire.Edges.SelectMany(z => new[] { z.Start, z.End }).ToArray();
-            pnts = pnts.Select(zz => Vector3d.Transform(zz, matrix4d)).ToArray();
+            pnts = pnts.Select(zz => Vector3d.TransformVector(zz, matrix4d)).ToArray();
             var p = new[] { target.V0, target.V1, target.V2 };
 
             float eps = 1e-5f;
@@ -325,7 +326,7 @@ namespace BREP.Common
                 axis = -crs1.Normalized();
             }
             var mtr2 = Matrix4d.CreateFromAxisAngle(axis, -ang2);
-            var trans = Vector3d.Transform(neg, mtr2);
+            var trans = Vector3d.TransformVector(neg, mtr2);
 
             return trans;
         }

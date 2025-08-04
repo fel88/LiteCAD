@@ -1,5 +1,6 @@
 ﻿using BREP.BRep.Curves;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 
 namespace BREP.BRep
@@ -45,8 +46,8 @@ namespace BREP.BRep
 
         public void Transform(Matrix4d mtr4)
         {
-            Start = Vector3d.Transform(Start, mtr4);
-            End = Vector3d.Transform(End, mtr4);
+            Start = Vector3d.TransformVector( Start, mtr4);
+            End = Vector3d.TransformVector(End, mtr4);
             Curve.Transform(mtr4);
         }
     }

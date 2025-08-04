@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Xml.Linq;
 
-namespace LiteCAD.Common
+namespace BREP
 {
     public interface IXmlStorable
     {

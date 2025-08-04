@@ -16,6 +16,7 @@ using LiteCAD.PropEditors;
 using ClipperLib;
 using System.Globalization;
 using LiteCAD.Dialogs;
+using OpenTK.Mathematics;
 
 namespace LiteCAD.DraftEditor
 {
@@ -640,7 +641,8 @@ namespace LiteCAD.DraftEditor
             ctx.FitToPoints(t.Select(z => z.ToPointF()).ToArray(), 5);
         }
 
-        public static Type DrawerType = typeof(SkiaGLDrawingContext);
+        //public static Type DrawerType = typeof(SkiaGLDrawingContext);
+        public static Type DrawerType = typeof(GdiDrawingContext);
         IDrawingContext ctx;
         public object nearest { get; private set; }
         public object startMiddleDragNearest;

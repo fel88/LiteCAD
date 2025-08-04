@@ -1,4 +1,5 @@
 ﻿using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,7 +23,11 @@ namespace LiteCAD.Common
             {
                 var id = int.Parse(line.Attribute("id").Value);
                 var dirr = (line.Attribute("dir").Value).Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
-                infos.Add(new TopologyDraftLineInfo() { Line = parent.DraftLines.First(z => z.Id == id), Dir = new Vector2d(Helpers.ParseDouble(dirr[0]), Helpers.ParseDouble(dirr[1])) });
+                infos.Add(new TopologyDraftLineInfo()
+                {
+                    Line = parent.DraftLines.First(z => z.Id == id),
+                    Dir = new Vector2d(Helpers.ParseDouble(dirr[0]), Helpers.ParseDouble(dirr[1]))
+                });
             }
             //Point = parent.Elements.OfType<DraftPoint>().First(z => z.Id == int.Parse(el.Attribute("pointId").Value));
             Lines = infos.ToArray();

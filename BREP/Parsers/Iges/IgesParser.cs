@@ -7,6 +7,7 @@ using IxMilia.Iges;
 using IxMilia.Iges.Entities;
 using LiteCAD.Common;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -55,7 +56,7 @@ namespace LiteCAD.Parsers.Iges
                             BRepFace face = null;
                             if (surf is IgesPlane pl)
                             {
-                                var normal = new OpenTK.Vector3d(pl.PlaneCoefficientA, pl.PlaneCoefficientB, pl.PlaneCoefficientC).Normalized();
+                                var normal = new Vector3d(pl.PlaneCoefficientA, pl.PlaneCoefficientB, pl.PlaneCoefficientC).Normalized();
                                 var pos = normal * pl.PlaneCoefficientD;
                                 face = new BRepPlaneFace()
                                 {
@@ -138,8 +139,8 @@ namespace LiteCAD.Parsers.Iges
                 {
                     if (citem is IgesLine ln)
                     {
-                        var s = new OpenTK.Vector3d(ln.P1.X, ln.P1.Y, ln.P1.Z);
-                        var ee = new OpenTK.Vector3d(ln.P2.X, ln.P2.Y, ln.P2.Z);
+                        var s = new Vector3d(ln.P1.X, ln.P1.Y, ln.P1.Z);
+                        var ee = new Vector3d(ln.P2.X, ln.P2.Y, ln.P2.Z);
                         ret.Edges.Add(new BRepEdge()
                         {
                             Curve = new BRepLineCurve()

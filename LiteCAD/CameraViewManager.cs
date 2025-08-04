@@ -1,5 +1,6 @@
 ﻿using LiteCAD.Graphics;
 using OpenTK;
+using OpenTK.GLControl;
 
 namespace LiteCAD
 {

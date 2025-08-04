@@ -5,6 +5,7 @@ using OpenTK;
 using LiteCAD.Common;
 using System.Linq;
 using ClipperLib;
+using OpenTK.Mathematics;
 
 namespace LiteCAD.DraftEditor
 {

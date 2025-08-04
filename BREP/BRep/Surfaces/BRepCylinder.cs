@@ -1,6 +1,7 @@
 ﻿using BREP.Common;
 using LiteCAD.Common;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 
 namespace BREP.BRep.Surfaces
@@ -39,7 +40,7 @@ namespace BREP.BRep.Surfaces
         public override void Transform(Matrix4d mtr4)
         {
             var rot = mtr4.ExtractRotation();
-            Location = Vector3d.Transform(Location,mtr4);
+            Location = Vector3d.TransformVector(Location,mtr4);
             Axis = Vector3d.Transform(Axis, rot);
             RefDir = Vector3d.Transform(RefDir, rot);
         }

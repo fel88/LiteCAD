@@ -3,6 +3,7 @@ using LiteCAD.Common;
 using LiteCAD.BRep.Editor;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using OpenTK.Mathematics;
 
 namespace LiteCAD.DraftEditor
 {

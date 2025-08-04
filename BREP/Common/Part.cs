@@ -3,6 +3,7 @@ using BREP.BRep.Faces;
 using BREP.BRep.Surfaces;
 using BREP.Common;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;

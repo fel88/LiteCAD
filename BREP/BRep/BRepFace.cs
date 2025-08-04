@@ -3,6 +3,7 @@ using BREP.Common;
 using BREP.Parsers.Step;
 using LiteCAD.Common;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 

@@ -2,14 +2,13 @@
 using BREP.BRep.Surfaces;
 using LiteCAD.Tools;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace LiteCAD.BRep.Editor
@@ -45,7 +44,7 @@ namespace LiteCAD.BRep.Editor
             tp.Visible = false;
         }
 
-        private void Pet_PointChanged(Vector2d obj)
+        private void Pet_PointChanged(OpenTK.Mathematics.Vector2d obj)
         {
             sp.Points[lastEditedPointIndex] = obj;
         }

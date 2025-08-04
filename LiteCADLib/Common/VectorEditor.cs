@@ -1,4 +1,5 @@
 ﻿using OpenTK;
+using OpenTK.Mathematics;
 using System.Reflection;
 
 namespace LiteCAD.Common

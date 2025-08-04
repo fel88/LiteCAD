@@ -1,4 +1,5 @@
 ﻿using OpenTK;
+using OpenTK.Mathematics;
 
 namespace BREP.BRep.Curves
 {
@@ -17,9 +18,9 @@ namespace BREP.BRep.Curves
 
         public override void Transform(Matrix4d mtr4)
         {
-            Point = Vector3d.Transform(Point, mtr4);
+            Point = Vector3d.TransformVector(Point, mtr4);
             var p2 = Point + Vector;
-            p2 = Vector3d.Transform(p2, mtr4);
+            p2 = Vector3d.TransformVector(p2, mtr4);
 
             Vector = p2 - Point;
         }

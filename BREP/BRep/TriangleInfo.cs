@@ -1,6 +1,7 @@
 ﻿using BREP.Common;
 using LiteCAD.Common;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -57,7 +58,7 @@ namespace BREP.BRep
             for (int i = 0; i < Vertices.Length; i++)
             {
                 ret.Vertices[i] = new VertexInfo();
-                ret.Vertices[i].Position = Vector3d.Transform(Vertices[i].Position, matrix);
+                ret.Vertices[i].Position = Vector3d.TransformVector(Vertices[i].Position, matrix);
             }
             
             return ret;

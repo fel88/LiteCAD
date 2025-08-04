@@ -1,6 +1,7 @@
 ﻿using LiteCAD.Common;
 using LiteCAD.DraftEditor;
 using OpenTK;
+using OpenTK.Mathematics;
 using System.Linq;
 using System.Windows.Forms;
 

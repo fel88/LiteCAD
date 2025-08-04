@@ -1,4 +1,5 @@
 ﻿using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,8 +10,8 @@ namespace LiteCAD.Common
     public class DraftEllipse : DraftElement
     {
         public readonly DraftPoint Center;
-        public double X { get => Center.Location.X; set => Center.SetLocation(new OpenTK.Vector2d(value, Center.Y)); }
-        public double Y { get => Center.Location.Y; set => Center.SetLocation(new OpenTK.Vector2d(Center.X, value)); }
+        public double X { get => Center.Location.X; set => Center.SetLocation(new Vector2d(value, Center.Y)); }
+        public double Y { get => Center.Location.Y; set => Center.SetLocation(new Vector2d(Center.X, value)); }
         decimal _radius { get; set; }
         public decimal Radius { get => _radius; set => _radius = value; }
         public decimal Diameter { get => 2 * _radius; set => _radius = value / 2; }

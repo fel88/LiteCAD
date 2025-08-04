@@ -13,22 +13,20 @@ using LiteCAD.Parsers.Iges;
 using LiteCAD.PropEditors;
 using LiteCAD.Tools;
 using OpenTK;
+using OpenTK.GLControl;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Windows.Controls.Ribbon;
 using System.Windows.Forms;
-using System.Windows.Forms.Integration;
 using System.Xml.Linq;
-using TriangleNet;
 
 namespace LiteCAD
 {
@@ -37,59 +35,11 @@ namespace LiteCAD
         static Form1()
         {
             //add new commands 
-            PlaneHelper.Commands.Add(new CutByPlaneCommand());
+
             VisualPart.SelectManager = new DefaultSelectManager();
         }
 
-        public class CutByPlaneCommand : ICommand
-        {
-            public string Name => "cut by plane";
 
-            public Action<IDrawable, object> Process => (owner, editor) =>
-            {
-                var form = editor as Form1;
-                var models = form.treeListView1.SelectedObjects.OfType<IPlaneSplittable>().ToArray();
-                if (models.Length == 0) return;
-                var ph = form.treeListView1.SelectedObjects.OfType<PlaneHelper>().FirstOrDefault();
-                if (ph == null) return;
-
-                var pnts = models.SelectMany(z => z.SplitPyPlane(ph.GetPlane()));
-
-                //project all to ph
-                //var proj = pnts.Select(ph.ProjPoint).ToList();
-                var lines = pnts.ToList();
-                Draft d = new Draft() { Name = "cut-by-plane" };
-                float closeEps = 1e-3f;
-                /*Group gr = new Group() { Name = "cut-by-plane-lines" };
-                Parts.Add(gr);
-                foreach (var item in lines)
-                {
-                    gr.Childs.Add(new LineHelper(item));
-                }*/
-                foreach (var line in lines)
-                {
-                    var uv1 = ph.ProjectPointUV(line.Start);
-                    var uv2 = ph.ProjectPointUV(line.End);
-                    var fd1 = d.DraftPoints.FirstOrDefault(z => (z.Location - uv1).Length < closeEps);
-                    var fd2 = d.DraftPoints.FirstOrDefault(z => (z.Location - uv2).Length < closeEps);
-                    if (fd1 == null)
-                    {
-                        fd1 = new DraftPoint(d, uv1.X, uv1.Y);
-                        d.AddElement(fd1);
-                    }
-                    if (fd2 == null)
-                    {
-                        fd2 = new DraftPoint(d, uv2.X, uv2.Y);
-                        d.AddElement(fd2);
-                    }
-
-                    d.AddElement(new DraftLine(fd1, fd2, d));
-                }
-
-                form.Parts.Add(d);
-                form.updateList();
-            };
-        }
 
         RibbonMenu menu;
         public static Form1 Form;
@@ -124,12 +74,13 @@ namespace LiteCAD
             }
 
             if (first)
-            {          
+            {
                 camera1 = new Camera() { IsOrtho = true };
                 gpuCtx = new GpuDrawingContext()
                 {
                     Camera = camera1,
-                    ModelShader = new DefaultModelShader()
+                    ModelShader = new DefaultModelShader(),
+                    TextRenderer = textRenderer
                 };
 
                 ViewManager = new DefaultCameraViewManager();
@@ -143,7 +94,7 @@ namespace LiteCAD
 
             }
             Redraw();
-        }        
+        }
 
         LiteCAD.Graphics.TextRenderer textRenderer = new Graphics.TextRenderer();
         public IntersectInfo Pick => pick;
@@ -163,13 +114,13 @@ namespace LiteCAD
             {
                 if (item is IDrawable d)
                 {
-                    if (!d.Visible) 
+                    if (!d.Visible)
                         continue;
 
-                    if (d.Parent != null)                    
-                        if (!d.Parent.Visible) 
+                    if (d.Parent != null)
+                        if (!d.Parent.Visible)
                             continue;//todo: check all tree up
-                    
+
                 }
                 var r = UpdatePickTriangle(item);
                 if (r != null)
@@ -194,7 +145,9 @@ namespace LiteCAD
             //var mds = part.Nodes.Where(z => z.IsVisible).Select(z => z.Model).ToArray();
 
             var inter = Intersection.AllRayIntersect(part, mr);
-            if (inter == null || inter.Count() == 0) return null;
+            if (inter == null || inter.Count() == 0)
+                return null;
+
             var fr = inter.OrderBy(z => z.Distance).First();
 
             var rpick = fr;
@@ -203,6 +156,7 @@ namespace LiteCAD
         }
 
         GpuDrawingContext gpuCtx = new GpuDrawingContext();
+
 
         bool pickEnable = true;
 
@@ -427,6 +381,8 @@ namespace LiteCAD
             }
             GL.Disable(EnableCap.Lighting);
             hoverText.Visible = middleDrag;
+
+
             if (middleDrag)
             {
                 if (hovered is MeshNode mn)
@@ -437,7 +393,8 @@ namespace LiteCAD
                         var p = mn.Triangles[0].Multiply(hoveredMatrix).GetPlane();
                         var snap2 = p.ProjPoint(snap1.Value);
                         DrawMeasureLine(snap1.Value, snap2);
-                        hoverText.Text = $"dist: {(snap1.Value - snap2).Length:N4}";
+                        hoverText.Text = $"{(snap1.Value - snap2).Length:0.####}mm";
+
                     }
                 }
                 else if (pick != null)
@@ -447,7 +404,7 @@ namespace LiteCAD
                     if (snap1 != null && snap2 != null)
                     {
                         DrawMeasureLine(snap1.Value, snap2.Value);
-                        hoverText.Text = $"dist: {(snap1.Value - snap2.Value).Length:N4}";
+                        hoverText.Text = $"{(snap1.Value - snap2.Value).Length:0.####}mm";
                     }
                 }
             }
@@ -468,6 +425,11 @@ namespace LiteCAD
             //textRenderer.RenderText("(C) LearnOpenGL.com", 10.0f, glControl.Height - 30, 0.5f, new Vector3(0.3f, 0.7f, 0.9f));
             if (hovered != null)
                 textRenderer.RenderText(toolStripStatusLabel3.Text, 10.0f, glControl.Height - 30, 0.5f, new Vector3(0.3f, 0.7f, 0.9f));
+
+            var pos = glControl.PointToClient(Cursor.Position);
+            hoverText.Scale = 0.4f;
+            hoverText.Position = new Vector2(pos.X, glControl.Height - pos.Y);
+            hoverText.Draw(gpuCtx);
 
             GL.Enable(EnableCap.DepthTest);
             GL.Disable(EnableCap.CullFace);
@@ -608,7 +570,7 @@ namespace LiteCAD
             GL.Enable(EnableCap.DepthTest);
         }
 
-        Vector3d? SnapPoint(IntersectInfo inter)
+        Vector3d? SnapPoint(LiteCAD.Graphics.IntersectInfo inter)
         {
             float pickEps = 10;
             var pp = new[] {
@@ -623,7 +585,7 @@ namespace LiteCAD
         }
 
         public DraftEditorControl de;
-        Label hoverText;
+        GpuTextLabel hoverText = new GpuTextLabel();
         public void LoadSettings()
         {
             if (!File.Exists("settings.xml")) return;
@@ -751,25 +713,41 @@ namespace LiteCAD
 
             de.Dock = DockStyle.Fill;
 
-            glControl = new OpenTK.GLControl(new OpenTK.Graphics.GraphicsMode(32, 24, 0, 8));
+            //glControl = new OpenTK.GLControl(new OpenTK.Graphics.GraphicsMode(32, 24, 0, 8));
+            var gl = new GLControlSettings()
+            {
+                Flags = OpenTK.Windowing.Common.ContextFlags.ForwardCompatible,
+                Profile = OpenTK.Windowing.Common.ContextProfile.Compatability,
+                API = OpenTK.Windowing.Common.ContextAPI.OpenGL,
+                AlphaBits = 8,
+                RedBits = 8,
+                GreenBits = 8,
+                BlueBits = 8,
+                NumberOfSamples = 8,
+                DepthBits = 24,
+                StencilBits = 0
+            };
 
-            if (glControl.Context.GraphicsMode.Samples == 0)
+            glControl = new GLControl(gl);
+
+            /*if (glControl.Context.GraphicsMode.Samples == 0)
             {
                 glControl = new OpenTK.GLControl(new OpenTK.Graphics.GraphicsMode(32, 24, 0, 8));
-            }
-            hoverText = new Label();
-            glControl.Controls.Add(hoverText);
-            hoverText.Text = "dist:";
-            hoverText.BackColor = Color.Transparent;
-            hoverText.ForeColor = Color.White;
-            hoverText.AutoSize = true;
+            }*/
+            //  hoverText = new Label();
+            // glControl.Controls.Add(hoverText);
+            /* hoverText.Text = "dist:";
+             hoverText.BackColor = Color.Transparent;
+             hoverText.ForeColor = Color.White;
+             hoverText.AutoSize = true;*/
+
             evwrapper = new EventWrapperGlControl(glControl);
 
             glControl.MouseDown += GlControl_MouseDown;
             glControl.MouseUp += GlControl_MouseUp;
 
             glControl.Paint += Gl_Paint;
-           
+
             panel2.Controls.Add(glControl);
             panel2.Controls.Add(de);
             panel2.Controls.Add(infoPanel);
@@ -991,7 +969,7 @@ namespace LiteCAD
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "LiteCAD scene (*.lcs)|*.lcs";
 
-            if (ofd.ShowDialog() != DialogResult.OK) 
+            if (ofd.ShowDialog() != DialogResult.OK)
                 return;
 
             Scene = new LiteCADScene();
@@ -1832,6 +1810,7 @@ namespace LiteCAD
 
         }
 
+        public void UpdateList() => updateList();
         public void updateList()
         {
             /*var grp = new Group() { Name = "root" };
@@ -1872,6 +1851,7 @@ namespace LiteCAD
         public List<ISceneObject> Parts => Scene.Parts;
 
         ISceneObject[] IEditor.Parts => Parts.ToArray();
+
 
         private void assemblyToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -2285,6 +2265,19 @@ namespace LiteCAD
                 AddHelper(g);
             }*/
             updateList();
+        }
+
+        public void AddPart(ISceneObject part)
+        {
+            Parts.Add(part);
+        }
+
+        public IList SelectedObjects
+        {
+            get
+            {
+                return treeListView1.SelectedObjects;
+            }
         }
     }
 }

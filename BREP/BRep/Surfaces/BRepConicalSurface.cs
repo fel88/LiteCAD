@@ -1,6 +1,7 @@
 ﻿using BREP.Common;
 using LiteCAD.Common;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 
 namespace BREP.BRep.Surfaces

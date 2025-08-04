@@ -1,18 +1,26 @@
 ﻿using BREP.Common;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
+using PolyBoolCS;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 using System.Xml.Linq;
 
 namespace LiteCAD.Common
 {
     public class PlaneHelper : AbstractSceneObject, IEditFieldsContainer, ICommandsContainer
     {
+        static PlaneHelper()
+        {
+            Commands.Add(new CutByPlaneCommand());
+        }
+
         public PlaneHelper()
         {
 
@@ -171,9 +179,60 @@ namespace LiteCAD.Common
             var d2 = a[0] * c[1] - a[1] * c[0];
             var x = d1 / d;
             var y = d2 / d;
-            return new[] { x, y };
+            return [x, y];
         }
+        public class CutByPlaneCommand : ICommand
+        {
+            public string Name => "cut by plane";
 
+            public Action<IDrawable, IEditor> Process => (owner, editor) =>
+            {
+                
+                var models = editor.SelectedObjects.OfType<IPlaneSplittable>().ToArray();
+
+                if (models.Length == 0) 
+                    return;
+
+                var ph = editor.SelectedObjects.OfType<PlaneHelper>().FirstOrDefault();
+                if (ph == null) return;
+
+                var pnts = models.SelectMany(z => z.SplitPyPlane(ph.GetPlane()));
+
+                //project all to ph
+                //var proj = pnts.Select(ph.ProjPoint).ToList();
+                var lines = pnts.ToList();
+                Draft d = new Draft() { Name = "cut-by-plane" };
+                float closeEps = 1e-3f;
+                /*Group gr = new Group() { Name = "cut-by-plane-lines" };
+                Parts.Add(gr);
+                foreach (var item in lines)
+                {
+                    gr.Childs.Add(new LineHelper(item));
+                }*/
+                foreach (var line in lines)
+                {
+                    var uv1 = ph.ProjectPointUV(line.Start);
+                    var uv2 = ph.ProjectPointUV(line.End);
+                    var fd1 = d.DraftPoints.FirstOrDefault(z => (z.Location - uv1).Length < closeEps);
+                    var fd2 = d.DraftPoints.FirstOrDefault(z => (z.Location - uv2).Length < closeEps);
+                    if (fd1 == null)
+                    {
+                        fd1 = new DraftPoint(d, uv1.X, uv1.Y);
+                        d.AddElement(fd1);
+                    }
+                    if (fd2 == null)
+                    {
+                        fd2 = new DraftPoint(d, uv2.X, uv2.Y);
+                        d.AddElement(fd2);
+                    }
+
+                    d.AddElement(new DraftLine(fd1, fd2, d));
+                }
+
+                editor.AddPart(d);
+                editor.UpdateList();
+            };
+        }
         public bool Fill { get; set; }
 
         public static List<ICommand> Commands = new List<ICommand>();
@@ -192,7 +251,9 @@ namespace LiteCAD.Common
 
         public override void Draw(GpuDrawingContext ctx)
         {
-            if (!Visible) return;
+            if (!Visible) 
+                return;
+
             GL.Disable(EnableCap.Lighting);
             var basis = GetBasis();
             if (Fill)
@@ -246,14 +307,4 @@ namespace LiteCAD.Common
             return ret.ToArray();
         }
     }
-
-    public interface ICommand
-    {
-        string Name { get; }
-        Action<IDrawable, object> Process { get; }
-    }
-    public interface ICommandsContainer
-    {
-        ICommand[] Commands { get; }        
-    }    
 }

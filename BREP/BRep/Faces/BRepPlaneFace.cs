@@ -5,6 +5,7 @@ using BREP.Common;
 using BREP.Parsers.Step;
 using LiteCAD.Common;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -112,13 +113,13 @@ namespace BREP.BRep.Faces
                         {                            
                             var mtr4 = Matrix4d.CreateFromAxisAngle(elc.Axis, i);
                             
-                            var res = Vector4d.Transform(new Vector4d(norm ), mtr4);
-                            var realAng = Vector3d.CalculateAngle(res.Xyz, elc.RefDir);
+                            var res = Vector3d.TransformVector((norm ), mtr4);
+                            var realAng = Vector3d.CalculateAngle(res, elc.RefDir);
 
                             var rad = elc.SemiAxis1 * elc.SemiAxis2 / (Math.Sqrt(Math.Pow(elc.SemiAxis1 * Math.Sin(realAng), 2) + Math.Pow(elc.SemiAxis2 * Math.Cos(realAng), 2)));
                             res *= rad;
 
-                            pnts.Add(elc.Location + res.Xyz);
+                            pnts.Add(elc.Location + res);
                         }
                         pnts.Add(edge.End);
                         for (int i = 1; i < pnts.Count; i++)
@@ -289,8 +290,8 @@ namespace BREP.BRep.Faces
             for (double i = 0; i < ang2; i += step)
             {
                 var mtr4 = Matrix4d.CreateFromAxisAngle(axis, i);
-                var res = Vector4d.Transform(new Vector4d(dir1), mtr4);
-                pnts.Add(pos + res.Xyz);
+                var res = Vector3d.TransformVector( (dir1), mtr4);
+                pnts.Add(pos + res);
             }
             pnts.Add(pos + dir2);
             for (int j = 1; j < pnts.Count; j++)
@@ -353,13 +354,13 @@ namespace BREP.BRep.Faces
             {
                 var mtr4 = Matrix4d.CreateFromAxisAngle(axis, i);
                 //var rad = (radius1 * radius2) / (Math.Sqrt(radius2 * radius2 * Math.Pow(Math.Sin(i), 2)) + Math.Sqrt(radius1 * radius1 * Math.Pow(Math.Cos(i), 2)));
-                var res = Vector4d.Transform(new Vector4d(norm ), mtr4);
-                var realAng = Vector3d.CalculateAngle(res.Xyz, cc.RefDir);
+                var res = Vector3d.TransformVector( (norm ), mtr4);
+                var realAng = Vector3d.CalculateAngle(res, cc.RefDir);
                 var rad = (radius1 * radius2) / (Math.Sqrt(Math.Pow(radius1 * Math.Sin(realAng), 2) + Math.Pow(radius2 * Math.Cos(realAng), 2)));
 
                 res *= rad;
 
-                pnts.Add(pos + res.Xyz);
+                pnts.Add(pos + res);
 
                 /*var mtr4 = Matrix4d.CreateFromAxisAngle(elc.Axis, i);
                             

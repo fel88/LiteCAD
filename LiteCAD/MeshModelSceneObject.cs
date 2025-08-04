@@ -4,6 +4,7 @@ using LiteCAD.BRep;
 using LiteCAD.Common;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -170,8 +171,8 @@ namespace LiteCAD
             for (int i = 0; i < ret.Length; i++)
             {
 
-                var res1 = Vector3d.Transform(ret[i].Start, mm);
-                var res2 = Vector3d.Transform(ret[i].End, mm);
+                var res1 = Vector3d.TransformVector(ret[i].Start, mm);
+                var res2 = Vector3d.TransformVector(ret[i].End, mm);
                 ret[i].Start = res1;
                 ret[i].End = res2;
             }

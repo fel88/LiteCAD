@@ -5,6 +5,7 @@ using BREP.Common;
 using BREP.Parsers.Step;
 using LiteCAD.Common;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,7 +77,7 @@ namespace BREP.BRep.Faces
                 List<Vector3d> pnts = new List<Vector3d>();
                 //check
                 var mtr44 = Matrix4d.CreateFromAxisAngle(elc.Axis, elc.SweepAngle);
-                var res44 = Vector4d.Transform(new Vector4d(norm), mtr44);
+                var res44 = (new Vector4d(norm)* mtr44);
                 var realAng2 = Vector3d.CalculateAngle(res44.Xyz, elc.RefDir);
                 var rad2 = elc.SemiAxis1 * elc.SemiAxis2 / (Math.Sqrt(Math.Pow(elc.SemiAxis1 * Math.Sin(realAng2), 2) + Math.Pow(elc.SemiAxis2 * Math.Cos(realAng2), 2)));
                 res44 *= rad2;
@@ -94,7 +95,7 @@ namespace BREP.BRep.Faces
                 for (double i = 0; i < elc.SweepAngle; i += step)
                 {
                     var mtr4 = Matrix4d.CreateFromAxisAngle(realAxis, i);
-                    var res = Vector4d.Transform(new Vector4d(norm), mtr4);
+                    var res = (new Vector4d(norm)* mtr4);
                     var realAng = Vector3d.CalculateAngle(res.Xyz, elc.RefDir);
                     var rad = elc.SemiAxis1 * elc.SemiAxis2 / (Math.Sqrt(Math.Pow(elc.SemiAxis1 * Math.Sin(realAng), 2) + Math.Pow(elc.SemiAxis2 * Math.Cos(realAng), 2)));
                     res *= rad;
@@ -103,7 +104,7 @@ namespace BREP.BRep.Faces
 
                 //check #2
                 mtr44 = Matrix4d.CreateFromAxisAngle(realAxis, elc.SweepAngle);
-                res44 = Vector4d.Transform(new Vector4d(norm), mtr44);
+                res44 = (new Vector4d(norm)*mtr44);
                 realAng2 = Vector3d.CalculateAngle(res44.Xyz, elc.RefDir);
                 rad2 = elc.SemiAxis1 * elc.SemiAxis2 / (Math.Sqrt(Math.Pow(elc.SemiAxis1 * Math.Sin(realAng2), 2) + Math.Pow(elc.SemiAxis2 * Math.Cos(realAng2), 2)));
                 res44 *= rad2;
@@ -218,8 +219,8 @@ namespace BREP.BRep.Faces
             for (double i = 0; i < ang2; i += step)
             {
                 var mtr4 = Matrix4d.CreateFromAxisAngle(axis, i);
-                var res = Vector4d.Transform(new Vector4d(dir1), mtr4);
-                pnts.Add(pos + res.Xyz);
+                var res = Vector3d.TransformVector((dir1), mtr4);
+                pnts.Add(pos + res);
             }
             pnts.Add(pos + dir2);
             for (int j = 1; j < pnts.Count; j++)

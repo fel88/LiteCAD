@@ -1,5 +1,6 @@
 ﻿using LiteCAD.Common;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Linq;
 

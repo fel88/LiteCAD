@@ -12,6 +12,7 @@ using BREP.BRep;
 using BREP.BRep.Curves;
 using BREP.BRep.Faces;
 using BREP.BRep.Surfaces;
+using OpenTK.Mathematics;
 
 namespace LiteCAD
 {
@@ -22,7 +23,7 @@ namespace LiteCAD
         {
             public string Name => "extract draft";
 
-            public Action<IDrawable, object> Process => (z, editor) =>
+            public Action<IDrawable, IEditor> Process => (z, editor) =>
             {
                 var d = z as ExtrudeModifier;
                 StringWriter sw = new StringWriter();
@@ -125,14 +126,14 @@ namespace LiteCAD
                     foreach (var item in wire.OfType<DraftLine>())
                     {
                         var diff = item.V0.Location - item.V1.Location;
-                        var p = new OpenTK.Vector3d(item.V0.Location.X, item.V0.Location.Y, 0);
-                        var pe = new OpenTK.Vector3d(item.V1.Location.X, item.V1.Location.Y, 0);
+                        var p = new Vector3d(item.V0.Location.X, item.V0.Location.Y, 0);
+                        var pe = new Vector3d(item.V1.Location.X, item.V1.Location.Y, 0);
                         edges.Add(new BRepEdge()
                         {
                             Curve = new BRepLineCurve()
                             {
                                 Point = p,
-                                Vector = new OpenTK.Vector3d(diff.X, diff.Y, 0)
+                                Vector = new Vector3d(diff.X, diff.Y, 0)
                             },
                             Start = p,
                             End = pe
@@ -167,7 +168,7 @@ namespace LiteCAD
                         }
                         else
                         {
-                            var p = new OpenTK.Vector3d(item.Center.X + (double)item.Radius, item.Center.Y, 0);
+                            var p = new Vector3d(item.Center.X + (double)item.Radius, item.Center.Y, 0);
                             var dir2 = (p.Xy - item.Center.Location);
                             var dir3 = new Vector3d(dir2.X, dir2.Y, 0);
 

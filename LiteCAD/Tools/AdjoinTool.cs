@@ -4,7 +4,9 @@ using BREP.BRep.Surfaces;
 using BREP.Common;
 using LiteCAD.BRep;
 using LiteCAD.Common;
+using LiteCAD.Graphics;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,13 +36,18 @@ namespace LiteCAD.Tools
         IntersectInfo inter2;
         public override void MouseDown(MouseEventArgs e)
         {
-            if (e.Button != MouseButtons.Left) return;
-            if (Editor.Pick == null) return;
+            if (e.Button != MouseButtons.Left) 
+                return;
+
+            if (Editor.Pick == null) 
+                return;
+
             if (lastPickedFace != null)
             {
                 var f = getFace(Editor.Pick);
                 inter2 = Editor.Pick;
-                if (f == null) return;
+                if (f == null) 
+                    return;
 
                 //adjoint selected faces
                 if (f is BRepPlaneFace pf2 && lastPickedFace is BRepPlaneFace pf1)
@@ -59,8 +66,8 @@ namespace LiteCAD.Tools
                     {
                         var plane1 = pf1.Surface as BRepPlane;
                         var plane2 = pf2.Surface as BRepPlane;
-                        var ploc1 = Vector3d.Transform(plane1.Location, drw1.Matrix.Calc());
-                        var ploc2 = Vector3d.Transform(plane2.Location, drw2.Matrix.Calc());
+                        var ploc1 = Vector3d.TransformVector(plane1.Location, drw1.Matrix.Calc());
+                        var ploc2 = Vector3d.TransformVector(plane2.Location, drw2.Matrix.Calc());
                         var q1 = drw1.Matrix.Calc();
                         var q2 = drw2.Matrix.Calc();
                         var rot1 = q1.ExtractRotation();

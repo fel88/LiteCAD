@@ -1,9 +1,8 @@
 ﻿using BREP.BRep;
-using LiteCAD.BRep;
 using LiteCAD.Common;
-using OpenTK;
+using OpenTK.Mathematics;
 
-namespace LiteCAD
+namespace LiteCAD.Graphics
 {
     public class IntersectInfo
     {
@@ -13,5 +12,4 @@ namespace LiteCAD
         public Vector3d Point { get; set; }
         public object Parent;
     }
-
 }

@@ -5,6 +5,7 @@ using BREP.Common;
 using BREP.Parsers.Step;
 using LiteCAD.Common;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -98,11 +99,11 @@ namespace BREP.BRep.Faces
                 List<Vector3d> pnts = new List<Vector3d>();
                 //check
                 var mtr44 = Matrix4d.CreateFromAxisAngle(elc.Axis, elc.SweepAngle);
-                var res44 = Vector4d.Transform(new Vector4d(norm), mtr44);
-                var realAng2 = Vector3d.CalculateAngle(res44.Xyz, elc.RefDir);
+                var res44 = Vector3d.TransformVector( (norm), mtr44);
+                var realAng2 = Vector3d.CalculateAngle(res44, elc.RefDir);
                 var rad2 = elc.SemiAxis1 * elc.SemiAxis2 / (Math.Sqrt(Math.Pow(elc.SemiAxis1 * Math.Sin(realAng2), 2) + Math.Pow(elc.SemiAxis2 * Math.Cos(realAng2), 2)));
                 res44 *= rad2;
-                var checkPoint = (elc.Location + res44.Xyz);
+                var checkPoint = (elc.Location + res44);
                 var realAxis = elc.Axis;
                 if ((checkPoint - edge.End).Length > 1e-5)
                 {
@@ -116,20 +117,20 @@ namespace BREP.BRep.Faces
                 for (double i = 0; i < elc.SweepAngle; i += step)
                 {
                     var mtr4 = Matrix4d.CreateFromAxisAngle(realAxis, i);
-                    var res = Vector4d.Transform(new Vector4d(norm), mtr4);
-                    var realAng = Vector3d.CalculateAngle(res.Xyz, elc.RefDir);
+                    var res = Vector3d.TransformVector( (norm), mtr4);
+                    var realAng = Vector3d.CalculateAngle(res, elc.RefDir);
                     var rad = elc.SemiAxis1 * elc.SemiAxis2 / (Math.Sqrt(Math.Pow(elc.SemiAxis1 * Math.Sin(realAng), 2) + Math.Pow(elc.SemiAxis2 * Math.Cos(realAng), 2)));
                     res *= rad;
-                    pnts.Add(elc.Location + res.Xyz);
+                    pnts.Add(elc.Location + res);
                 }
 
                 //check #2
                 mtr44 = Matrix4d.CreateFromAxisAngle(realAxis, elc.SweepAngle);
-                res44 = Vector4d.Transform(new Vector4d(norm), mtr44);
-                realAng2 = Vector3d.CalculateAngle(res44.Xyz, elc.RefDir);
+                res44 = Vector3d.TransformVector( (norm), mtr44);
+                realAng2 = Vector3d.CalculateAngle(res44, elc.RefDir);
                 rad2 = elc.SemiAxis1 * elc.SemiAxis2 / (Math.Sqrt(Math.Pow(elc.SemiAxis1 * Math.Sin(realAng2), 2) + Math.Pow(elc.SemiAxis2 * Math.Cos(realAng2), 2)));
                 res44 *= rad2;
-                checkPoint = (elc.Location + res44.Xyz);
+                checkPoint = (elc.Location + res44);
 
                 if ((checkPoint - edge.End).Length > 1e-5)
                 {
@@ -216,11 +217,11 @@ namespace BREP.BRep.Faces
                 for (double i = 0; i < elc.SweepAngle; i += step)
                 {
                     var mtr4 = Matrix4d.CreateFromAxisAngle(elc.Axis, i);
-                    var res = Vector4d.Transform(new Vector4d(norm), mtr4);
-                    var realAng = Vector3d.CalculateAngle(res.Xyz, elc.RefDir);
+                    var res = Vector3d.TransformVector((norm), mtr4);
+                    var realAng = Vector3d.CalculateAngle(res, elc.RefDir);
                     var rad = elc.SemiAxis1 * elc.SemiAxis2 / (Math.Sqrt(Math.Pow(elc.SemiAxis1 * Math.Sin(realAng), 2) + Math.Pow(elc.SemiAxis2 * Math.Cos(realAng), 2)));
                     res *= rad;
-                    pnts.Add(elc.Location + res.Xyz);
+                    pnts.Add(elc.Location + res);
                 }
                 if ((pnts.First() - edge.Start).Length > eps)
                 {
@@ -653,7 +654,7 @@ namespace BREP.BRep.Faces
                     var ang = d.X;
                     var mtr = Matrix4d.CreateFromAxisAngle(cl.Axis, -ang);
 
-                    var rot0 = Vector3d.Transform(vec0 + cl.Axis * d.Y, mtr);
+                    var rot0 = Vector3d.TransformVector(vec0 + cl.Axis * d.Y, mtr);
                     Plane ph = new Plane();
                     //ph.Position = cl.Location;
                     ph.Normal = cl.Axis;
@@ -741,12 +742,12 @@ namespace BREP.BRep.Faces
             for (double i = 0; i < cc.SweepAngle; i += step)
             {
                 var mtr4 = Matrix4d.CreateFromAxisAngle(cc.Axis, i);
-                var res = Vector4d.Transform(new Vector4d(norm), mtr4);
-                var realAng = Vector3d.CalculateAngle(res.Xyz, cc.RefDir);
+                var res = Vector3d.TransformVector( (norm), mtr4);
+                var realAng = Vector3d.CalculateAngle(res, cc.RefDir);
                 var rad = cc.SemiAxis1 * cc.SemiAxis2 / (Math.Sqrt(Math.Pow(cc.SemiAxis1 * Math.Sin(realAng), 2) + Math.Pow(cc.SemiAxis2 * Math.Cos(realAng), 2)));
 
                 res *= rad;
-                pnts.Add(cc.Location + res.Xyz);
+                pnts.Add(cc.Location + res);
             }
 
             pnts.Add(edge.End);
@@ -825,8 +826,8 @@ namespace BREP.BRep.Faces
             for (double i = 0; i < cc.SweepAngle; i += step)
             {
                 var mtr4 = Matrix4d.CreateFromAxisAngle(axis1, i);
-                var res = Vector4d.Transform(new Vector4d(cc.Dir), mtr4);
-                pnts.Add(cc.Location + res.Xyz);
+                var res = Vector3d.TransformVector( (cc.Dir), mtr4);
+                pnts.Add(cc.Location + res);
             }
             if ((pnts.Last() - edge.End).Length > 1e-8 && (pnts.First() - edge.End).Length > 1e-8)
             {

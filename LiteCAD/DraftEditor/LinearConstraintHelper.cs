@@ -8,6 +8,7 @@ using System.Linq;
 using System.IO;
 using System.Xml.Linq;
 using SkiaSharp;
+using OpenTK.Mathematics;
 
 namespace LiteCAD.DraftEditor
 {

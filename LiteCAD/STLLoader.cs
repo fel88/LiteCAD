@@ -2,6 +2,7 @@
 using LiteCAD.BRep;
 using LiteCAD.Common;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.IO;

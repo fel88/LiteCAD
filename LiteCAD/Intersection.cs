@@ -3,6 +3,7 @@ using LiteCAD.BRep;
 using LiteCAD.Common;
 using LiteCAD.Graphics;
 using OpenTK;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -104,7 +105,7 @@ namespace LiteCAD
             }
             return null;
         }
-        public static OpenTK.Vector3d? InstersectPlaneWithRay(PlaneDataTransferObject plane, MouseRay ray)
+        public static Vector3d? InstersectPlaneWithRay(PlaneDataTransferObject plane, MouseRay ray)
         {
 
             //OpenTK.Vector3d l = ray.End - ray.Start;
@@ -127,7 +128,7 @@ namespace LiteCAD
         }
 
 
-        public static OpenTK.Vector3d? CheckIntersect(MouseRay ray, OpenTK.Vector3d[] triangle)
+        public static Vector3d? CheckIntersect(MouseRay ray, Vector3d[] triangle)
         {
             //calc parametric equation.
             var dir = ray.End - ray.Start;
@@ -152,14 +153,14 @@ namespace LiteCAD
                 var v1 = triangle[1] - triangle[0];
                 var v2 = triangle[2] - triangle[1];
                 var v3 = triangle[0] - triangle[2];
-                var crs1 = OpenTK.Vector3d.Cross(ss - triangle[0], v1);
-                var crs2 = OpenTK.Vector3d.Cross(ss - triangle[1], v2);
-                var crs3 = OpenTK.Vector3d.Cross(ss - triangle[2], v3);
-                var up = OpenTK.Vector3d.Cross(v1, triangle[2] - triangle[0]);
+                var crs1 = Vector3d.Cross(ss - triangle[0], v1);
+                var crs2 = Vector3d.Cross(ss - triangle[1], v2);
+                var crs3 = Vector3d.Cross(ss - triangle[2], v3);
+                var up = Vector3d.Cross(v1, triangle[2] - triangle[0]);
                 //find dot
-                var dot1 = OpenTK.Vector3d.Dot(crs1, up);
-                var dot2 = OpenTK.Vector3d.Dot(crs2, up);
-                var dot3 = OpenTK.Vector3d.Dot(crs3, up);
+                var dot1 = Vector3d.Dot(crs1, up);
+                var dot2 = Vector3d.Dot(crs2, up);
+                var dot3 = Vector3d.Dot(crs3, up);
                 //if (Math.Sign(crs1.Z) == Math.Sign(crs2.Z) && Math.Sign(crs2.Z) == Math.Sign(crs3.Z) && Math.Sign(crs2.Z) == -1)
                 if (Math.Sign(dot1) == Math.Sign(dot2) && Math.Sign(dot2) == Math.Sign(dot3) /*&& Math.Sign(dot1) == 1*/)
                 {

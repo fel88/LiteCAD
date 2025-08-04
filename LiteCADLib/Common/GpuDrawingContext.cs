@@ -1,6 +1,5 @@
 ﻿using LiteCAD.Graphics;
-using OpenTK;
-using System;
+using OpenTK.Mathematics;
 using System.Drawing;
 
 namespace LiteCAD.Common
@@ -13,6 +12,8 @@ namespace LiteCAD.Common
         Color LightColor = Color.FromArgb(255, 255, 255);
         float _diffuseValue = 0.8f;
         float _ambientValue = 0.8f;
+
+        public TextRenderer TextRenderer;
 
         public Shader ModelShader;
         public void SetModelShader()

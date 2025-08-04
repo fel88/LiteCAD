@@ -81,6 +81,7 @@ namespace LiteCAD.Graphics
                 if (success == 0)
                 {
                     GL.GetProgramInfoLog(shader, out infoLog);
+                    throw new Exception(infoLog);
                     //  std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
                 }
             }

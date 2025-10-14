@@ -82,7 +82,7 @@ namespace LiteCAD.Graphics
             GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
 
             // load first 128 characters of ASCII set
-            for (char c = (char)0; c < 128; c++)
+            for (char c = (char)0; c < 256; c++)
             {
                 face.LoadChar(c, LoadFlags.Render, LoadTarget.Normal);
                 //   face.Glyph.RenderGlyph(RenderMode.Normal);

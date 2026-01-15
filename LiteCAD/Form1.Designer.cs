@@ -48,6 +48,7 @@
             importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             partToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             meshToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            meshgpuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             cloneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -140,7 +141,7 @@
             toolStripButton18 = new System.Windows.Forms.ToolStripButton();
             toolStripButton6 = new System.Windows.Forms.ToolStripButton();
             toolStripButton17 = new System.Windows.Forms.ToolStripButton();
-            meshgpuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            propertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)treeListView1).BeginInit();
@@ -220,6 +221,7 @@
             treeListView1.VirtualMode = true;
             treeListView1.SelectedIndexChanged += treeListView1_SelectedIndexChanged;
             treeListView1.KeyDown += treeListView1_KeyDown;
+            treeListView1.MouseDoubleClick += treeListView1_MouseDoubleClick;
             // 
             // olvColumn1
             // 
@@ -240,9 +242,9 @@
             // 
             // contextMenuStrip1
             // 
-            contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { addToolStripMenuItem, importToolStripMenuItem, cloneToolStripMenuItem, deleteToolStripMenuItem, toolStripSeparator1, editToolStripMenuItem, updateToolStripMenuItem1, matrixEditToolStripMenuItem, fitToolStripMenuItem1, toolStripSeparator5, exportToolStripMenuItem, infoToolStripMenuItem, toolStripSeparator6, commandsToolStripMenuItem, setCameraToolStripMenuItem });
+            contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { addToolStripMenuItem, importToolStripMenuItem, cloneToolStripMenuItem, deleteToolStripMenuItem, toolStripSeparator1, editToolStripMenuItem, propertiesToolStripMenuItem, updateToolStripMenuItem1, matrixEditToolStripMenuItem, fitToolStripMenuItem1, toolStripSeparator5, exportToolStripMenuItem, infoToolStripMenuItem, toolStripSeparator6, commandsToolStripMenuItem, setCameraToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new System.Drawing.Size(181, 308);
+            contextMenuStrip1.Size = new System.Drawing.Size(181, 330);
             contextMenuStrip1.Opening += contextMenuStrip1_Opening;
             // 
             // addToolStripMenuItem
@@ -302,6 +304,7 @@
             // importToolStripMenuItem
             // 
             importToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { partToolStripMenuItem1, meshToolStripMenuItem1, meshgpuToolStripMenuItem });
+            importToolStripMenuItem.Image = Properties.Resources.fill;
             importToolStripMenuItem.Name = "importToolStripMenuItem";
             importToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             importToolStripMenuItem.Text = "import";
@@ -309,16 +312,23 @@
             // partToolStripMenuItem1
             // 
             partToolStripMenuItem1.Name = "partToolStripMenuItem1";
-            partToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            partToolStripMenuItem1.Size = new System.Drawing.Size(135, 22);
             partToolStripMenuItem1.Text = "part (brep)";
             partToolStripMenuItem1.Click += partToolStripMenuItem1_Click;
             // 
             // meshToolStripMenuItem1
             // 
             meshToolStripMenuItem1.Name = "meshToolStripMenuItem1";
-            meshToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            meshToolStripMenuItem1.Size = new System.Drawing.Size(135, 22);
             meshToolStripMenuItem1.Text = "mesh";
             meshToolStripMenuItem1.Click += meshToolStripMenuItem1_Click;
+            // 
+            // meshgpuToolStripMenuItem
+            // 
+            meshgpuToolStripMenuItem.Name = "meshgpuToolStripMenuItem";
+            meshgpuToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            meshgpuToolStripMenuItem.Text = "mesh (gpu)";
+            meshgpuToolStripMenuItem.Click += meshgpuToolStripMenuItem_Click;
             // 
             // cloneToolStripMenuItem
             // 
@@ -543,35 +553,35 @@
             // updateToolStripMenuItem
             // 
             updateToolStripMenuItem.Name = "updateToolStripMenuItem";
-            updateToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            updateToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
             updateToolStripMenuItem.Text = "update";
             updateToolStripMenuItem.Click += updateToolStripMenuItem_Click;
             // 
             // projectionToolStripMenuItem
             // 
             projectionToolStripMenuItem.Name = "projectionToolStripMenuItem";
-            projectionToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            projectionToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
             projectionToolStripMenuItem.Text = "projection";
             projectionToolStripMenuItem.Click += projectionToolStripMenuItem_Click;
             // 
             // deleteToolStripMenuItem1
             // 
             deleteToolStripMenuItem1.Name = "deleteToolStripMenuItem1";
-            deleteToolStripMenuItem1.Size = new System.Drawing.Size(171, 22);
+            deleteToolStripMenuItem1.Size = new System.Drawing.Size(170, 22);
             deleteToolStripMenuItem1.Text = "delete";
             deleteToolStripMenuItem1.Click += deleteToolStripMenuItem1_Click;
             // 
             // fitToolStripMenuItem
             // 
             fitToolStripMenuItem.Name = "fitToolStripMenuItem";
-            fitToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            fitToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
             fitToolStripMenuItem.Text = "fit";
             fitToolStripMenuItem.Click += fitToolStripMenuItem_Click;
             // 
             // extract3dContourToolStripMenuItem
             // 
             extract3dContourToolStripMenuItem.Name = "extract3dContourToolStripMenuItem";
-            extract3dContourToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            extract3dContourToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
             extract3dContourToolStripMenuItem.Text = "extract 3d contour";
             extract3dContourToolStripMenuItem.Click += extract3dContourToolStripMenuItem_Click;
             // 
@@ -629,7 +639,7 @@
             checkBox8.Location = new System.Drawing.Point(20, 233);
             checkBox8.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             checkBox8.Name = "checkBox8";
-            checkBox8.Size = new System.Drawing.Size(144, 19);
+            checkBox8.Size = new System.Drawing.Size(143, 19);
             checkBox8.TabIndex = 12;
             checkBox8.Text = "skip wire on exception";
             checkBox8.UseVisualStyleBackColor = true;
@@ -654,7 +664,7 @@
             checkBox7.Location = new System.Drawing.Point(20, 260);
             checkBox7.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             checkBox7.Name = "checkBox7";
-            checkBox7.Size = new System.Drawing.Size(144, 19);
+            checkBox7.Size = new System.Drawing.Size(143, 19);
             checkBox7.TabIndex = 10;
             checkBox7.Text = "skip face on exception";
             checkBox7.UseVisualStyleBackColor = true;
@@ -680,7 +690,7 @@
             checkBox5.Location = new System.Drawing.Point(14, 190);
             checkBox5.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             checkBox5.Name = "checkBox5";
-            checkBox5.Size = new System.Drawing.Size(78, 19);
+            checkBox5.Size = new System.Drawing.Size(77, 19);
             checkBox5.TabIndex = 8;
             checkBox5.Text = "draw axes";
             checkBox5.UseVisualStyleBackColor = true;
@@ -747,7 +757,7 @@
             checkBox3.Location = new System.Drawing.Point(10, 92);
             checkBox3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             checkBox3.Name = "checkBox3";
-            checkBox3.Size = new System.Drawing.Size(137, 19);
+            checkBox3.Size = new System.Drawing.Size(136, 19);
             checkBox3.TabIndex = 1;
             checkBox3.Text = "extract mesh on load";
             checkBox3.UseVisualStyleBackColor = true;
@@ -803,14 +813,14 @@
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            openToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
             openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.Click += openToolStripMenuItem_Click;
             // 
             // saveAsToolStripMenuItem
             // 
             saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            saveAsToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            saveAsToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
             saveAsToolStripMenuItem.Text = "Save as";
             saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
             // 
@@ -818,7 +828,7 @@
             // 
             exportAsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { stepToolStripMenuItem });
             exportAsToolStripMenuItem.Name = "exportAsToolStripMenuItem";
-            exportAsToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            exportAsToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
             exportAsToolStripMenuItem.Text = "Export as";
             // 
             // stepToolStripMenuItem
@@ -986,7 +996,7 @@
             toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripButton9, toolStripButton2, toolStripButton10, toolStripButton3, toolStripButton4, toolStripSeparator2, toolStripButton11, toolStripButton15, toolStripButton7, toolStripSeparator3, toolStripButton8, toolStripButton16, toolStripButton22 });
             toolStrip2.Location = new System.Drawing.Point(3, 38);
             toolStrip2.Name = "toolStrip2";
-            toolStrip2.Size = new System.Drawing.Size(608, 38);
+            toolStrip2.Size = new System.Drawing.Size(606, 38);
             toolStrip2.TabIndex = 3;
             // 
             // toolStripButton9
@@ -1073,7 +1083,7 @@
             toolStripButton7.Image = (System.Drawing.Image)resources.GetObject("toolStripButton7.Image");
             toolStripButton7.ImageTransparentColor = System.Drawing.Color.Magenta;
             toolStripButton7.Name = "toolStripButton7";
-            toolStripButton7.Size = new System.Drawing.Size(45, 35);
+            toolStripButton7.Size = new System.Drawing.Size(44, 35);
             toolStripButton7.Text = "Export";
             toolStripButton7.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             toolStripButton7.Click += toolStripButton7_Click;
@@ -1088,7 +1098,7 @@
             toolStripButton8.Image = (System.Drawing.Image)resources.GetObject("toolStripButton8.Image");
             toolStripButton8.ImageTransparentColor = System.Drawing.Color.Magenta;
             toolStripButton8.Name = "toolStripButton8";
-            toolStripButton8.Size = new System.Drawing.Size(30, 35);
+            toolStripButton8.Size = new System.Drawing.Size(29, 35);
             toolStripButton8.Text = "Exit";
             toolStripButton8.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             toolStripButton8.Click += toolStripButton8_Click;
@@ -1122,7 +1132,7 @@
             toolStrip4.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripButton18, toolStripButton6, toolStripButton17 });
             toolStrip4.Location = new System.Drawing.Point(92, 76);
             toolStrip4.Name = "toolStrip4";
-            toolStrip4.Size = new System.Drawing.Size(168, 38);
+            toolStrip4.Size = new System.Drawing.Size(167, 38);
             toolStrip4.TabIndex = 5;
             // 
             // toolStripButton18
@@ -1142,7 +1152,7 @@
             toolStripButton6.Image = (System.Drawing.Image)resources.GetObject("toolStripButton6.Image");
             toolStripButton6.ImageTransparentColor = System.Drawing.Color.Magenta;
             toolStripButton6.Name = "toolStripButton6";
-            toolStripButton6.Size = new System.Drawing.Size(51, 35);
+            toolStripButton6.Size = new System.Drawing.Size(50, 35);
             toolStripButton6.Text = "Extrude";
             toolStripButton6.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             toolStripButton6.Click += toolStripButton6_Click;
@@ -1157,12 +1167,13 @@
             toolStripButton17.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             toolStripButton17.Click += toolStripButton17_Click_1;
             // 
-            // meshgpuToolStripMenuItem
+            // propertiesToolStripMenuItem
             // 
-            meshgpuToolStripMenuItem.Name = "meshgpuToolStripMenuItem";
-            meshgpuToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            meshgpuToolStripMenuItem.Text = "mesh (gpu)";
-            meshgpuToolStripMenuItem.Click += meshgpuToolStripMenuItem_Click;
+            propertiesToolStripMenuItem.Image = Properties.Resources.property;
+            propertiesToolStripMenuItem.Name = "propertiesToolStripMenuItem";
+            propertiesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            propertiesToolStripMenuItem.Text = "properties";
+            propertiesToolStripMenuItem.Click += propertiesToolStripMenuItem_Click;
             // 
             // Form1
             // 
@@ -1320,6 +1331,7 @@
         private System.Windows.Forms.ToolStripMenuItem matrixEditToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem stlToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem meshgpuToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem propertiesToolStripMenuItem;
     }
 }
 

@@ -1,4 +1,5 @@
-﻿using BREP.BRep;
+﻿using AutoDialog.Extensions;
+using BREP.BRep;
 using BREP.BRep.Faces;
 using BREP.Common;
 using BREP.Parsers.Step;
@@ -729,6 +730,7 @@ namespace LiteCAD
             };
 
             glControl = new GLControl(gl);
+            glControl.MouseDoubleClick += GlControl_MouseDoubleClick;
 
             /*if (glControl.Context.GraphicsMode.Samples == 0)
             {
@@ -777,6 +779,11 @@ namespace LiteCAD
             };
 
             infoPanel.Switch();
+        }
+
+        private void GlControl_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            CameraToHovered();
         }
 
         private void De_UndosChanged()
@@ -1315,32 +1322,37 @@ namespace LiteCAD
             face.Node.SwitchNormal();
         }
 
+        void CameraToHovered()
+        {
+            if (hovered is Vector3d v)
+                camToSelected(new[] { v });
+            else if (hovered is MeshNode mn)
+            {
+                var cc = mn.Triangles.Select(z => z.Center());
+                Vector3d sum = Vector3d.Zero;
+                foreach (var item in cc)
+                {
+                    sum += item;
+                }
+                sum /= cc.Count();
+                camToSelected(new[] { sum });
+
+                //camera perpendicular to face?
+                /*var t = mn.Triangles.First();
+                var up = (t.Center() - t.V0).ToVector3();
+                var nm = t.Normal().ToVector3();
+                camera1.CamTo = t.V0.ToVector3();
+                camera1.CamFrom = camera1.CamTo - nm * 100;
+                camera1.CamUp = up;*/
+
+            }
+        }
+
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == Keys.Decimal)
             {
-                if (hovered is Vector3d v)
-                    camToSelected(new[] { v });
-                else if (hovered is MeshNode mn)
-                {
-                    var cc = mn.Triangles.Select(z => z.Center());
-                    Vector3d sum = Vector3d.Zero;
-                    foreach (var item in cc)
-                    {
-                        sum += item;
-                    }
-                    sum /= cc.Count();
-                    camToSelected(new[] { sum });
-
-                    //camera perpendicular to face?
-                    /*var t = mn.Triangles.First();
-                    var up = (t.Center() - t.V0).ToVector3();
-                    var nm = t.Normal().ToVector3();
-                    camera1.CamTo = t.V0.ToVector3();
-                    camera1.CamFrom = camera1.CamTo - nm * 100;
-                    camera1.CamUp = up;*/
-
-                }
+                CameraToHovered();
             }
             return base.ProcessCmdKey(ref msg, keyData);
         }
@@ -1450,7 +1462,9 @@ namespace LiteCAD
 
         private void editToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (treeListView1.SelectedObjects.Count <= 0) return;
+            if (treeListView1.SelectedObjects.Count <= 0)
+                return;
+
             if (treeListView1.SelectedObject is Draft d)
             {
                 glControl.Visible = false;
@@ -1955,16 +1969,47 @@ namespace LiteCAD
 
         private void meshToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            //obj or stl
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "STL file (*.stl)|*.stl";
+            //obj or stl            
+            OpenFileDialog ofd = new OpenFileDialog
+            {
+                Filter = "All mesh formats (*.obj, *.stl)|*.obj;*.stl"
+            };
 
             if (ofd.ShowDialog() != DialogResult.OK)
                 return;
 
-            var mesh = STLLoader.LoadFromFile(ofd.FileName);
-            Parts.Add(mesh);
-            updateList();
+            var ext = Path.GetExtension(ofd.FileName).ToLower();
+            switch (ext)
+            {
+                case ".obj":
+                    {
+                        var model = ObjFileModelLoader.Parse(File.ReadAllText(ofd.FileName));
+                        if (model.Normals.Count == 0)
+                        {
+                            if (MessageBox.Show("models without normals are not supported. Try to restore normals automatically?", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                                return;
+
+                            //restore normals here
+                            model.CalcNormals();
+
+                        }
+
+                        Parts.Add(new GpuMeshSceneObject(model));
+                        updateList();
+
+                        break;
+                    }
+                case ".stl":
+                    {
+                        var mesh = STLLoader.LoadFromFile(ofd.FileName);
+                        Parts.Add(mesh);
+                        updateList();
+                        break;
+                    }
+
+            }
+
+
         }
 
         private void propertyGrid1_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -2270,6 +2315,17 @@ namespace LiteCAD
         public void AddPart(ISceneObject part)
         {
             Parts.Add(part);
+        }
+
+        private void treeListView1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+
+
+        }
+
+        private void propertiesToolStripMenuItem_Click(object sender, EventArgs e)
+        {            
+            treeListView1.SelectedObject.EditWithAutoDialog();
         }
 
         public IList SelectedObjects

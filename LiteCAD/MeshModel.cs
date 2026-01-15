@@ -1,5 +1,6 @@
 ﻿using OpenTK;
 using OpenTK.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
 using System.Linq;
@@ -15,13 +16,31 @@ namespace LiteCAD
                 Indices = indices;
                 Parent = parent;
                 Points = indices.Select(z => parent.Points[z]).ToArray();
-                Normals = indices.Select(z => parent.Normals[z]).ToArray();
+                
+            }
+
+            public Face(MeshModel parent, int[] indices, int[] nindices)
+            {
+                Indices = indices;
+                NIndices = nindices;
+                Parent = parent;
+                Points = indices.Select(z => parent.Points[z]).ToArray();
+                Normals = nindices.Select(z => parent.Normals[z]).ToArray();
             }
 
             public Vector3d[] Points { get; private set; }
             public Vector3d[] Normals { get; private set; }
             public int[] Indices;
+            public int[] NIndices;
+
             public MeshModel Parent;
+
+            internal Vector3d CalcNormal()
+            {
+                var v0 = Points[2] - Points[0];
+                var v1 = Points[1] - Points[0];
+                return Vector3d.Cross(v0, v1);
+            }   
         }
 
         public List<Face> Faces = new List<Face>();
@@ -37,10 +56,21 @@ namespace LiteCAD
                 for (int i = 0; i < item.Indices.Length; i++)
                 {
                     triags.Add(Points[item.Indices[i]]);
-                    norms.Add(Normals[item.Indices[i]]);
+                    norms.Add(Normals[item.NIndices[i]]);
                 }
             }
             return new GpuObject(triags.ToArray(), norms.ToArray());
         }
+
+        internal void CalcNormals()
+        {
+            foreach (var item in Faces)
+            {
+                Normals.Add(item.CalcNormal());
+                item.NIndices = [Normals.Count - 1, Normals.Count - 1, Normals.Count - 1];
+
+            }
+        }
     }
+        
 }

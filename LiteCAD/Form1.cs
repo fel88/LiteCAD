@@ -2274,8 +2274,7 @@ namespace LiteCAD
             {
                 case ".obj":
                     {
-                        var gpuObj = ObjFile.Parse(File.ReadAllText(ofd.FileName)).ToGpuObject();
-                        Parts.Add(new GpuMeshSceneObject(gpuObj));
+                        Parts.Add(new GpuMeshSceneObject(ObjFileModelLoader.Parse(File.ReadAllText(ofd.FileName)).ToGpuObject()));                        
                         break;
                     }
 

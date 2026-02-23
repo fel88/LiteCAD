@@ -77,7 +77,7 @@ namespace LiteCAD.Graphics
             int y = 0;
 
             Matrix4 matrix = Matrix4.Mult(Matrix4.Mult(world, view), projection);
-            Vector4 vector = source* matrix;
+            Vector4 vector = source * matrix;
             float a = (((source.X * matrix.M14) + (source.Y * matrix.M24)) + (source.Z * matrix.M34)) + matrix.M44;
             if (!WithinEpsilon(a, 1f))
             {
@@ -145,8 +145,8 @@ namespace LiteCAD.Graphics
             Matrix4 viewInv = Matrix4.Invert(view);
             Matrix4 projInv = Matrix4.Invert(projection);
 
-            vec = vec*projInv ;
-            vec = vec*viewInv ;
+            vec = vec * projInv;
+            vec = vec * viewInv;
             //Vector4.Transform(ref vec, ref projInv, out vec);
             //Vector4.Transform(ref vec, ref viewInv, out vec);
 

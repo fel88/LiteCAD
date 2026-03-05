@@ -96,6 +96,7 @@
       <Version>0.8.4</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="netDxf" Version="2023.11.10" />
     <PackageReference Include="OpenTK" Version="4.9.4" />
     <PackageReference Include="OpenTK.GLControl" Version="4.0.2" />
     <PackageReference Include="SharpFont.Dependencies" Version="2.6.0" />

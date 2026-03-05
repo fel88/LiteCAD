@@ -2274,7 +2274,7 @@ namespace LiteCAD
             {
                 case ".obj":
                     {
-                        Parts.Add(new GpuMeshSceneObject(ObjFileModelLoader.Parse(File.ReadAllText(ofd.FileName)).ToGpuObject()));                        
+                        Parts.Add(new GpuMeshSceneObject(ObjFileModelLoader.Parse(File.ReadAllText(ofd.FileName)).ToGpuObject()));
                         break;
                     }
 
@@ -2323,8 +2323,84 @@ namespace LiteCAD
         }
 
         private void propertiesToolStripMenuItem_Click(object sender, EventArgs e)
-        {            
+        {
             treeListView1.SelectedObject.EditWithAutoDialog();
+        }
+
+        private void dxfToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            if (ofd.ShowDialog() != DialogResult.OK)
+                return;
+
+            var doc = netDxf.DxfDocument.Load(ofd.FileName);
+            int cnt = 0;
+            List<Vector3d> vv = new List<Vector3d>();
+            Vector3d sum = new Vector3d();
+            Vector3d? first = null;
+            foreach (var item in doc.Entities.Arcs)
+            {
+                
+                int n = 10;
+                var pl = item.ToPolyline2D(n);
+                cnt++;
+                //if (cnt > 100000)
+                //  break;
+
+                var verts = pl.Vertexes;
+                List<Vector3d> vvv = new List<Vector3d>();
+                var pos = new Vector3d(verts[0].Position.X, verts[0].Position.Y, 0);
+
+                if (first == null)
+                    first = pos;
+                pos -= first.Value;
+                vvv.Add(pos);
+                for (int i = 1; i < verts.Count - 1; i++)
+                {
+                    netDxf.Entities.Polyline2DVertex vitem = verts[i];
+                    pos = new Vector3d(vitem.Position.X, vitem.Position.Y, 0);
+                    pos -= first.Value;
+                    sum += pos;
+
+                    vvv.Add(pos);
+                    vvv.Add(pos);
+                }
+                vvv.Add(new Vector3d(verts[^1].Position.X, verts[^1].Position.Y, 0) - first.Value);
+
+                vv.AddRange(vvv.ToArray());
+                if (vv.Count > 10000)
+                {
+                    PolylineGpuObject g = new PolylineGpuObject(vv.ToArray()) { PrimitiveType = PrimitiveType.Lines };
+                    PolylineGpuMeshSceneObject sceneObject = new PolylineGpuMeshSceneObject(g);
+                    vv.Clear();
+                    Parts.Add(sceneObject);
+                }
+
+
+            }
+            if (vv.Count > 0)
+            {
+                PolylineGpuObject g = new PolylineGpuObject(vv.ToArray()) { PrimitiveType = PrimitiveType.Lines };
+                PolylineGpuMeshSceneObject sceneObject = new PolylineGpuMeshSceneObject(g);
+                vv.Clear();
+                Parts.Add(sceneObject);
+            }
+            sum /= cnt;
+            foreach (var item in Parts)
+            {
+                //item.Matrix.Items.Add(new TranslateTransformChainItem() { Vector = -sum });
+            }
+            foreach (var item in doc.Entities.Lines)
+            {
+                int n = 20;
+                var verts = new netDxf.Vector3[] { item.StartPoint, item.EndPoint };
+                if (first == null)
+                    first = new Vector3d(verts[0].X, verts[0].Y, 0);
+                PolylineGpuObject g = new PolylineGpuObject(verts.Select(z => new Vector3d(z.X, z.Y, 0) - first.Value).ToArray()) { PrimitiveType = PrimitiveType.Lines };
+                PolylineGpuMeshSceneObject sceneObject = new PolylineGpuMeshSceneObject(g);
+
+                Parts.Add(sceneObject);
+            }
         }
 
         public IList SelectedObjects

@@ -1,4 +1,5 @@
-﻿using LiteCAD.Common;
+﻿using FxEngine;
+using LiteCAD.Common;
 using OpenTK;
 using OpenTK.Mathematics;
 using System;
@@ -24,8 +25,8 @@ namespace LiteCAD
 
         internal override void RestoreXml(XElement elem)
         {
-            Axis = Helpers.ParseVector(elem.Attribute("axis").Value);
-            Angle = Helpers.ParseDouble(elem.Attribute("angle").Value);
+            Axis = Common.Helpers.ParseVector(elem.Attribute("axis").Value);
+            Angle = (elem.Attribute("angle").Value.ToDouble());
         }
 
         internal override void StoreXml(TextWriter writer)

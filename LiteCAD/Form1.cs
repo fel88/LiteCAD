@@ -3,13 +3,17 @@ using BREP.BRep;
 using BREP.BRep.Faces;
 using BREP.Common;
 using BREP.Parsers.Step;
+using FxEngine;
+using FxEngine.Cameras;
+using FxEngine.Fonts;
+using FxEngine.Interfaces;
+using FxEngine.Shaders;
 using IxMilia.Dxf;
 using IxMilia.Dxf.Entities;
 using LiteCAD.BRep;
 using LiteCAD.BRep.Editor;
 using LiteCAD.Common;
 using LiteCAD.DraftEditor;
-using LiteCAD.Graphics;
 using LiteCAD.Parsers.Iges;
 using LiteCAD.PropEditors;
 using LiteCAD.Tools;
@@ -28,6 +32,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using IntersectInfo = LiteCAD.Common.IntersectInfo;
 
 namespace LiteCAD
 {
@@ -97,7 +102,7 @@ namespace LiteCAD
             Redraw();
         }
 
-        LiteCAD.Graphics.TextRenderer textRenderer = new Graphics.TextRenderer();
+        FreeTypeTextRenderer textRenderer = new FreeTypeTextRenderer();
         public IntersectInfo Pick => pick;
         IntersectInfo pick;
 
@@ -204,7 +209,7 @@ namespace LiteCAD
 
             var mtr = camera1.ViewMatrix;
             var q = mtr.ExtractRotation();
-            var mtr3 = Matrix4.CreateFromQuaternion(q);
+            var mtr3 = Matrix4d.CreateFromQuaternion(q);
             GL.MultMatrix(ref mtr3);
             GL.LineWidth(2);
             GL.Color3(Color.Red);
@@ -276,7 +281,7 @@ namespace LiteCAD
             hovered = null;
             if (pick != null)
             {
-                float pickEps = camera1.OrthoWidth * 0.02f;
+                var pickEps = camera1.OrthoWidth * 0.02;
                 //if (pickEps < 2) { pickEps = 2; }
 
                 var pp = new[] { pick.Target.V0,
@@ -425,7 +430,7 @@ namespace LiteCAD
             //textRenderer.RenderText("This is sample text", 25.0f, 25.0f, 1.0f, new Vector3(0.5f, 0.8f, 0.2f));
             //textRenderer.RenderText("(C) LearnOpenGL.com", 10.0f, glControl.Height - 30, 0.5f, new Vector3(0.3f, 0.7f, 0.9f));
             if (hovered != null)
-                textRenderer.RenderText(toolStripStatusLabel3.Text, 10.0f, glControl.Height - 30, 0.5f, new Vector3(0.3f, 0.7f, 0.9f));
+                textRenderer.RenderText(toolStripStatusLabel3.Text, 10.0f, glControl.Height - 30, new Vector3(0.3f, 0.7f, 0.9f), 0.5f);
 
             var pos = glControl.PointToClient(Cursor.Position);
             hoverText.Scale = 0.4f;
@@ -571,7 +576,7 @@ namespace LiteCAD
             GL.Enable(EnableCap.DepthTest);
         }
 
-        Vector3d? SnapPoint(LiteCAD.Graphics.IntersectInfo inter)
+        Vector3d? SnapPoint(IntersectInfo inter)
         {
             float pickEps = 10;
             var pp = new[] {
@@ -925,14 +930,14 @@ namespace LiteCAD
         {
             glControl.Invalidate();
             toolStripStatusLabel4.Text = de.LastRenderTime + "ms";
-            label1.Text = "camera len: " + camera1.DirLen;
+            label1.Text = "camera len: " + camera1.Direction.Length;
         }
 
         public void ViewX()
         {
-            camera1.CamTo = Vector3.Zero;
-            camera1.CamFrom = new Vector3(-10, 0, 0);
-            camera1.CamUp = Vector3.UnitZ;
+            camera1.Target = Vector3.Zero;
+            camera1.Eye = new Vector3(-10, 0, 0);
+            camera1.Up = Vector3.UnitZ;
         }
         private void button2_Click(object sender, EventArgs e)
         {
@@ -941,9 +946,9 @@ namespace LiteCAD
 
         public void ViewY()
         {
-            camera1.CamTo = Vector3.Zero;
-            camera1.CamFrom = new Vector3(0, -10, 0);
-            camera1.CamUp = Vector3.UnitZ;
+            camera1.Target = Vector3.Zero;
+            camera1.Eye = new Vector3(0, -10, 0);
+            camera1.Up = Vector3.UnitZ;
         }
         private void button3_Click(object sender, EventArgs e)
         {
@@ -952,9 +957,9 @@ namespace LiteCAD
 
         public void ViewZ()
         {
-            camera1.CamTo = Vector3.Zero;
-            camera1.CamFrom = new Vector3(0, 0, -10);
-            camera1.CamUp = Vector3.UnitY;
+            camera1.Target = Vector3.Zero;
+            camera1.Eye = new Vector3(0, 0, -10);
+            camera1.Up = Vector3.UnitY;
         }
         private void button4_Click(object sender, EventArgs e)
         {
@@ -1021,44 +1026,7 @@ namespace LiteCAD
             propertyGrid1.SelectedObject = listView1.SelectedItems[0].Tag;
         }
 
-        public void FitToPoints(Vector3d[] pnts, Camera cam, float gap = 10)
-        {
-            List<Vector2d> vv = new List<Vector2d>();
-            foreach (var vertex in pnts)
-            {
-                var p = MouseRay.Project(vertex.ToVector3(), cam.ProjectionMatrix, cam.ViewMatrix, cam.WorldMatrix, camera1.viewport);
-                vv.Add(p.Xy.ToVector2d());
-            }
 
-            //prjs->xy coords
-            var minx = vv.Min(z => z.X) - gap;
-            var maxx = vv.Max(z => z.X) + gap;
-            var miny = vv.Min(z => z.Y) - gap;
-            var maxy = vv.Max(z => z.Y) + gap;
-
-            var dx = (maxx - minx);
-            var dy = (maxy - miny);
-
-            var cx = dx / 2;
-            var cy = dy / 2;
-            var dir = cam.CamTo - cam.CamFrom;
-            //center back to 3d
-
-            var mr = new MouseRay((float)(cx + minx), (float)(cy + miny), cam);
-            var v0 = mr.Start;
-
-            cam.CamFrom = v0;
-            cam.CamTo = cam.CamFrom + dir;
-
-            var aspect = glControl.Width / (float)(glControl.Height);
-
-            dx /= glControl.Width;
-            dx *= camera1.OrthoWidth;
-            dy /= glControl.Height;
-            dy *= camera1.OrthoWidth;
-
-            cam.OrthoWidth = (float)Math.Max(dx, dy);
-        }
 
         Vector3d[] getAllPoints()
         {
@@ -1115,7 +1083,7 @@ namespace LiteCAD
             if (vv.Length == 0)
                 return;
 
-            FitToPoints(vv, camera1);
+            camera1.FitToPoints(vv, glControl.Width, glControl.Height);
         }
 
         BRepFace selectedFace = null;
@@ -1245,10 +1213,10 @@ namespace LiteCAD
 
         private void button7_Click(object sender, EventArgs e)
         {
-            var len = camera1.DirLen;
-            var dir = camera1.Dir;
-            camera1.CamTo = Vector3.Zero;
-            camera1.CamFrom = camera1.CamTo + dir * len;
+            var len = camera1.Direction.Length;
+            var dir = camera1.DirNormalized;
+            camera1.Target = Vector3.Zero;
+            camera1.Eye = camera1.Target + dir * len;
         }
 
 
@@ -1261,10 +1229,10 @@ namespace LiteCAD
                 cnt += item;
             }
             cnt /= vv.Length;
-            var len = camera1.DirLen;
-            var dir = camera1.Dir;
-            camera1.CamTo = cnt.ToVector3();
-            camera1.CamFrom = camera1.CamTo + dir * len;
+            var len = camera1.Direction.Length;
+            var dir = camera1.DirNormalized;
+            camera1.Target = cnt;
+            camera1.Eye = camera1.Target + dir * len;
         }
         private void button6_Click(object sender, EventArgs e)
         {
@@ -1447,7 +1415,7 @@ namespace LiteCAD
 
             if (vv.Count == 0) return;
             camToSelected(vv.ToArray());
-            FitToPoints(vv.ToArray(), camera1);
+            camera1.FitToPoints(vv.ToArray(), glControl.Width, glControl.Height);
             camToSelected(vv.ToArray());
         }
 
@@ -1458,7 +1426,7 @@ namespace LiteCAD
             updateList();
         }
 
-        Vector3[] camState = new Vector3[3];
+        Vector3d[] camState = new Vector3d[3];
 
         private void editToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1478,13 +1446,13 @@ namespace LiteCAD
 
                 EditMode = EditModeEnum.Draft;
                 updateList();
-                camState[0] = camera1.CamTo;
-                camState[1] = camera1.CamFrom;
-                camState[2] = camera1.CamUp;
+                camState[0] = camera1.Target;
+                camState[1] = camera1.Eye;
+                camState[2] = camera1.Up;
 
-                camera1.CamTo = d.Plane.Position.ToVector3();
-                camera1.CamFrom = (d.Plane.Position + d.Plane.Normal * 10).ToVector3();
-                camera1.CamUp = Vector3.UnitY;
+                camera1.Target = d.Plane.Position;
+                camera1.Eye = (d.Plane.Position + d.Plane.Normal * 10);
+                camera1.Up = Vector3.UnitY;
 
                 editedDraft = d;
                 toolStrip2.Visible = true;
@@ -1555,9 +1523,9 @@ namespace LiteCAD
             toolStrip2.Visible = false;
             toolStrip3.Visible = false;
             //restore cam state
-            camera1.CamTo = camState[0];
-            camera1.CamFrom = camState[1];
-            camera1.CamUp = camState[2];
+            camera1.Target = camState[0];
+            camera1.Eye = camState[1];
+            camera1.Up = camState[2];
         }
         private void toolStripButton8_Click(object sender, EventArgs e)
         {
@@ -1565,9 +1533,9 @@ namespace LiteCAD
         }
         public void ResetCamera()
         {
-            camera1.CamTo = Vector3.Zero;
-            camera1.CamFrom = new Vector3(250, 250, 250);
-            camera1.CamUp = Vector3.UnitZ;
+            camera1.Target = Vector3.Zero;
+            camera1.Eye = new Vector3(250, 250, 250);
+            camera1.Up = Vector3.UnitZ;
         }
         private void button1_Click_1(object sender, EventArgs e)
         {
@@ -2340,7 +2308,7 @@ namespace LiteCAD
             Vector3d? first = null;
             foreach (var item in doc.Entities.Arcs)
             {
-                
+
                 int n = 10;
                 var pl = item.ToPolyline2D(n);
                 cnt++;
@@ -2370,7 +2338,7 @@ namespace LiteCAD
                 vv.AddRange(vvv.ToArray());
                 if (vv.Count > 10000)
                 {
-                    PolylineGpuObject g = new PolylineGpuObject(vv.ToArray()) { PrimitiveType = PrimitiveType.Lines };
+                    PolylineGpuObject g = new PolylineGpuObject(vv.ToArray(), PrimitiveType.Lines);
                     PolylineGpuMeshSceneObject sceneObject = new PolylineGpuMeshSceneObject(g);
                     vv.Clear();
                     Parts.Add(sceneObject);
@@ -2380,7 +2348,7 @@ namespace LiteCAD
             }
             if (vv.Count > 0)
             {
-                PolylineGpuObject g = new PolylineGpuObject(vv.ToArray()) { PrimitiveType = PrimitiveType.Lines };
+                PolylineGpuObject g = new PolylineGpuObject(vv.ToArray(), PrimitiveType.Lines);
                 PolylineGpuMeshSceneObject sceneObject = new PolylineGpuMeshSceneObject(g);
                 vv.Clear();
                 Parts.Add(sceneObject);
@@ -2396,7 +2364,7 @@ namespace LiteCAD
                 var verts = new netDxf.Vector3[] { item.StartPoint, item.EndPoint };
                 if (first == null)
                     first = new Vector3d(verts[0].X, verts[0].Y, 0);
-                PolylineGpuObject g = new PolylineGpuObject(verts.Select(z => new Vector3d(z.X, z.Y, 0) - first.Value).ToArray()) { PrimitiveType = PrimitiveType.Lines };
+                PolylineGpuObject g = new PolylineGpuObject(verts.Select(z => new Vector3d(z.X, z.Y, 0) - first.Value).ToArray(), PrimitiveType.Lines);
                 PolylineGpuMeshSceneObject sceneObject = new PolylineGpuMeshSceneObject(g);
 
                 Parts.Add(sceneObject);

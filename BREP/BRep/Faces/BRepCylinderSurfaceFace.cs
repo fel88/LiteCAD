@@ -3,6 +3,7 @@ using BREP.BRep.Outlines;
 using BREP.BRep.Surfaces;
 using BREP.Common;
 using BREP.Parsers.Step;
+using FxEngine;
 using LiteCAD.Common;
 using OpenTK;
 using OpenTK.Mathematics;
@@ -10,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using Plane = BREP.Common.Plane;
 
 namespace BREP.BRep.Faces
 {

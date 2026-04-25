@@ -4,7 +4,6 @@ using BREP.BRep.Surfaces;
 using BREP.Common;
 using LiteCAD.BRep;
 using LiteCAD.Common;
-using LiteCAD.Graphics;
 using OpenTK;
 using OpenTK.Mathematics;
 using System;

@@ -193,13 +193,13 @@ namespace LiteCAD
 
         private void RibbonButton_Click_9(object sender, RoutedEventArgs e)
         {
-            Form.camera1.CamUp *= -1;
+            Form.camera1.Up *= -1;
         }
 
         private void RibbonButton_Click_10(object sender, RoutedEventArgs e)
         {
-            var d = Form.camera1.CameraFrom - Form.camera1.CameraTo;
-            Form.camera1.CamFrom = Form.camera1.CameraTo - d;
+            var d = Form.camera1.Eye - Form.camera1.Target;
+            Form.camera1.Eye = Form.camera1.Target - d;
         }
 
         private void vertConstrBtn_Click(object sender, RoutedEventArgs e)

@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using System;
 using System.IO;
 using System.Drawing.Imaging;
+using FxEngine;
 
 namespace LiteCAD.DraftEditor
 {
@@ -23,14 +24,14 @@ namespace LiteCAD.DraftEditor
         public ImageDraftHelper(XElement el, Draft draft)
         {
             DraftParent = draft;
-            Width = Helpers.ParseDouble(el.Attribute("width").Value);
+            Width = el.Attribute("width").Value.ToDouble();
             var bts = Convert.FromBase64String(el.Value);
             var ms = new MemoryStream(bts);
             Image = Bitmap.FromStream(ms) as Bitmap;
             Z = -1;
-            Rotation = Helpers.ParseDouble(el.Attribute("rotation").Value);
-            X = Helpers.ParseDouble(el.Attribute("x").Value);
-            Y = Helpers.ParseDouble(el.Attribute("y").Value);
+            Rotation = el.Attribute("rotation").Value.ToDouble();
+            X = el.Attribute("x").Value.ToDouble();
+            Y = el.Attribute("y").Value.ToDouble();
             //ms.Dispose();
         }
         public override void Store(TextWriter writer)

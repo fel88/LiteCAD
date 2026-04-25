@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using FxEngine;
 using LiteCAD.Common;
 using OpenTK;
 using OpenTK.Mathematics;
@@ -21,7 +22,7 @@ namespace LiteCAD.PropEditors
         {
             try
             {
-                vector.Y = Helpers.ParseDouble(textBox2.Text);
+                vector.Y = textBox2.Text.ToDouble();
                 textBox2.SetNormalStyle();
             }
             catch (Exception ex)
@@ -34,7 +35,7 @@ namespace LiteCAD.PropEditors
         {
             try
             {
-                vector.X = Helpers.ParseDouble(textBox1.Text);
+                vector.X = textBox1.Text.ToDouble();
                 textBox1.SetNormalStyle();
             }
             catch (Exception ex)

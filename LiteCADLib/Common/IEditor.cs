@@ -1,5 +1,4 @@
-﻿using LiteCAD.Graphics;
-using System;
+﻿using System;
 using System.Collections;
 
 namespace LiteCAD.Common

@@ -11,12 +11,12 @@ namespace LiteCAD
             if (!Visible)
                 return;
 
-            ctx.TextRenderer.RenderText(Text, Position.X, Position.Y, Scale, new Vector3()
+            ctx.TextRenderer.RenderText(Text, Position.X, Position.Y, new Vector3()
             {
                 X = Color.R / 255.0f,
                 Y = Color.G / 255.0f,
                 Z = Color.B / 255.0f,
-            });
+            }, Scale);
         }
         public Color Color = Color.Blue;
         public float Scale = 1;

@@ -1,5 +1,6 @@
 ﻿using BREP.BRep;
 using BREP.Common;
+using FxEngine;
 using LiteCAD.BRep;
 using LiteCAD.Common;
 using OpenTK;
@@ -11,6 +12,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using Plane = BREP.Common.Plane;
 
 namespace LiteCAD
 {

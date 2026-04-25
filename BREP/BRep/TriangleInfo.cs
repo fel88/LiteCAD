@@ -1,4 +1,5 @@
 ﻿using BREP.Common;
+using FxEngine;
 using LiteCAD.Common;
 using OpenTK;
 using OpenTK.Mathematics;
@@ -7,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using Plane = BREP.Common.Plane;
 
 namespace BREP.BRep
 {
@@ -142,8 +144,8 @@ namespace BREP.BRep
             foreach (var tt in t.Elements("vertex"))
             {
                 Vertices[cnt] = new VertexInfo();
-                Vertices[cnt].Position = Helpers.ParseVector(tt.Attribute("pos").Value);
-                Vertices[cnt].Normal = Helpers.ParseVector(tt.Attribute("normal").Value);
+                Vertices[cnt].Position = LiteCAD.Common.Helpers.ParseVector(tt.Attribute("pos").Value);
+                Vertices[cnt].Normal = LiteCAD.Common.Helpers.ParseVector(tt.Attribute("normal").Value);
                 cnt++;
             }
         }
@@ -157,10 +159,5 @@ namespace BREP.BRep
             return false;
         }
     }
-    public class VertexInfo
-    {
-        public Vector3d Position;
-        public Vector3d Normal;
-    }
-
+    
 }

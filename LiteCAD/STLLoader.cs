@@ -1,4 +1,5 @@
 ﻿using BREP.BRep;
+using FxEngine;
 using LiteCAD.BRep;
 using LiteCAD.Common;
 using OpenTK;
@@ -7,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TriangleInfo = BREP.BRep.TriangleInfo;
 
 namespace LiteCAD
 {
@@ -31,9 +33,9 @@ namespace LiteCAD
                     if (line.StartsWith("facet"))
                     {
                         var spl = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
-                        var db = spl.Skip(2).Select(z => Helpers.ParseDouble(z)).ToArray();
+                        var db = spl.Skip(2).Select(z => z.ToDouble()).ToArray();
                         normal = new Vector3d(db[0], db[1], db[2]);
-                        tr = new TriangleInfo();
+                        tr = new BREP.BRep.TriangleInfo();
                         node.Triangles.Add(tr);
                     }
                     if (line.StartsWith("endfacet"))
@@ -44,7 +46,7 @@ namespace LiteCAD
                     if (line.StartsWith("vertex"))
                     {
                         var spl = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
-                        var db = spl.Skip(1).Select(z => Helpers.ParseDouble(z)).ToArray();
+                        var db = spl.Skip(1).Select(z => z.ToDouble()).ToArray();
                         verts.Add(new VertexInfo()
                         {
                             Normal = normal,

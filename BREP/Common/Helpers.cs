@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using FxEngine;
+using OpenTK;
 using OpenTK.Mathematics;
 using System;
 using System.Drawing;
@@ -9,11 +10,8 @@ namespace LiteCAD.Common
 {
     public static class Helpers
     {
-        public static double ParseDouble(this string v)
-        {
-            return double.Parse(v.Replace(",", "."), CultureInfo.InvariantCulture);
-        }
-        public static double ToDouble(this string v) => double.Parse(v.Replace(",", "."), CultureInfo.InvariantCulture);
+      
+        
         public static decimal ParseDecimal(string v)
         {
             return decimal.Parse(v.Replace(",", "."), CultureInfo.InvariantCulture);
@@ -39,7 +37,7 @@ namespace LiteCAD.Common
         public static Vector3d ParseVector(string value)
         {
             Vector3d ret = new Vector3d();
-            var spl = value.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(ParseDouble).ToArray();
+            var spl = value.Split([';'], StringSplitOptions.RemoveEmptyEntries).Select(z=>z.ToDouble()).ToArray();
             for (int i = 0; i < 3; i++)
             {
                 ret[i] = spl[i];
@@ -49,7 +47,7 @@ namespace LiteCAD.Common
         public static Vector2d ParseVector2(string value)
         {
             Vector2d ret = new Vector2d();
-            var spl = value.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(ParseDouble).ToArray();
+            var spl = value.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(z=>z.ToDouble()).ToArray();
             for (int i = 0; i < 2; i++)
             {
                 ret[i] = spl[i];

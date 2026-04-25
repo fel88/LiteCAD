@@ -12,6 +12,7 @@
     <ProjectReference Include="..\Triangle\Triangle.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="FxEngine" Version="1.0.6" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="ObjectListView.Repack.NET6Plus" Version="2.9.5" />
     <PackageReference Include="OpenTK">

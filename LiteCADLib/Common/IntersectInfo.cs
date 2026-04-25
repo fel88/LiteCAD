@@ -2,7 +2,7 @@
 using LiteCAD.Common;
 using OpenTK.Mathematics;
 
-namespace LiteCAD.Graphics
+namespace LiteCAD.Common
 {
     public class IntersectInfo
     {

@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using FxEngine;
+using OpenTK;
 using OpenTK.Mathematics;
 using System.IO;
 using System.Linq;
@@ -44,8 +45,8 @@ namespace LiteCAD.Common
                 Id = int.Parse(el.Attribute("id").Value);
 
             Point = parent.Elements.OfType<DraftPoint>().First(z => z.Id == int.Parse(el.Attribute("pointId").Value));
-            X = Helpers.ParseDouble(el.Attribute("x").Value);
-            Y = Helpers.ParseDouble(el.Attribute("y").Value);
+            X = el.Attribute("x").Value.ToDouble();
+            Y = el.Attribute("y").Value.ToDouble();
         }
 
         public PointPositionConstraint(DraftPoint draftPoint1, Draft parent) : base(parent)

@@ -1,4 +1,5 @@
 ﻿using ClipperLib;
+using FxEngine;
 using LiteCAD.Common;
 using LiteCAD.DraftEditor;
 using System;
@@ -51,7 +52,7 @@ namespace LiteCAD.Dialogs
         {
             try
             {
-                Offset = Helpers.ParseDouble(textBox1.Text);
+                Offset = textBox1.Text.ToDouble();
                 LastOffset = Offset;
                 textBox1.SetNormalStyle();
             }
@@ -65,7 +66,7 @@ namespace LiteCAD.Dialogs
         {
             try
             {
-                CurveTolerance = Helpers.ParseDouble(textBox2.Text);
+                CurveTolerance = textBox2.Text.ToDouble();
                 LastCurveTolerance = CurveTolerance;
                 textBox2.SetNormalStyle();
             }

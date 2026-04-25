@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenTK;
 using LiteCAD.Common;
+using FxEngine;
 
 namespace LiteCAD.PropEditors
 {
@@ -83,15 +84,15 @@ namespace LiteCAD.PropEditors
 
                 if (current is TranslateTransformChainItem tr)
                 {
-                    tr.Vector.X = Helpers.ParseDouble(textBox1.Text);
+                    tr.Vector.X = textBox1.Text.ToDouble();
                 }
                 if (current is ScaleTransformChainItem sc)
                 {
-                    sc.Vector.X = Helpers.ParseDouble(textBox1.Text);
+                    sc.Vector.X = textBox1.Text.ToDouble();
                 }
                 if (current is RotationTransformChainItem rt)
                 {
-                    rt.Axis.X = Helpers.ParseDouble(textBox1.Text);
+                    rt.Axis.X = textBox1.Text.ToDouble();
                 }
             }
             catch (Exception ex)
@@ -121,15 +122,15 @@ namespace LiteCAD.PropEditors
 
                 if (current is TranslateTransformChainItem tr)
                 {
-                    tr.Vector.Y = Helpers.ParseDouble(textBox2.Text);
+                    tr.Vector.Y = textBox2.Text.ToDouble();
                 }
                 if (current is ScaleTransformChainItem sc)
                 {
-                    sc.Vector.Y = Helpers.ParseDouble(textBox2.Text);
+                    sc.Vector.Y = textBox2.Text.ToDouble();
                 }
                 if (current is RotationTransformChainItem rt)
                 {
-                    rt.Axis.Y = Helpers.ParseDouble(textBox2.Text);
+                    rt.Axis.Y = textBox2.Text.ToDouble();
                 }
             }
             catch (Exception ex)
@@ -145,15 +146,15 @@ namespace LiteCAD.PropEditors
 
                 if (current is TranslateTransformChainItem tr)
                 {
-                    tr.Vector.Z = Helpers.ParseDouble(textBox3.Text);
+                    tr.Vector.Z = textBox3.Text.ToDouble();
                 }
                 if (current is ScaleTransformChainItem sc)
                 {
-                    sc.Vector.Z = Helpers.ParseDouble(textBox3.Text);
+                    sc.Vector.Z = textBox3.Text.ToDouble();
                 }
                 if (current is RotationTransformChainItem rt)
                 {
-                    rt.Axis.Z = Helpers.ParseDouble(textBox3.Text);
+                    rt.Axis.Z = textBox3.Text.ToDouble();
                 }
             }
             catch (Exception ex)

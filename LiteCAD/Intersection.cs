@@ -1,12 +1,14 @@
 ﻿using BREP.BRep;
+using FxEngine;
 using LiteCAD.BRep;
 using LiteCAD.Common;
-using LiteCAD.Graphics;
 using OpenTK;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using IntersectInfo = LiteCAD.Common.IntersectInfo;
+using TriangleInfo = BREP.BRep.TriangleInfo;
 
 namespace LiteCAD
 {
@@ -92,7 +94,7 @@ namespace LiteCAD
                     {
                         intersects.Add(new IntersectInfo()
                         {
-                            Distance = (res.Value.ToVector3() - ray.Start).Length,
+                            Distance = (res.Value - ray.Start).Length,
                             Target = polygon,
                             Point = res.Value
                         });
@@ -121,7 +123,7 @@ namespace LiteCAD
                 var t0 = -((r0n) + plane.W) / d;
                 if (t0 >= 0)
                 {
-                    return (ray.Start + l * (float)t0).ToVector3d();
+                    return (ray.Start + l * (double)t0);
                 }
             }
             return null;

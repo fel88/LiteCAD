@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using FxEngine;
 using LiteCAD.Common;
 using LiteCAD.CSP;
 
@@ -18,7 +19,7 @@ namespace LiteCAD.PropEditors
             {
                 if (ops.Contains(text[i]))
                 {
-                    tokens.Add(new DoubleToken(Helpers.ParseDouble(sb.ToString())));
+                    tokens.Add(new DoubleToken(sb.ToString().ToDouble()));
                     tokens.Add(new ArithmOperationToken(text[i] + ""));
                     sb.Clear();
                     continue;
@@ -27,7 +28,7 @@ namespace LiteCAD.PropEditors
             }
             if (sb.Length > 0)
             {
-                tokens.Add(new DoubleToken(Helpers.ParseDouble(sb.ToString())));
+                tokens.Add(new DoubleToken(sb.ToString().ToDouble()));
             }
             return tokens.ToArray();
         }

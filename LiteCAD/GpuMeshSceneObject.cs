@@ -1,5 +1,6 @@
 ﻿using BREP.BRep;
 using BREP.Common;
+using FxEngine;
 using LiteCAD.Common;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
@@ -10,6 +11,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using TriangleInfo = BREP.BRep.TriangleInfo;
 
 namespace LiteCAD
 {

@@ -1,4 +1,7 @@
-﻿using LiteCAD.Graphics;
+﻿using FxEngine.Cameras;
+using FxEngine.Fonts;
+using FxEngine.Interfaces;
+using FxEngine.Shaders;
 using OpenTK.Mathematics;
 using System.Drawing;
 
@@ -13,7 +16,7 @@ namespace LiteCAD.Common
         float _diffuseValue = 0.8f;
         float _ambientValue = 0.8f;
 
-        public TextRenderer TextRenderer;
+        public FreeTypeTextRenderer TextRenderer;
 
         public Shader ModelShader;
         public void SetModelShader()
@@ -22,7 +25,7 @@ namespace LiteCAD.Common
             // be sure to activate shader when setting uniforms/drawing objects
             ModelShader.use();
             ModelShader.setVec3("light.position", lightPos);
-            ModelShader.setVec3("viewPos", Camera.CameraFrom);
+            ModelShader.setVec3("viewPos", Camera.Eye);
 
             // light properties
             Vector3 lightColor = new Vector3

@@ -1,4 +1,5 @@
-﻿using LiteCAD.Common;
+﻿using FxEngine;
+using LiteCAD.Common;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -59,7 +60,7 @@ namespace LiteCAD.Dialogs
         {
             try
             {
-                OffsetX = Helpers.ParseDouble(textBox4.Text);
+                OffsetX = textBox4.Text.ToDouble();
                 textBox4.SetNormalStyle();
             }
             catch (Exception ex)
@@ -72,7 +73,7 @@ namespace LiteCAD.Dialogs
         {
             try
             {
-                OffsetY = Helpers.ParseDouble(textBox3.Text);
+                OffsetY = textBox3.Text.ToDouble();
                 textBox3.SetNormalStyle();
             }
             catch (Exception ex)

@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using FxEngine;
+using OpenTK;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace LiteCAD.Common
                 infos.Add(new TopologyDraftLineInfo()
                 {
                     Line = parent.DraftLines.First(z => z.Id == id),
-                    Dir = new Vector2d(Helpers.ParseDouble(dirr[0]), Helpers.ParseDouble(dirr[1]))
+                    Dir = new Vector2d(dirr[0].ToDouble(), dirr[1].ToDouble())
                 });
             }
             //Point = parent.Elements.OfType<DraftPoint>().First(z => z.Id == int.Parse(el.Attribute("pointId").Value));
